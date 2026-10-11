@@ -1,0 +1,222 @@
+<div class="login-layout">
+  <!-- Barra de navegación superior -->
+  <header class="top-navbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.25 3v4.046a3 3 0 00-1.5 2.583v.371c0 .503.125.998.36 1.439l-4.103 7.181A3 3 0 008.601 23h6.798a3 3 0 002.594-4.38l-4.103-7.181c.235-.441.36-.936.36-1.439v-.371a3 3 0 00-1.5-2.583V3h.75a.75.75 0 000-1.5h-4.5a.75.75 0 000 1.5h.75z"/>
+        </svg>
+      </div>
+      <span class="brand-name">Reactiv<span class="highlight">A</span></span>
+    </div>
+
+    <nav class="nav-links">
+      <a href="#">Portal</a>
+      <a href="#">Ayuda y Soporte</a>
+      <a href="#">Buscar Sede</a>
+      <button type="button" class="profile-avatar" aria-label="Perfil">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.6-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+    <div class="login-card">
+      
+      <!-- Columna Izquierda: Formulario -->
+      <section class="form-column">
+        <div class="status-badges">
+          <span class="badge badge-info">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+            Simulador Interactivo v2.4
+          </span>
+          <span class="badge badge-success">
+            <span class="status-dot"></span> Servidores Activos
+          </span>
+        </div>
+
+        <div class="welcome-header">
+          <h1>¡Bienvenido de nuevo a ReactivA!</h1>
+          <p>Ingresa para continuar tus experimentos, mantener tu racha activa 🔥 y explorar el laboratorio digital.</p>
+        </div>
+
+        <!-- Selector de Rol (Estudiante / Docente) -->
+        <div class="role-selector">
+          <button type="button" [class.active]="selectedRole === 'estudiante'" (click)="setRole('estudiante')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/></svg>
+            Estudiante
+          </button>
+          <button type="button" [class.active]="selectedRole === 'docente'" (click)="setRole('docente')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+            Docente / Tutor
+          </button>
+        </div>
+
+        <!-- Botones Social Auth -->
+        <div class="social-buttons">
+          <button type="button" class="btn-social">
+            <span class="google-icon">G</span> Google Classroom
+          </button>
+          <button type="button" class="btn-social">
+            <span class="ms-icon">::</span> Microsoft Escolar
+          </button>
+        </div>
+
+        <div class="divider">
+          <span>O INGRESA CON TUS CREDENCIALES</span>
+        </div>
+
+        <!-- Formulario de Credenciales -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label for="usernameOrEmail">Correo electrónico o Código de Estudiante</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" clip-rule="evenodd"/></svg>
+              </span>
+              <input 
+                id="usernameOrEmail" 
+                type="text" 
+                formControlName="usernameOrEmail" 
+                placeholder="ej. alex@quimica.edu.co o EST-4092"
+                [class.is-invalid]="loginForm.get('usernameOrEmail')?.invalid && loginForm.get('usernameOrEmail')?.touched"
+              />
+            </div>
+            <span class="error-text" *ngIf="loginForm.get('usernameOrEmail')?.invalid && loginForm.get('usernameOrEmail')?.touched">
+              Por favor ingresa un correo o código válido.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <div class="label-row">
+              <label for="password">Contraseña</label>
+              <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
+              </span>
+              <input 
+                id="password" 
+                [type]="showPassword ? 'text' : 'password'" 
+                formControlName="password" 
+                placeholder="Ingresa al menos 8 caracteres"
+                [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+              />
+              <button type="button" class="toggle-password" (click)="togglePasswordVisibility()" aria-label="Mostrar/Ocultar contraseña">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+              </button>
+            </div>
+            <span class="error-text" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+              La contraseña debe tener al menos 8 caracteres.
+            </span>
+          </div>
+
+          <div class="options-row">
+            <label class="checkbox-container">
+              <input type="checkbox" formControlName="rememberMe" />
+              <span class="checkmark"></span>
+              Recordar sesión en este equipo
+            </label>
+            <span class="tls-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              Conexión TLS 1.3
+            </span>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
+            Iniciar Experimento 🚀
+          </button>
+        </form>
+
+        <!-- Tarjeta de PIN de clase -->
+        <div class="pin-card">
+          <div class="pin-info">
+            <div class="pin-icon">🔑</div>
+            <div>
+              <strong>¿Tienes un código PIN de tu profesor?</strong>
+              <p>Acceso directo a la sesión de hoy sin contraseña</p>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary">Ingresar PIN de Clase</button>
+        </div>
+
+        <p class="account-help">
+          ¿No tienes cuenta escolar? <a href="#">Solicita acceso a tu institución</a> o <a href="#">Crea cuenta de prueba gratuita</a>
+        </p>
+      </section>
+
+      <!-- Columna Derecha: Panel de Estación de Trabajo -->
+      <section class="dashboard-column">
+        <div class="dash-header">
+          <div>
+            <span class="section-subtitle">TU ESTACIÓN DE TRABAJO</span>
+            <h2>Laboratorio 04: Reactores</h2>
+          </div>
+          <div class="streak-badge">
+            <span>🔥 Racha: 5 Días</span>
+          </div>
+        </div>
+
+        <div class="preview-card">
+          <div class="card-overlay">
+            <span class="pill-tag">Módulo en Progreso</span>
+            <h3>Enlaces Iónicos vs Covalentes</h3>
+            <p>Nivel 2 • Experimento Termoquímico #12</p>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-header">
+            <span class="challenge-title">⚡ Reto Diario: Enlace Covalente Polar</span>
+            <span class="xp-tag">+50 XP</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: 75%;"></div>
+          </div>
+          <div class="progress-labels">
+            <span>Progreso: 75% completado</span>
+            <span>1 balance restante</span>
+          </div>
+        </div>
+
+        <div class="info-card achievement-card">
+          <div class="achievement-icon">🏆</div>
+          <div class="achievement-text">
+            <strong>Logro desbloqueado</strong>
+            <p>Experto en Nomenclatura IUPAC • Ayer</p>
+          </div>
+          <span class="xp-tag">+120 XP</span>
+        </div>
+
+        <div class="feature-pills">
+          <span class="pill">🔬 Simulador 3D</span>
+          <span class="pill">📊 118 Elementos</span>
+          <span class="pill">⚖️ Balanceador Químico</span>
+        </div>
+
+        <div class="quote-card">
+          <span class="quote-icon">💡</span>
+          <p>"La química es como cocinar, pero nunca lamas la cuchara."<br><small>Recuerda repasar el protocolo de seguridad antes de cada titulación.</small></p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bottom-footer">
+    <div class="footer-left">
+      <span>🏛️ Institutional Single Sign-On enabled for accredited colleges & high schools</span>
+    </div>
+    <div class="footer-right">
+      <a href="#">Institutional Access</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <span>© 2026 ReactivA Pro. All rights reserved.</span>
+    </div>
+  </footer>
+</div>
