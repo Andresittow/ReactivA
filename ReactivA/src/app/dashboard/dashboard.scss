@@ -1,0 +1,196 @@
+.dashboard-container {
+  padding: 2.5rem;
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+
+    .greeting {
+      h1 {
+        font-size: 1.8rem;
+        color: #1e293b;
+        margin: 0 0 0.25rem 0;
+      }
+      p {
+        color: #64748b;
+        margin: 0;
+      }
+    }
+
+    .header-widgets {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .grade-select {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background-color: #fff;
+        color: #334155;
+        outline: none;
+      }
+
+      .streak-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+        .streak-info {
+          display: flex;
+          flex-direction: column;
+          strong { font-size: 0.85rem; color: #1e293b; }
+          small { font-size: 0.7rem; color: #94a3b8; }
+        }
+      }
+    }
+  }
+
+  .banner-card {
+    background: linear-gradient(135deg, #eef7fe 0%, #e8f1fd 100%);
+    border: 1px solid #d0e3ff;
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+
+    .banner-info {
+      max-width: 60%;
+
+      .badge {
+        background: #dbeafe;
+        color: #1d4ed8;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        color: #0f172a;
+        margin: 0.75rem 0 0.5rem 0;
+      }
+
+      p {
+        color: #64748b;
+        margin: 0;
+        font-size: 0.9rem;
+      }
+    }
+
+    .btn-enter {
+      background-color: #1d4ed8;
+      color: #fff;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #1e40af;
+      }
+    }
+  }
+
+  .knowledge-route {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+
+      h3 { margin: 0; font-size: 1.2rem; color: #1e293b; }
+      .view-all { color: #2563eb; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+
+      .route-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        border-top: 4px solid transparent;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+
+        &.green { border-color: #10b981; }
+        &.blue { border-color: #3b82f6; }
+        &.purple { border-color: #8b5cf6; }
+
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+
+          .icon-box {
+            width: 36px;
+            height: 36px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .progress-circle {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+          }
+        }
+
+        .unit-tag {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: #94a3b8;
+          letter-spacing: 0.5px;
+        }
+
+        h4 {
+          margin: 0.25rem 0 0.5rem 0;
+          color: #1e293b;
+          font-size: 1rem;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.8rem;
+          color: #64748b;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+
+  .floating-chat-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #0284c7;
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+}
