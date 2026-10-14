@@ -1,0 +1,108 @@
+$primary-blue: #00a2ed;
+$secondary-purple: #635bfc;
+$bg-sidebar: #f8f9fa;
+$text-dark: #2c3e50;
+$text-muted: #8c9ba5;
+
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background-color: $bg-sidebar;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: #1a4da1;
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .brand-text {
+      h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0;
+        color: $text-dark;
+      }
+
+      span {
+        font-size: 0.75rem;
+        color: $text-muted;
+      }
+    }
+  }
+
+  .nav-menu, .footer-menu {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: 0.5rem;
+
+        a {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          color: $text-muted;
+          text-decoration: none;
+          border-radius: 12px;
+          font-weight: 500;
+          font-size: 0.9rem;
+          transition: all 0.2s ease;
+
+          i {
+            font-size: 1.2rem;
+          }
+
+          &.active, &:hover {
+            background-color: $primary-blue;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 162, 237, 0.3);
+          }
+        }
+      }
+    }
+  }
+
+  .sidebar-action {
+    margin: 1.5rem 0;
+
+    .btn-assistant {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, $primary-blue, $secondary-purple);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 91, 252, 0.3);
+    }
+  }
+
+  .footer-menu {
+    margin-top: auto;
+  }
+}
