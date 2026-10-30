@@ -1,70 +1,80 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Cabecera de la Marca y Botón Toggle (Clase 4b) -->
   <div class="brand">
-    <div class="logo-icon">
-      <i class="ph ph-flask"></i>
+    <div class="brand-info">
+      <div class="logo-icon">
+        <i class="ph ph-flask"></i>
+      </div>
+      @if (!isCollapsed) {
+        <div class="brand-text">
+          <h2>Lab Stage</h2>
+          <span>Active Experiment</span>
+        </div>
+      }
     </div>
-    <div class="brand-text">
-      <h2>Lab Stage</h2>
-      <span>Active Experiment</span>
-    </div>
-  </div>
 
-  <nav class="nav-menu">
-    <ul>
-      <li>
-        <a routerLink="/dashboard" routerLinkActive="active">
-          <i class="ph ph-squares-four"></i>
-          <span>Dashboard</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/tabla-periodica" routerLinkActive="active">
-          <i class="ph ph-table"></i>
-          <span>Periodic Table</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/virtual-lab" routerLinkActive="active">
-          <i class="ph ph-test-tube"></i>
-          <span>Virtual Lab</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/challenges" routerLinkActive="active">
-          <i class="ph ph-trophy"></i>
-          <span>Challenges</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/profile" routerLinkActive="active">
-          <i class="ph ph-user-circle"></i>
-          <span>Profile</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
-
-  <div class="sidebar-action">
-    <button class="btn-assistant">
-      <i class="ph ph-robot"></i>
-      <span>Asistente Átomo</span>
+    <!-- Botón de Colapsar / Expandir -->
+    <button 
+      type="button" 
+      class="btn-toggle" 
+      (click)="toggleSidebar()" 
+      [title]="isCollapsed ? 'Expandir menú' : 'Colapsar menú'"
+      [attr.aria-label]="isCollapsed ? 'Expandir menú' : 'Colapsar menú'">
+      <i class="ph" [class.ph-caret-left]="!isCollapsed" [class.ph-caret-right]="isCollapsed"></i>
     </button>
   </div>
 
+  <!-- Navegación Principal Dinámica con @for y routerLinkActive (Clase 3 y 4b) -->
+  <nav class="nav-menu">
+    <ul>
+      @for (item of menuItems; track item.route) {
+        <li>
+          <a 
+            [routerLink]="item.route" 
+            routerLinkActive="active" 
+            [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+            [title]="item.label">
+            <i class="ph" [ngClass]="item.icon"></i>
+            @if (!isCollapsed) {
+              <span>{{ item.label }}</span>
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <!-- Botón del Asistente Átomo con Manejo de Eventos (Clase 3 y 5c) -->
+  <div class="sidebar-action">
+    <button 
+      type="button" 
+      class="btn-assistant" 
+      (click)="onAssistantClick()"
+      [title]="'Asistente Átomo'">
+      <i class="ph ph-robot"></i>
+      @if (!isCollapsed) {
+        <span>Asistente Átomo</span>
+      }
+    </button>
+  </div>
+
+  <!-- Menú Inferior Dinámico con @for y Eventos (Clase 3 y 5c) -->
   <div class="footer-menu">
     <ul>
-      <li>
-        <a routerLink="/settings">
-          <i class="ph ph-gear"></i>
-          <span>Settings</span>
-        </a>
-      </li>
-      <li>
-        <a routerLink="/help">
-          <i class="ph ph-question"></i>
-          <span>Help</span>
-        </a>
-      </li>
+      @for (item of footerMenuItems; track item.route) {
+        <li>
+          <a 
+            [routerLink]="item.route" 
+            routerLinkActive="active" 
+            (click)="onFooterClick(item)"
+            [title]="item.label">
+            <i class="ph" [ngClass]="item.icon"></i>
+            @if (!isCollapsed) {
+              <span>{{ item.label }}</span>
+            }
+          </a>
+        </li>
+      }
     </ul>
   </div>
 </aside>
