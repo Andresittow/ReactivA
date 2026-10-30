@@ -12,8 +12,11 @@ import { SidebarComponent } from './sidebar/sidebar';
 export class AppComponent {
   constructor(public router: Router) {}
 
-  // Método para saber si estamos en la pantalla de login
+  // Determina si estamos en la pantalla de login para ocultar el sidebar
   isLoginPage(): boolean {
-    return this.router.url === '/login';
+    const currentUrl = this.router.url;
+    return currentUrl === '/login' || currentUrl.startsWith('/login') || currentUrl === '/' || currentUrl === '';
   }
 }
+
+export { AppComponent as App };

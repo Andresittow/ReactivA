@@ -1,23 +1,19 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  // Ruta de Login (Pública)
+  // Ruta de Login (Pública / Autenticación)
   { 
     path: 'login', 
     loadComponent: () => import('./login/login').then(m => m.LoginComponent) 
   },
 
-  // Rutas del Dashboard y Tabla Periódica
+  // Ruta del Dashboard (Dentro del Layout con Sidebar)
   { 
     path: 'dashboard', 
     loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardComponent) 
   },
-  { 
-    path: 'tabla-periodica', 
-    loadComponent: () => import('./tabla-periodica/tabla-periodica').then(m => m.TablaPeriodicaComponent) 
-  },
 
-  // Redirecciones por defecto
+  // Redirecciones por defecto con las rutas existentes
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];
