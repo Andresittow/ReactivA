@@ -1,0 +1,36 @@
+.app-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f8fafc;
+
+  app-sidebar {
+    flex-shrink: 0;
+    height: 100vh;
+    z-index: 20;
+  }
+
+  .main-content {
+    flex: 1;
+    min-width: 0;
+    height: 100vh;
+    overflow-y: auto;
+    position: relative;
+    background-color: #f8fafc;
+  }
+
+  &.no-sidebar {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+
+    .main-content {
+      width: 100%;
+      height: auto;
+      min-height: 100vh;
+      overflow-y: visible;
+    }
+  }
+}
