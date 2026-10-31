@@ -1,0 +1,499 @@
+<div class="page-wrapper">
+  <!-- Barra de Navegación Superior -->
+  <header class="top-navbar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.25 3v4.046a3 3 0 00-1.5 2.583v.371c0 .503.125.998.36 1.439l-4.103 7.181A3 3 0 008.601 23h6.798a3 3 0 002.594-4.38l-4.103-7.181c.235-.441.36-.936.36-1.439v-.371a3 3 0 00-1.5-2.583V3h.75a.75.75 0 000-1.5h-4.5a.75.75 0 000 1.5h.75z"/>
+        </svg>
+      </div>
+      <span class="brand-title">Reactiv<span class="highlight">A</span></span>
+    </div>
+
+    <nav class="nav-links">
+      <a href="#portal">Portal</a>
+      <a href="#soporte">Ayuda y Soporte</a>
+      <a href="#sedes">Buscar Sede</a>
+      <button type="button" class="avatar-btn" aria-label="Perfil de usuario">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.6-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Encabezado Hero Centrado -->
+  <section class="hero-header">
+    <div class="hero-badges">
+      <span class="pill-badge pill-green">
+        <svg class="pill-icon" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+        </svg>
+        Registro Escolar 2024–2025
+      </span>
+      <span class="pill-badge pill-teal">
+        <svg class="pill-icon" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+        Acceso Gratuito con tu Colegio
+      </span>
+    </div>
+
+    <h1 class="hero-title">Crea tu Cuenta en <span class="brand-text">ReactivA</span></h1>
+    <p class="hero-subtitle">Únete a más de 50,000 estudiantes y profesores experimentando la química en 3D e interactiva.</p>
+  </section>
+
+  <!-- Contenedor Principal (Dos Columnas) -->
+  <main class="main-layout">
+    
+    <!-- Columna Izquierda: Tarjeta de Formulario Principal -->
+    <div class="form-container">
+      <div class="form-card">
+
+        <!-- Selector de Perfil Educativo -->
+        <div class="profile-select-section">
+          <label class="section-title">Selecciona tu perfil educativo</label>
+          <div class="role-grid">
+            
+            <!-- Opción Estudiante -->
+            <button 
+              type="button" 
+              class="role-card" 
+              [class.active]="selectedRole === 'estudiante'" 
+              (click)="setRole('estudiante')">
+              <div class="role-icon-box student-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 00-1.838l-7-3z"/>
+                </svg>
+              </div>
+              <div class="role-info">
+                <div class="role-title-row">
+                  <strong>Soy Estudiante</strong>
+                  @if (selectedRole === 'estudiante') {
+                    <span class="verified-check" title="Perfil seleccionado">
+                      <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                    </span>
+                  }
+                </div>
+                <p>Para aprender, completar prácticas y mantener tu racha diaria.</p>
+              </div>
+            </button>
+
+            <!-- Opción Docente / Tutor -->
+            <button 
+              type="button" 
+              class="role-card" 
+              [class.active]="selectedRole === 'docente'" 
+              (click)="setRole('docente')">
+              <div class="role-icon-box teacher-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                </svg>
+              </div>
+              <div class="role-info">
+                <div class="role-title-row">
+                  <strong>Soy Docente / Tutor</strong>
+                  @if (selectedRole === 'docente') {
+                    <span class="verified-check" title="Perfil seleccionado">
+                      <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                    </span>
+                  }
+                </div>
+                <p>Para crear clases, generar códigos PIN y supervisar alumnos.</p>
+              </div>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Botones de Autenticación Social -->
+        <div class="social-stack">
+          <button type="button" class="btn-social">
+            <svg class="social-icon" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            Registrarse con Google Classroom
+          </button>
+
+          <button type="button" class="btn-social">
+            <svg class="social-icon" viewBox="0 0 24 24">
+              <rect x="1" y="1" width="10" height="10" fill="#F25022"/>
+              <rect x="13" y="1" width="10" height="10" fill="#7FBA00"/>
+              <rect x="1" y="13" width="10" height="10" fill="#00A4EF"/>
+              <rect x="13" y="13" width="10" height="10" fill="#FFB900"/>
+            </svg>
+            Registrarse con Microsoft Escolar
+          </button>
+        </div>
+
+        <!-- Divisor con Texto -->
+        <div class="custom-divider">
+          <span>O REGÍSTRATE CON TU CORREO ESCOLAR</span>
+        </div>
+
+        <!-- Formulario de Registro Reactivo -->
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          
+          <div class="inputs-grid">
+            <!-- Nombre Completo -->
+            <div class="field-item">
+              <label for="fullName">Nombre Completo</label>
+              <div class="input-container">
+                <span class="field-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <input 
+                  id="fullName" 
+                  type="text" 
+                  formControlName="fullName" 
+                  placeholder="Camila Morales"
+                  [class.is-invalid]="isFieldInvalid('fullName')"
+                />
+              </div>
+              @if (isFieldInvalid('fullName')) {
+                <span class="error-msg">El nombre completo es requerido.</span>
+              }
+            </div>
+
+            <!-- Correo Escolar o Código PIN -->
+            <div class="field-item">
+              <label for="email">Correo Escolar o Código PIN</label>
+              <div class="input-container">
+                <span class="field-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                  </svg>
+                </span>
+                <input 
+                  id="email" 
+                  type="email" 
+                  formControlName="email" 
+                  placeholder="c.morales@colegio.edu"
+                  [class.is-invalid]="isFieldInvalid('email')"
+                />
+              </div>
+              @if (isFieldInvalid('email')) {
+                <span class="error-msg">Ingresa un correo institucional válido.</span>
+              }
+            </div>
+
+            <!-- Grado / Nivel -->
+            <div class="field-item">
+              <label for="grade">Grado / Nivel</label>
+              <div class="input-container">
+                <span class="field-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <input 
+                  id="grade" 
+                  type="text" 
+                  formControlName="grade" 
+                  placeholder="10° Grado / Química General"
+                  [class.is-invalid]="isFieldInvalid('grade')"
+                />
+                <span class="select-chevron">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Colegio o Institución -->
+            <div class="field-item">
+              <label for="school">Colegio o Institución</label>
+              <div class="input-container">
+                <span class="field-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                  </svg>
+                </span>
+                <input 
+                  id="school" 
+                  type="text" 
+                  formControlName="school" 
+                  placeholder="Colegio San Ignacio"
+                  [class.is-invalid]="isFieldInvalid('school')"
+                />
+                <span class="valid-badge" title="Institución verificada">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="field-item">
+              <label for="password">Contraseña</label>
+              <div class="input-container">
+                <span class="field-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+                <input 
+                  id="password" 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  formControlName="password" 
+                  placeholder="Mínimo 8 caracteres"
+                  [class.is-invalid]="isFieldInvalid('password')"
+                />
+                <button 
+                  type="button" 
+                  class="eye-btn" 
+                  (click)="togglePasswordVisibility()" 
+                  aria-label="Ver u ocultar contraseña">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+              @if (isFieldInvalid('password')) {
+                <span class="error-msg">Mínimo 8 caracteres requeridos.</span>
+              }
+            </div>
+
+            <!-- Confirmar Contraseña -->
+            <div class="field-item">
+              <label for="confirmPassword">Confirmar Contraseña</label>
+              <div class="input-container">
+                <span class="field-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                </span>
+                <input 
+                  id="confirmPassword" 
+                  [type]="showConfirmPassword ? 'text' : 'password'" 
+                  formControlName="confirmPassword" 
+                  placeholder="Repite tu contraseña"
+                  [class.is-invalid]="isFieldInvalid('confirmPassword')"
+                />
+                <button 
+                  type="button" 
+                  class="eye-btn" 
+                  (click)="toggleConfirmPasswordVisibility()" 
+                  aria-label="Ver u ocultar contraseña">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+              @if (registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched) {
+                <span class="error-msg">Las contraseñas no coinciden.</span>
+              }
+            </div>
+
+          </div>
+
+          <!-- Barra de Seguridad de la Contraseña -->
+          <div class="password-meter-box">
+            <div class="meter-labels">
+              <span class="meter-text">Seguridad de la contraseña:</span>
+              <span class="meter-status">Fuerte (8+ car., núm. y símbolo)</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-segment filled"></div>
+              <div class="meter-segment filled"></div>
+            </div>
+          </div>
+
+          <!-- Checkboxes de Términos y Desafíos -->
+          <div class="terms-group">
+            <label class="custom-check-label">
+              <input type="checkbox" formControlName="acceptTerms" />
+              <span class="checkbox-box"></span>
+              <span class="check-text">
+                Acepto los <a href="#terms">Términos de Servicio</a> y la <a href="#privacy">Política de Privacidad de Datos Escolares</a>.
+              </span>
+            </label>
+
+            <label class="custom-check-label">
+              <input type="checkbox" formControlName="newsletter" />
+              <span class="checkbox-box"></span>
+              <span class="check-text">
+                Recibir desafíos semanales y recordatorios de racha científica en mi correo.
+              </span>
+            </label>
+          </div>
+
+          <!-- Botón Principal de Envío -->
+          <button type="submit" class="btn-submit" [disabled]="registerForm.invalid">
+            Comenzar a Experimentar 🚀
+          </button>
+
+          <!-- Enlace de retorno hacia el Login independiente -->
+          <div class="switch-mode-row">
+            <span>¿Ya tienes una cuenta escolar?</span>
+            <a routerLink="/login" class="btn-link">Iniciar Sesión</a>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Tarjetas Informativas y Beneficios -->
+    <div class="info-container">
+      
+      <!-- Tarjeta 1: Beneficios y Estado de Cuota Escolar -->
+      <section class="info-card benefits-card">
+        
+        <div class="benefits-header">
+          <div class="badge-icon-blue">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+          </div>
+          <h2>¿Qué obtendrás desde el día 1?</h2>
+        </div>
+
+        <p class="benefits-desc">
+          Tu cuenta escolar incluye pase libre a simulaciones de química general y avanzada:
+        </p>
+
+        <!-- Lista de Beneficios -->
+        <ul class="perks-list">
+          
+          <li class="perk-item">
+            <div class="perk-icon-circle bg-amber">
+              <span class="emoji-icon">🔥</span>
+            </div>
+            <div class="perk-content">
+              <strong>Racha inicial de 3 días</strong>
+              <p>Protegida automáticamente con comodines de bienvenida para no perder progreso.</p>
+            </div>
+          </li>
+
+          <li class="perk-item">
+            <div class="perk-icon-circle bg-cyan">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+              </svg>
+            </div>
+            <div class="perk-content">
+              <strong>Laboratorio 3D sin reactivos reales</strong>
+              <p>Manipula buretas, precipitados y visualiza geometría orbital sin riesgos físicos.</p>
+            </div>
+          </li>
+
+          <li class="perk-item">
+            <div class="perk-icon-circle bg-purple">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14H8a4 4 0 01-.8-7.92 4.01 4.01 0 017.6 0A4 4 0 0112 14z"/>
+              </svg>
+            </div>
+            <div class="perk-content">
+              <strong>Tutor Inteligente 'Átomo' 24/7</strong>
+              <p>Resuelve dudas paso a paso de balanceo redox, moles y nomenclatura al instante.</p>
+            </div>
+          </li>
+
+          <li class="perk-item">
+            <div class="perk-icon-circle bg-green">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="perk-content">
+              <strong>Sincronización con Classroom</strong>
+              <p>Tus informes de laboratorio y calificaciones se registran automáticamente.</p>
+            </div>
+          </li>
+
+        </ul>
+
+        <!-- Subtarjeta de Cuota Escolar -->
+        <div class="quota-box">
+          <div class="quota-icon-container">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 2v7.31L4.2 18A2 2 0 006 21h12a2 2 0 001.8-3L14 9.31V2h-4z"/>
+              <path d="M8.5 14h7"/>
+            </svg>
+          </div>
+          <div class="quota-details">
+            <div class="quota-status-label">
+              <span class="live-indicator"></span>
+              <span>ESTADO DE CUOTA ESCOLAR</span>
+            </div>
+            <strong class="quota-count">Licencias Disponibles: 84 / 120</strong>
+          </div>
+          <span class="active-badge">Activo</span>
+        </div>
+
+      </section>
+
+      <!-- Tarjeta 2: Testimonio Estudiantil -->
+      <section class="info-card testimonial-card">
+        <div class="avatar-box">
+          <svg viewBox="0 0 64 64" fill="currentColor">
+            <rect width="64" height="64" rx="14" fill="#e0f2fe"/>
+            <path d="M32 30a10 10 0 100-20 10 10 0 000 20z" fill="#0284c7"/>
+            <path d="M14 54c0-8 8-14 18-14s18 6 18 14v4H14v-4z" fill="#0369a1"/>
+            <path d="M30 40l2 18 2-18" stroke="#ffffff" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="testimonial-body">
+          <div class="stars-row">
+            ★★★★★
+          </div>
+          <p class="quote-text">
+            “El simulador me ayudó a entender estequiometría en 10 minutos para mi examen final.”
+          </p>
+          <span class="quote-author">
+            — Valentina R., 10° Grado (Colegio San Ignacio)
+          </span>
+        </div>
+      </section>
+
+      <!-- Tarjeta 3: Certificado y Seguridad para Colegios -->
+      <section class="info-card cert-card">
+        <div class="cert-left">
+          <div class="cert-shield-icon">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="cert-text">
+            <strong>Certificado para colegios</strong>
+            <p>Protección integral bajo normativas FERPA y COPPA.</p>
+          </div>
+        </div>
+        <span class="ssl-pill">256-bit SSL</span>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Pie de Página Institucional -->
+  <footer class="bottom-footer">
+    <div class="footer-left">
+      <span>🏛️ Institutional Single Sign-On enabled for accredited colleges & high schools</span>
+    </div>
+    <div class="footer-right">
+      <a href="#access">Institutional Access</a>
+      <a href="#privacy">Privacy Policy</a>
+      <a href="#terms">Terms of Service</a>
+      <span>© 2026 ReactivA. All rights reserved.</span>
+    </div>
+  </footer>
+
+</div>
+
