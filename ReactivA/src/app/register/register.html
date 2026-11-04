@@ -160,7 +160,13 @@
                 />
               </div>
               @if (isFieldInvalid('fullName')) {
-                <span class="error-msg">El nombre completo es requerido.</span>
+                <span class="error-msg">
+                  @if (registerForm.get('fullName')?.hasError('required')) {
+                    El nombre completo es obligatorio.
+                  } @else if (registerForm.get('fullName')?.hasError('minlength')) {
+                    El nombre debe tener al menos 3 caracteres.
+                  }
+                </span>
               }
             </div>
 
@@ -183,33 +189,44 @@
                 />
               </div>
               @if (isFieldInvalid('email')) {
-                <span class="error-msg">Ingresa un correo institucional válido.</span>
+                <span class="error-msg">
+                  @if (registerForm.get('email')?.hasError('required')) {
+                    El correo electrónico es obligatorio.
+                  } @else if (registerForm.get('email')?.hasError('email')) {
+                    Ingresa un correo electrónico válido (ej. usuario@colegio.edu).
+                  }
+                </span>
               }
             </div>
 
-            <!-- Grado / Nivel -->
-            <div class="field-item">
-              <label for="grade">Grado / Nivel</label>
-              <div class="input-container">
-                <span class="field-icon">
-                  <svg viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                  </svg>
-                </span>
-                <input 
-                  id="grade" 
-                  type="text" 
-                  formControlName="grade" 
-                  placeholder="10° Grado / Química General"
-                  [class.is-invalid]="isFieldInvalid('grade')"
-                />
-                <span class="select-chevron">
-                  <svg viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                  </svg>
-                </span>
+            <!-- Grado / Nivel (visible condicionalmente si el rol es estudiante) -->
+            @if (selectedRole === 'estudiante') {
+              <div class="field-item">
+                <label for="grade">Grado / Nivel</label>
+                <div class="input-container">
+                  <span class="field-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                  <input 
+                    id="grade" 
+                    type="text" 
+                    formControlName="grade" 
+                    placeholder="10° Grado / Química General"
+                    [class.is-invalid]="isFieldInvalid('grade')"
+                  />
+                  <span class="select-chevron">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+                @if (isFieldInvalid('grade')) {
+                  <span class="error-msg">El grado académico es obligatorio para estudiantes.</span>
+                }
               </div>
-            </div>
+            }
 
             <!-- Colegio o Institución -->
             <div class="field-item">
@@ -225,7 +242,6 @@
                   type="text" 
                   formControlName="school" 
                   placeholder="Colegio San Ignacio"
-                  [class.is-invalid]="isFieldInvalid('school')"
                 />
                 <span class="valid-badge" title="Institución verificada">
                   <svg viewBox="0 0 20 20" fill="currentColor">
@@ -248,7 +264,7 @@
                   id="password" 
                   [type]="showPassword ? 'text' : 'password'" 
                   formControlName="password" 
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Mínimo 6 caracteres"
                   [class.is-invalid]="isFieldInvalid('password')"
                 />
                 <button 
@@ -263,7 +279,13 @@
                 </button>
               </div>
               @if (isFieldInvalid('password')) {
-                <span class="error-msg">Mínimo 8 caracteres requeridos.</span>
+                <span class="error-msg">
+                  @if (registerForm.get('password')?.hasError('required')) {
+                    La contraseña es obligatoria.
+                  } @else if (registerForm.get('password')?.hasError('minlength')) {
+                    La contraseña debe tener al menos 6 caracteres.
+                  }
+                </span>
               }
             </div>
 
@@ -281,7 +303,7 @@
                   [type]="showConfirmPassword ? 'text' : 'password'" 
                   formControlName="confirmPassword" 
                   placeholder="Repite tu contraseña"
-                  [class.is-invalid]="isFieldInvalid('confirmPassword')"
+                  [class.is-invalid]="isFieldInvalid('confirmPassword') || hasPasswordMismatch()"
                 />
                 <button 
                   type="button" 
@@ -294,7 +316,9 @@
                   </svg>
                 </button>
               </div>
-              @if (registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched) {
+              @if (isFieldInvalid('confirmPassword')) {
+                <span class="error-msg">Por favor confirma tu contraseña.</span>
+              } @else if (hasPasswordMismatch()) {
                 <span class="error-msg">Las contraseñas no coinciden.</span>
               }
             </div>
@@ -305,7 +329,7 @@
           <div class="password-meter-box">
             <div class="meter-labels">
               <span class="meter-text">Seguridad de la contraseña:</span>
-              <span class="meter-status">Fuerte (8+ car., núm. y símbolo)</span>
+              <span class="meter-status">Fuerte (6+ car., núm. y símbolo)</span>
             </div>
             <div class="meter-track">
               <div class="meter-segment filled"></div>
@@ -322,6 +346,9 @@
                 Acepto los <a href="#terms">Términos de Servicio</a> y la <a href="#privacy">Política de Privacidad de Datos Escolares</a>.
               </span>
             </label>
+            @if (registerForm.get('acceptTerms')?.invalid && (registerForm.get('acceptTerms')?.touched || registerForm.get('acceptTerms')?.dirty)) {
+              <span class="error-msg">Debes aceptar los Términos de Servicio y la Política de Privacidad.</span>
+            }
 
             <label class="custom-check-label">
               <input type="checkbox" formControlName="newsletter" />
@@ -332,7 +359,7 @@
             </label>
           </div>
 
-          <!-- Botón Principal de Envío -->
+          <!-- Botón Principal de Envío con Property Binding [disabled] -->
           <button type="submit" class="btn-submit" [disabled]="registerForm.invalid">
             Comenzar a Experimentar 🚀
           </button>
@@ -496,4 +523,3 @@
   </footer>
 
 </div>
-
