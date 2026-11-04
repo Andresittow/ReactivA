@@ -31,7 +31,74 @@
     </button>
   </section>
 
-  <!-- Sección: Ruta del Conocimiento -->
+  <!-- Buscador Dinámico con FormControl Individual (Clase 5a) -->
+  <section class="search-section">
+    <div class="search-input-box">
+      <i class="ph ph-magnifying-glass search-icon"></i>
+      <input
+        type="text"
+        [formControl]="searchControl"
+        placeholder="Buscar unidades temáticas o retos..."
+        class="search-input"
+        aria-label="Buscar unidades temáticas o retos"
+      />
+      @if (searchTerm) {
+        <button
+          type="button"
+          class="btn-clear-search"
+          (click)="clearSearch()"
+          title="Limpiar búsqueda"
+          aria-label="Limpiar búsqueda"
+        >
+          <i class="ph ph-x"></i>
+        </button>
+      }
+    </div>
+    @if (searchTerm) {
+      <div class="search-feedback">
+        <span>Filtrando por: <strong>"{{ searchTerm }}"</strong></span>
+      </div>
+    }
+  </section>
+
+  <!-- Sección: Misiones/Retos Diarios (Clases 4a y 4b) -->
+  <section class="daily-missions">
+    <div class="section-header">
+      <div class="header-title-group">
+        <h3>Misiones Diarias</h3>
+        <span class="missions-counter">
+          {{ completedTasksCount }}/{{ allTasks.length }} completadas
+        </span>
+      </div>
+      <span class="missions-reward"><i class="ph ph-trophy"></i> +150 XP hoy</span>
+    </div>
+
+    <div class="tasks-grid">
+      @for (task of dailyTasks; track task.id) {
+        <div class="task-card" [class.completed]="task.completed">
+          <label class="task-label">
+            <input
+              type="checkbox"
+              class="task-checkbox"
+              [checked]="task.completed"
+              (change)="toggleTask(task.id)"
+            />
+            <span class="task-title">{{ task.title }}</span>
+          </label>
+          <span class="task-status-badge">
+            {{ task.completed ? 'Completado' : 'Pendiente' }}
+          </span>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <i class="ph ph-clipboard-text"></i>
+          <p>No se encontraron misiones que coincidan con la búsqueda.</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Sección: Ruta del Conocimiento (Clase 3) -->
   <section class="knowledge-route">
     <div class="section-header">
       <h3>Ruta del Conocimiento</h3>
@@ -39,43 +106,32 @@
     </div>
 
     <div class="cards-grid">
-      <!-- Módulo 1 -->
-      <div class="route-card green">
-        <div class="card-header">
-          <div class="icon-box"><i class="ph ph-flask"></i></div>
-          <div class="progress-circle">75%</div>
-        </div>
-        <span class="unit-tag">UNIT 1</span>
-        <h4>States of Matter</h4>
-        <p>Explore solids, liquids, gases, and plasma through...</p>
-      </div>
+      @for (topic of filteredTopics; track topic.id) {
+        <div class="route-card" [ngClass]="topic.color">
+          <div class="card-header">
+            <div class="icon-box"><i [class]="topic.icon"></i></div>
+            <div class="progress-circle">{{ topic.progress }}%</div>
+          </div>
+          <span class="unit-tag">{{ topic.unit }}</span>
+          <h4>{{ topic.title }}</h4>
+          <p>{{ topic.description }}</p>
 
-      <!-- Módulo 2 -->
-      <div class="route-card blue">
-        <div class="card-header">
-          <div class="icon-box"><i class="ph ph-atom"></i></div>
-          <div class="progress-circle">40%</div>
+          <!-- Indicador de Progreso Dinámico con Property Binding directo (Clase 3) -->
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" [style.width.%]="topic.progress"></div>
+          </div>
         </div>
-        <span class="unit-tag">UNIT 2</span>
-        <h4>Atomic Structure</h4>
-        <p>Dive into the nucleus, electron clouds, and...</p>
-      </div>
-
-      <!-- Módulo 3 -->
-      <div class="route-card purple">
-        <div class="card-header">
-          <div class="icon-box"><i class="ph ph-molecule"></i></div>
-          <div class="progress-circle">0%</div>
+      } @empty {
+        <div class="empty-state">
+          <i class="ph ph-magnifying-glass"></i>
+          <p>No se encontraron unidades temáticas para tu búsqueda.</p>
         </div>
-        <span class="unit-tag">UNIT 3</span>
-        <h4>Organic Chemistry</h4>
-        <p>Carbon bonds, hydrocarbon chains, and complex organi...</p>
-      </div>
+      }
     </div>
   </section>
 
   <!-- Botón flotante Asistente -->
-  <button class="floating-chat-btn">
+  <button class="floating-chat-btn" aria-label="Abrir asistente virtual">
     <i class="ph ph-robot"></i>
   </button>
 </div>
