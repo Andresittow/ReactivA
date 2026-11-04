@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 @Component({
@@ -11,7 +11,7 @@ import { Router, RouterLink } from '@angular/router';
   styleUrl: './register.scss'
 })
 export class RegisterComponent {
-  registerForm: FormGroup;
+  registerForm!: FormGroup;
 
   showPassword = false;
   showConfirmPassword = false;
@@ -20,66 +20,90 @@ export class RegisterComponent {
     private fb: FormBuilder,
     private router: Router
   ) {
-    // Formulario Reactivo fiel a la imagen de referencia
+    this.initForm();
+  }
+
+  // 1. Inicialización de FormGroup con FormBuilder y validaciones correspondientes (Clase 5b)
+  private initForm(): void {
     this.registerForm = this.fb.group({
+      fullName: ['', [Validators.required, Validators.minLength(3)]],
       role: ['estudiante', [Validators.required]],
-      fullName: ['Camila Morales', [Validators.required, Validators.minLength(3)]],
-      email: ['c.morales@colegio.edu', [Validators.required, Validators.email]],
-      grade: ['10° Grado / Química General', [Validators.required]],
-      school: ['Colegio San Ignacio', [Validators.required]],
-      password: ['Quimica2026*!', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['Quimica2026*!', [Validators.required]],
-      acceptTerms: [true, [Validators.requiredTrue]],
-      newsletter: [true]
+      email: ['', [Validators.required, Validators.email]],
+      grade: ['', [Validators.required]],
+      school: ['Colegio San Ignacio'],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]],
+      acceptTerms: [false, [Validators.requiredTrue]],
+      newsletter: [false]
     }, { validators: this.passwordMatchValidator });
   }
 
-  // Validador personalizado para confirmación de contraseña
-  passwordMatchValidator(g: FormGroup) {
-    const password = g.get('password')?.value;
-    const confirm = g.get('confirmPassword')?.value;
-    return password === confirm ? null : { mismatch: true };
+  // 2. Validador personalizado a nivel de FormGroup para verificar coincidencia exacta de contraseñas (Clase 5b/5c)
+  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+    const password = control.get('password')?.value;
+    const confirmPassword = control.get('confirmPassword')?.value;
+
+    if (!password || !confirmPassword) {
+      return null;
+    }
+
+    return password === confirmPassword ? null : { mismatch: true };
   }
 
-  // Getter para el rol seleccionado actualmente
+  // Getter auxiliar para obtener el rol actual seleccionado
   get selectedRole(): 'estudiante' | 'docente' {
     return this.registerForm.get('role')?.value ?? 'estudiante';
   }
 
-  // Selección de perfil educativo
+  // Permite seleccionar el perfil y ajusta dinámicamente las validaciones del campo 'grade'
   setRole(role: 'estudiante' | 'docente'): void {
     this.registerForm.get('role')?.setValue(role);
+    const gradeControl = this.registerForm.get('grade');
+
+    if (role === 'estudiante') {
+      gradeControl?.setValidators([Validators.required]);
+    } else {
+      gradeControl?.clearValidators();
+    }
+    gradeControl?.updateValueAndValidity();
   }
 
-  // Alternar visibilidad de contraseña
+  // Alterna entre mostrar y ocultar la contraseña principal
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
-  // Alternar visibilidad de confirmación de contraseña
+  // Alterna entre mostrar y ocultar la confirmación de contraseña
   toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  // Helper para validación visual de campos
+  // 3. Helper para consultar si un control es inválido y ya ha sido interactuado (touched o dirty)
   isFieldInvalid(field: string): boolean {
     const control = this.registerForm.get(field);
-    return !!(control && control.invalid && control.touched);
+    return !!(control && control.invalid && (control.touched || control.dirty));
   }
 
-  // Envío del registro
+  // Helper para verificar el error de contraseñas no coincidentes
+  hasPasswordMismatch(): boolean {
+    const confirmControl = this.registerForm.get('confirmPassword');
+    return !!(this.registerForm.hasError('mismatch') && (confirmControl?.touched || confirmControl?.dirty));
+  }
+
+  // 4. Manejo del envío del formulario con validación previa
   onSubmit(): void {
     if (this.registerForm.valid) {
-      console.log('Registro exitoso en ReactivA:', this.registerForm.value);
+      console.log('Formulario válido. Registro exitoso en ReactivA:', this.registerForm.value);
+      // Redirección al Dashboard o al Login
       this.router.navigate(['/dashboard']);
     } else {
+      // Si el formulario es inválido, marcamos todos los controles como touched para disparar las validaciones visuales
       this.registerForm.markAllAsTouched();
     }
   }
 
-  // Redirección al componente de Login
+  // Redirección al Login
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
 }
-
