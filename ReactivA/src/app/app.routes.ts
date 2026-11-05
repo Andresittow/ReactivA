@@ -2,21 +2,21 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   // Ruta de Login (Pública / Autenticación)
-  { 
-    path: 'login', 
-    loadComponent: () => import('./login/login').then(m => m.LoginComponent) 
-  },
-
-  // Ruta de Registro (Pública / Autenticación)
-  { 
-    path: 'register', 
-    loadComponent: () => import('./register/register').then(m => m.RegisterComponent) 
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login').then(m => m.LoginComponent)
   },
 
   // Ruta del Dashboard (Dentro del Layout con Sidebar)
-  { 
-    path: 'dashboard', 
-    loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardComponent) 
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardComponent)
+  },
+
+  // Ruta del Laboratorio Virtual (Dentro del Layout con Sidebar)
+  {
+    path: 'virtual-lab',
+    loadComponent: () => import('./virtual-lab/virtual-lab').then(m => m.VirtualLabComponent)
   },
 
   // Redirecciones por defecto con las rutas existentes
