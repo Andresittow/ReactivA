@@ -1,0 +1,1535 @@
+// ==========================================
+// VARIABLES DE COLOR Y SISTEMA DE DISEÑO
+// ==========================================
+$primary-blue: #00a2ed;
+$primary-dark: #1a4da1;
+$secondary-purple: #635bfc;
+$accent-cyan: #06b6d4;
+$success-green: #10b981;
+$success-dark: #059669;
+$warning-amber: #f59e0b;
+$danger-red: #ef4444;
+
+$bg-workspace: #f8fafc;
+$bg-canvas: #ffffff;
+$bg-card: #ffffff;
+$text-dark: #1e293b;
+$text-muted: #64748b;
+$text-light: #94a3b8;
+$border-color: #e2e8f0;
+$border-focus: #00a2ed;
+
+// ==========================================
+// CONTENEDOR PRINCIPAL: LAYOUT DE 3 COLUMNAS
+// (Sidebar integrado en app.html + Workspace Central + Equipment Panel)
+// ==========================================
+.virtual-lab-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: $bg-workspace;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+// ==========================================
+// COLUMNA CENTRAL: ÁREA DE SIMULACIÓN Y BALANCEADOR
+// ==========================================
+.simulation-workspace {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  gap: 1.25rem;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+}
+
+// ------------------------------------------
+// Encabezado del Laboratorio y Telemetría
+// ------------------------------------------
+.lab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: $bg-card;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid $border-color;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  .experiment-info {
+    .badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(0, 162, 237, 0.1);
+      color: $primary-blue;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+
+      i {
+        font-size: 0.9rem;
+      }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: $text-dark;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 0.25rem 0 0;
+      font-size: 0.85rem;
+      color: $text-muted;
+    }
+  }
+
+  .lab-telemetry {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .telemetry-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: #f1f5f9;
+      border: 1px solid $border-color;
+      padding: 0.5rem 0.85rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 1.2rem;
+        color: $primary-blue;
+      }
+
+      .telemetry-data {
+        display: flex;
+        flex-direction: column;
+
+        .label {
+          font-size: 0.7rem;
+          color: $text-muted;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        strong {
+          font-size: 0.85rem;
+          color: $text-dark;
+          font-weight: 700;
+
+          small {
+            font-size: 0.75rem;
+            color: $text-muted;
+            font-weight: 500;
+          }
+        }
+      }
+
+      &.heated {
+        background: #fff7ed;
+        border-color: #fdba74;
+
+        i {
+          color: #ea580c;
+          animation: pulseFlame 1.2s infinite alternate ease-in-out;
+        }
+      }
+    }
+
+    .btn-control-play {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1rem;
+      background: $primary-dark;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: lighten($primary-dark, 8%);
+        transform: translateY(-1px);
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+// ------------------------------------------
+// Canvas Central de Simulación (Fondo Cuadriculado y Órbitas)
+// ------------------------------------------
+.simulation-canvas-wrapper {
+  flex: 1;
+  min-height: 420px;
+  background: $bg-canvas;
+  border-radius: 20px;
+  border: 1px solid $border-color;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.simulation-canvas {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  box-sizing: border-box;
+
+  // Fondo cuadriculado suave (Estilo Blueprint de Laboratorio)
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, rgba(226, 232, 240, 0.65) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.65) 1px, transparent 1px);
+  background-size: 26px 26px;
+
+  &.simulation-paused {
+    .orbit-ring,
+    .electron,
+    .pulse-indicator {
+      animation-play-state: paused !important;
+    }
+  }
+}
+
+.canvas-watermark {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 2;
+
+  .watermark-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+  }
+
+  .watermark-formula {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #475569;
+    margin-top: 0.15rem;
+  }
+}
+
+// ------------------------------------------
+// Sistema de Órbitas Concéntricas y Reactivos
+// ------------------------------------------
+.orbit-system {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto 0;
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: all 0.3s ease;
+
+  &.ring-outer {
+    width: 340px;
+    height: 340px;
+    border: 1.5px dashed rgba(0, 162, 237, 0.3);
+    animation: rotateOrbit 30s linear infinite;
+  }
+
+  &.ring-mid {
+    width: 240px;
+    height: 240px;
+    border: 1.5px dashed rgba(99, 91, 252, 0.3);
+    animation: rotateOrbitCounter 22s linear infinite;
+  }
+
+  &.ring-inner {
+    width: 150px;
+    height: 150px;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    background: radial-gradient(circle, rgba(0, 162, 237, 0.04) 0%, transparent 70%);
+  }
+}
+
+// Rayos de enlace de energía que convergen al núcleo
+.bond-rays {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+
+  .ray {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 2px;
+    transform-origin: 0% 50%;
+  }
+
+  .ray-1 {
+    width: 140px;
+    background: linear-gradient(90deg, #0284c7, transparent);
+    transform: rotate(215deg);
+  }
+
+  .ray-2 {
+    width: 140px;
+    background: linear-gradient(90deg, #0284c7, transparent);
+    transform: rotate(145deg);
+  }
+
+  .ray-3 {
+    width: 150px;
+    background: linear-gradient(90deg, #e11d48, transparent);
+    transform: rotate(0deg);
+  }
+
+  &.bonding-active {
+    opacity: 0.9;
+
+    .ray {
+      height: 3px;
+      box-shadow: 0 0 10px rgba(0, 162, 237, 0.6);
+      animation: pulseRays 1.5s infinite alternate ease-in-out;
+    }
+  }
+}
+
+// Nodos de los reactivos atómicos posicionados visualmente
+.reactant-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.top-left {
+    top: 15%;
+    left: 20%;
+  }
+
+  &.bottom-left {
+    bottom: 15%;
+    left: 20%;
+  }
+
+  &.center-right {
+    top: 42%;
+    right: 20%;
+  }
+
+  .atom-halo {
+    position: absolute;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--node-color, $primary-blue);
+    opacity: 0.15;
+    animation: pulseHalo 2s infinite ease-in-out;
+  }
+
+  .atom-core {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--node-color, $primary-blue);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-weight: 800;
+
+    .atom-symbol {
+      font-size: 1.15rem;
+    }
+
+    .atom-charge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      font-size: 0.65rem;
+      background: #ffffff;
+      color: $text-dark;
+      padding: 0.1rem 0.25rem;
+      border-radius: 6px;
+      border: 1px solid $border-color;
+      font-weight: 700;
+    }
+  }
+
+  .atom-electrons {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    pointer-events: none;
+    animation: rotateOrbit 4s linear infinite;
+
+    .electron {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--node-color, $primary-blue);
+      border: 1.5px solid #ffffff;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+
+      &.electron-1 {
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      &.electron-2 {
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      &.electron-3 {
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+      }
+      &.electron-4 {
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+      }
+    }
+  }
+
+  .atom-label {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.2rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+
+    strong {
+      font-size: 0.75rem;
+      color: $text-dark;
+    }
+
+    small {
+      font-size: 0.65rem;
+      color: $text-muted;
+    }
+  }
+}
+
+// ------------------------------------------
+// Núcleo Central de Reacción (Synthesis Core)
+// ------------------------------------------
+.synthesis-core {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  .awaiting-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #ffffff;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 20px;
+    padding: 1.25rem 1.5rem;
+    max-width: 220px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+
+    .pulse-indicator {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(0, 162, 237, 0.1);
+      color: $primary-blue;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      animation: pulseCore 2s infinite ease-in-out;
+    }
+
+    .awaiting-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: $text-dark;
+    }
+
+    p {
+      margin: 0.35rem 0 0;
+      font-size: 0.7rem;
+      color: $text-muted;
+      line-height: 1.3;
+    }
+  }
+
+  // Molécula de H2O sintetizada exitosamente
+  &.synthesized {
+    .molecule-h2o {
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  }
+
+  .molecule-h2o {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .water-core {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #e11d48;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      box-shadow: 0 0 24px rgba(225, 29, 72, 0.45);
+
+      .bond-arm {
+        position: absolute;
+        width: 32px;
+        height: 6px;
+        background: #94a3b8;
+        border-radius: 3px;
+        top: 25px;
+      }
+
+      .arm-left {
+        left: -22px;
+        transform: rotate(-38deg);
+      }
+
+      .arm-right {
+        right: -22px;
+        transform: rotate(38deg);
+      }
+
+      .water-satellite {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #0284c7;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 800;
+        box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+
+        &.hydrogen-left {
+          top: -14px;
+          left: -38px;
+        }
+
+        &.hydrogen-right {
+          top: -14px;
+          right: -38px;
+        }
+      }
+    }
+
+    .water-label {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .formula {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: $primary-dark;
+      }
+
+      small {
+        font-size: 0.75rem;
+        color: $text-muted;
+        font-weight: 600;
+      }
+    }
+
+    .energy-burst {
+      margin-top: 0.4rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #ecfdf5;
+      color: $success-dark;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid #a7f3d0;
+      animation: bounceSmall 1.5s infinite;
+
+      i {
+        font-size: 0.95rem;
+      }
+    }
+  }
+}
+
+// ------------------------------------------
+// Barra de Mesa de Trabajo (Equipos Activos)
+// ------------------------------------------
+.workbench-bar {
+  background: rgba(248, 250, 252, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid $border-color;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  z-index: 5;
+
+  .workbench-header {
+    margin-bottom: 0.5rem;
+
+    .wb-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: $text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+
+      i {
+        font-size: 0.9rem;
+        color: $primary-blue;
+      }
+    }
+  }
+
+  .workbench-items {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .wb-item-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: #ffffff;
+      border: 1.5px solid;
+      padding: 0.35rem 0.65rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 1rem;
+      }
+
+      .chip-text {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+
+        .chip-name {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: $text-dark;
+        }
+
+        .chip-sub {
+          font-size: 0.7rem;
+          background: #f1f5f9;
+          color: $text-muted;
+          padding: 0.1rem 0.3rem;
+          border-radius: 4px;
+        }
+      }
+
+      .btn-chip-remove {
+        background: transparent;
+        border: none;
+        color: $text-light;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.1rem;
+        margin-left: 0.25rem;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+
+        &:hover {
+          color: $danger-red;
+          background: #fee2e2;
+        }
+
+        i {
+          font-size: 0.75rem;
+        }
+      }
+    }
+
+    .wb-empty-prompt {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: $text-muted;
+      font-size: 0.8rem;
+      font-style: italic;
+
+      i {
+        font-size: 1rem;
+        color: $primary-blue;
+      }
+    }
+  }
+}
+
+// ==========================================
+// BALANCEADOR DE ECUACIONES QUÍMICAS (Req 4)
+// ==========================================
+.equation-balancer-section {
+  width: 100%;
+}
+
+.balancer-card {
+  background: $bg-card;
+  border-radius: 18px;
+  border: 1px solid $border-color;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  .balancer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .balancer-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+
+      .balancer-icon-box {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(0, 162, 237, 0.1);
+        color: $primary-blue;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+      }
+
+      .balancer-headings {
+        h2 {
+          margin: 0;
+          font-size: 1.15rem;
+          font-weight: 800;
+          color: $text-dark;
+        }
+
+        p {
+          margin: 0.2rem 0 0;
+          font-size: 0.8rem;
+          color: $text-muted;
+        }
+      }
+    }
+
+    .balancer-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      // Badge de estado reactivo (Requerimiento 4)
+      .balance-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+        transition: all 0.3s ease;
+
+        i {
+          font-size: 1rem;
+        }
+
+        // Tinte verde cuando la ecuación esté balanceada (Requerimiento 4)
+        &.balanced {
+          background: #ecfdf5;
+          color: #047857;
+          border-color: #6ee7b7;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+
+          i {
+            color: #10b981;
+          }
+        }
+      }
+
+      .btn-reset-equation {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 0.85rem;
+        background: #ffffff;
+        color: $text-dark;
+        border: 1px solid $border-color;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #f8fafc;
+          border-color: #cbd5e1;
+          color: $danger-red;
+        }
+
+        i {
+          font-size: 0.95rem;
+        }
+      }
+
+      .btn-help-equation {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 0.85rem;
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #fde68a;
+        }
+
+        i {
+          font-size: 0.95rem;
+        }
+      }
+    }
+  }
+
+  // ------------------------------------------
+  // Expresión de la Fórmula Química Interactiva
+  // ------------------------------------------
+  .equation-formula-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: #f8fafc;
+    border-radius: 14px;
+    border: 1px solid $border-color;
+
+    .reactant-block,
+    .product-block {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      .input-wrapper {
+        .coeff-input {
+          width: 50px;
+          height: 50px;
+          border-radius: 12px;
+          border: 2px solid #cbd5e1;
+          background: #ffffff;
+          font-size: 1.25rem;
+          font-weight: 800;
+          text-align: center;
+          color: $primary-dark;
+          outline: none;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+
+          &::placeholder {
+            color: #94a3b8;
+            font-weight: 500;
+          }
+
+          &:focus {
+            border-color: $primary-blue;
+            box-shadow: 0 0 0 3px rgba(0, 162, 237, 0.2);
+          }
+
+          &.valid-coeff {
+            border-color: $success-green;
+            background-color: #f0fdf4;
+            color: $success-dark;
+          }
+
+          // Elimina spinners nativos en Chrome/Safari/Edge/Firefox
+          &::-webkit-outer-spin-button,
+          &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+          -moz-appearance: textfield;
+        }
+      }
+
+      .chemical-formula {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: $text-dark;
+        letter-spacing: -0.01em;
+
+        sub {
+          font-size: 0.9rem;
+          font-weight: 700;
+        }
+
+        .state-sub {
+          font-size: 0.8rem;
+          color: $text-muted;
+          font-weight: 600;
+          margin-left: 0.2rem;
+        }
+      }
+    }
+
+    .math-operator {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: $text-muted;
+    }
+
+    .reaction-arrow-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: $primary-blue;
+      padding: 0 0.5rem;
+
+      i {
+        font-size: 1.8rem;
+        font-weight: 800;
+      }
+
+      .heat-symbol {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #f97316;
+        margin-top: -0.25rem;
+      }
+    }
+  }
+
+  // ------------------------------------------
+  // Telemetría Didáctica de Conservación Atómica
+  // ------------------------------------------
+  .atomic-conservation-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed $border-color;
+
+    .atomic-counts {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .group-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: $text-muted;
+        text-transform: uppercase;
+      }
+
+      .count-tag {
+        font-size: 0.8rem;
+        background: #f1f5f9;
+        color: $text-dark;
+        padding: 0.25rem 0.5rem;
+        border-radius: 8px;
+        border: 1px solid $border-color;
+
+        strong {
+          color: $primary-dark;
+        }
+
+        &.matched {
+          background: #ecfdf5;
+          color: #065f46;
+          border-color: #a7f3d0;
+
+          strong {
+            color: #059669;
+          }
+        }
+      }
+    }
+
+    .conservation-status {
+      font-size: 0.8rem;
+      font-weight: 600;
+
+      .conservation-match {
+        color: $success-dark;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .conservation-mismatch {
+        color: $text-muted;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+    }
+  }
+}
+
+// ==========================================
+// COLUMNA DERECHA: PANEL DE HERRAMIENTAS ("Equipment")
+// ==========================================
+.equipment-panel {
+  width: 350px;
+  flex-shrink: 0;
+  height: 100vh;
+  background: $bg-card;
+  border-left: 1px solid $border-color;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  .panel-header {
+    padding: 1.5rem 1.25rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+
+    .panel-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      .panel-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(0, 162, 237, 0.1);
+        color: $primary-blue;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: $text-dark;
+      }
+
+      span {
+        font-size: 0.75rem;
+        color: $text-muted;
+      }
+    }
+
+    .active-count-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #eff6ff;
+      color: $primary-blue;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 162, 237, 0.2);
+    }
+  }
+
+  // ------------------------------------------
+  // 1. Buscador Reactivo de Herramientas con FormControl
+  // ------------------------------------------
+  .search-equipment-box {
+    position: relative;
+    padding: 1rem 1.25rem 0.5rem;
+
+    .search-icon {
+      position: absolute;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-20%);
+      color: $text-light;
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.7rem 2.2rem 0.7rem 2.4rem;
+      border: 1.5px solid $border-color;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      color: $text-dark;
+      background: #f8fafc;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+
+      &::placeholder {
+        color: $text-light;
+      }
+
+      &:focus {
+        background: #ffffff;
+        border-color: $primary-blue;
+        box-shadow: 0 0 0 3px rgba(0, 162, 237, 0.15);
+      }
+    }
+
+    .btn-clear-search {
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-20%);
+      background: #e2e8f0;
+      border: none;
+      color: $text-muted;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #cbd5e1;
+        color: $text-dark;
+      }
+    }
+  }
+
+  // ------------------------------------------
+  // Píldoras de Filtro de Categoría
+  // ------------------------------------------
+  .category-tabs {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.5rem 1.25rem 0.75rem;
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      white-space: nowrap;
+      background: #f1f5f9;
+      border: 1px solid transparent;
+      color: $text-muted;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #e2e8f0;
+        color: $text-dark;
+      }
+
+      &.active {
+        background: $primary-blue;
+        color: #ffffff;
+        border-color: $primary-blue;
+        box-shadow: 0 2px 6px rgba(0, 162, 237, 0.3);
+      }
+    }
+  }
+
+  // ------------------------------------------
+  // 2. Lista de Herramientas y Reactivos (@for)
+  // ------------------------------------------
+  .equipment-list-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 1.25rem 1.5rem;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
+  }
+
+  .equipment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .equipment-card {
+    display: flex;
+    gap: 0.85rem;
+    background: #ffffff;
+    border: 1.5px solid $border-color;
+    border-radius: 14px;
+    padding: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    outline: none;
+
+    &:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    &.active {
+      border-color: $primary-blue;
+      background: #f0f9ff;
+      box-shadow: 0 4px 14px rgba(0, 162, 237, 0.12);
+
+      .card-name {
+        color: $primary-dark;
+      }
+    }
+
+    .card-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+
+      .card-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.35rem;
+
+        .card-name {
+          margin: 0;
+          font-size: 0.88rem;
+          font-weight: 700;
+          color: $text-dark;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .card-formula-tag {
+          font-size: 0.7rem;
+          font-weight: 700;
+          background: #e2e8f0;
+          color: #475569;
+          padding: 0.1rem 0.35rem;
+          border-radius: 4px;
+          flex-shrink: 0;
+        }
+      }
+
+      .card-desc {
+        margin: 0.3rem 0 0.5rem;
+        font-size: 0.75rem;
+        color: $text-muted;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .card-footer-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.72rem;
+
+        .category-tag {
+          color: $text-light;
+          font-weight: 600;
+        }
+
+        .status-indicator {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-weight: 700;
+          color: $text-muted;
+
+          i {
+            font-size: 0.85rem;
+          }
+
+          &.status-active {
+            color: $primary-blue;
+          }
+        }
+      }
+    }
+  }
+
+  // Estado vacío cuando no hay resultados de búsqueda
+  .empty-equipment-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: $text-muted;
+
+    i {
+      font-size: 2.5rem;
+      color: #cbd5e1;
+      margin-bottom: 0.75rem;
+    }
+
+    h4 {
+      margin: 0 0 0.25rem;
+      font-size: 0.95rem;
+      color: $text-dark;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0 0 1rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-reset-filter {
+      padding: 0.5rem 1rem;
+      background: $primary-blue;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: darken($primary-blue, 8%);
+      }
+    }
+  }
+}
+
+// ==========================================
+// ANIMACIONES KEYFRAMES
+// ==========================================
+@keyframes rotateOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rotateOrbitCounter {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes pulseHalo {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.15;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.3;
+  }
+}
+
+@keyframes pulseCore {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes pulseFlame {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes pulseRays {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceSmall {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+// ==========================================
+// RESPONSIVIDAD (PANTALLAS MEDIANAS Y MÓVILES)
+// ==========================================
+@media (max-width: 1200px) {
+  .equipment-panel {
+    width: 300px;
+  }
+
+  .orbit-system {
+    height: 320px;
+  }
+
+  .orbit-ring.ring-outer {
+    width: 290px;
+    height: 290px;
+  }
+
+  .orbit-ring.ring-mid {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+@media (max-width: 992px) {
+  .virtual-lab-layout {
+    flex-direction: column;
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .simulation-workspace {
+    height: auto;
+    overflow: visible;
+  }
+
+  .equipment-panel {
+    width: 100%;
+    height: auto;
+    border-left: none;
+    border-top: 1px solid $border-color;
+  }
+}
+
