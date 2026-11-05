@@ -1,0 +1,979 @@
+// ==========================================================
+// TABLA PERIÓDICA INTERACTIVA - REACTIVA
+// ==========================================================
+
+.periodic-page {
+  display: flex;
+  min-height: calc(100vh - 2rem);
+  padding: 1.75rem 2rem;
+  gap: 1.5rem;
+  background-color: #f8fafc;
+  box-sizing: border-box;
+  color: #1e293b;
+  overflow-x: hidden;
+
+  // --------------------------------------------------------
+  // Área Principal de la Tabla
+  // --------------------------------------------------------
+  .table-workspace {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  // Encabezado
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+
+    .header-titles {
+      .badge-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #e0f2fe;
+        color: #0284c7;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.3px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 0.35rem 0;
+        letter-spacing: -0.5px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #64748b;
+      }
+    }
+
+    .stats-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .stat-item {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.5rem 0.85rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 70px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+        .stat-number {
+          font-size: 1.15rem;
+          font-weight: 800;
+          color: #2563eb;
+          line-height: 1.2;
+        }
+
+        .stat-label {
+          font-size: 0.68rem;
+          color: #94a3b8;
+          font-weight: 600;
+          text-transform: uppercase;
+        }
+      }
+    }
+  }
+
+  // --------------------------------------------------------
+  // Barra de Controles: Buscador y Filtros de Categoría
+  // --------------------------------------------------------
+  .controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
+      max-width: 440px;
+
+      .search-icon {
+        position: absolute;
+        left: 0.9rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.15rem;
+        color: #94a3b8;
+        pointer-events: none;
+      }
+
+      .search-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.7rem 2.4rem 0.7rem 2.6rem;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        font-size: 0.88rem;
+        color: #1e293b;
+        outline: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+        &::placeholder {
+          color: #94a3b8;
+        }
+
+        &:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+      }
+
+      .btn-clear {
+        position: absolute;
+        right: 0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 0.2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s, background-color 0.15s;
+
+        &:hover {
+          color: #1e293b;
+          background: #f1f5f9;
+        }
+      }
+    }
+
+    // Pills de Categoría
+    .categories-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+
+      .category-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 0.5rem 0.95rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+        .dot-indicator {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: #cbd5e1;
+          transition: background-color 0.2s ease;
+        }
+
+        &:hover {
+          border-color: #94a3b8;
+          color: #1e293b;
+          transform: translateY(-1px);
+        }
+
+        &.active {
+          background: #2563eb;
+          border-color: #2563eb;
+          color: #ffffff;
+          box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+
+          .dot-indicator {
+            background-color: #93c5fd;
+          }
+        }
+      }
+    }
+  }
+
+  // Leyenda de categorías
+  .category-legend {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: #64748b;
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+
+      .legend-box {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+      }
+
+      &.metal .legend-box { background: #dbeafe; border: 1px solid #93c5fd; }
+      &.metalloid .legend-box { background: #fef3c7; border: 1px solid #fde68a; }
+      &.nonmetal .legend-box { background: #d1fae5; border: 1px solid #a7f3d0; }
+      &.noble-gas .legend-box { background: #ede9fe; border: 1px solid #ddd6fe; }
+    }
+  }
+
+  // --------------------------------------------------------
+  // Contenedor Viewport con Scroll Horizontal de la Matriz
+  // --------------------------------------------------------
+  .periodic-grid-viewport {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+      &:hover { background: #94a3b8; }
+    }
+  }
+
+  // --------------------------------------------------------
+  // Matriz CSS Grid de 18 Columnas
+  // --------------------------------------------------------
+  .periodic-grid {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(50px, 1fr));
+    grid-template-rows: repeat(10, minmax(58px, auto));
+    gap: 6px;
+    min-width: 950px;
+    position: relative;
+
+    // Celda de Elemento Químico
+    .element-cell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.35rem 0.2rem;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+      .cell-number {
+        position: absolute;
+        top: 3px;
+        left: 5px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        opacity: 0.75;
+      }
+
+      .cell-symbol {
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-top: 4px;
+      }
+
+      .cell-name {
+        font-size: 0.62rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 90%;
+        opacity: 0.85;
+      }
+
+      .cell-weight {
+        font-size: 0.58rem;
+        opacity: 0.65;
+        margin-top: 1px;
+      }
+
+      // Estados de Hover y Selección
+      &:hover {
+        transform: translateY(-2px) scale(1.05);
+        z-index: 10;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+      }
+
+      &.selected {
+        z-index: 15;
+        border-color: #1d4ed8 !important;
+        box-shadow: 0 0 0 3px #3b82f6, 0 6px 16px rgba(59, 130, 246, 0.35) !important;
+        transform: translateY(-2px) scale(1.06);
+      }
+
+      // ----------------------------------------------------
+      // Colores por Categoría Química
+      // ----------------------------------------------------
+      &.metal {
+        background: #f0f7ff;
+        border-color: #bfdbfe;
+        color: #1e3a8a;
+
+        .cell-symbol { color: #1d4ed8; }
+        &:hover { background: #dbeafe; }
+      }
+
+      &.metalloid {
+        background: #fffbeb;
+        border-color: #fde68a;
+        color: #78350f;
+
+        .cell-symbol { color: #d97706; }
+        &:hover { background: #fef3c7; }
+      }
+
+      &.nonmetal {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+        color: #064e3b;
+
+        .cell-symbol { color: #059669; }
+        &:hover { background: #d1fae5; }
+      }
+
+      &.noble-gas {
+        background: #f5f3ff;
+        border-color: #ddd6fe;
+        color: #4c1d95;
+
+        .cell-symbol { color: #7c3aed; }
+        &:hover { background: #ede9fe; }
+      }
+    }
+
+    // Marcadores y etiquetas de series (Lantánidos y Actínidos)
+    .series-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      color: #64748b;
+      font-size: 0.68rem;
+      font-weight: 700;
+
+      small {
+        font-size: 0.58rem;
+        opacity: 0.75;
+      }
+    }
+
+    .series-label {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 0.5rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      white-space: nowrap;
+    }
+
+    // Estado vacío
+    .no-elements-state {
+      grid-column: 1 / -1;
+      grid-row: 1 / 8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      text-align: center;
+      color: #64748b;
+
+      i {
+        font-size: 3rem;
+        color: #94a3b8;
+        margin-bottom: 0.75rem;
+      }
+
+      h3 {
+        margin: 0 0 0.5rem 0;
+        color: #1e293b;
+        font-size: 1.2rem;
+      }
+
+      p {
+        margin: 0 0 1.25rem 0;
+        font-size: 0.88rem;
+      }
+
+      .btn-reset-filter {
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        padding: 0.6rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background: #1d4ed8;
+        }
+      }
+    }
+  }
+
+  // --------------------------------------------------------
+  // Panel Lateral de Detalle del Elemento (Fijo a la derecha)
+  // --------------------------------------------------------
+  .element-detail-sidebar {
+    width: 370px;
+    flex-shrink: 0;
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-sizing: border-box;
+    max-height: calc(100vh - 3.5rem);
+    overflow-y: auto;
+    position: sticky;
+    top: 1.75rem;
+    animation: slideInRight 0.25s ease-out;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
+
+    // Cabecera del Panel
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .panel-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-close-detail {
+        background: #f1f5f9;
+        border: none;
+        color: #64748b;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+          background: #e2e8f0;
+          color: #0f172a;
+        }
+      }
+    }
+
+    // Tarjeta Hero del Elemento
+    .element-hero-card {
+      border-radius: 16px;
+      padding: 1.25rem;
+      border: 1px solid #e2e8f0;
+      position: relative;
+      overflow: hidden;
+
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+
+        .hero-number {
+          font-size: 0.8rem;
+          font-weight: 700;
+          opacity: 0.75;
+        }
+
+        .hero-category-badge {
+          font-size: 0.72rem;
+          font-weight: 700;
+          padding: 0.2rem 0.6rem;
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(4px);
+        }
+      }
+
+      .hero-main {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+
+        .hero-symbol {
+          font-size: 2.75rem;
+          font-weight: 900;
+          margin: 0;
+          line-height: 1;
+          letter-spacing: -1px;
+        }
+
+        .hero-titles {
+          .hero-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin: 0;
+            color: #0f172a;
+          }
+
+          .hero-series {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .hero-summary {
+        margin: 0;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        color: #475569;
+      }
+
+      // Variantes de Hero según Categoría
+      &.metal {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-color: #bfdbfe;
+        .hero-symbol { color: #1d4ed8; }
+        .hero-category-badge { color: #1e40af; }
+      }
+
+      &.metalloid {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-color: #fde68a;
+        .hero-symbol { color: #d97706; }
+        .hero-category-badge { color: #92400e; }
+      }
+
+      &.nonmetal {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border-color: #a7f3d0;
+        .hero-symbol { color: #059669; }
+        .hero-category-badge { color: #065f46; }
+      }
+
+      &.noble-gas {
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border-color: #ddd6fe;
+        .hero-symbol { color: #7c3aed; }
+        .hero-category-badge { color: #5b21b6; }
+      }
+    }
+
+    // ------------------------------------------------------
+    // Visor del Modelo Atómico de Bohr (Interactive Bohr Model)
+    // ------------------------------------------------------
+    .bohr-model-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1rem 1.15rem;
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        .title-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+
+          i {
+            color: #2563eb;
+            font-size: 1.1rem;
+          }
+
+          h4 {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+          }
+        }
+
+        .shells-count {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: #64748b;
+          background: #f1f5f9;
+          padding: 0.15rem 0.5rem;
+          border-radius: 12px;
+        }
+      }
+
+      .bohr-canvas-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 14px;
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+
+        .bohr-svg {
+          overflow: visible;
+
+          .orbit-ring {
+            fill: none;
+            stroke: #cbd5e1;
+            stroke-width: 1.2;
+            stroke-dasharray: 4 3;
+            transition: stroke 0.3s ease;
+          }
+
+          .bohr-electron {
+            fill: #3b82f6;
+            stroke: #ffffff;
+            stroke-width: 1.2;
+            animation: pulseElectron 2s infinite alternate;
+          }
+
+          .nucleus-core {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+          }
+
+          .nucleus-symbol {
+            fill: #ffffff;
+            font-size: 13px;
+            font-weight: 800;
+            pointer-events: none;
+          }
+        }
+      }
+
+      .shells-distribution {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+
+        .shells-label {
+          font-size: 0.72rem;
+          color: #64748b;
+          font-weight: 600;
+        }
+
+        .shells-chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.35rem;
+
+          .shell-pill {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.2rem 0.45rem;
+            font-size: 0.72rem;
+            color: #334155;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+
+            small {
+              color: #94a3b8;
+              font-weight: 600;
+            }
+
+            strong {
+              color: #2563eb;
+            }
+          }
+        }
+      }
+    }
+
+    // ------------------------------------------------------
+    // Configuración Electrónica Destacada
+    // ------------------------------------------------------
+    .electron-config-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1rem 1.15rem;
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        .title-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+
+          i { color: #8b5cf6; font-size: 1.1rem; }
+          h4 { font-size: 0.88rem; font-weight: 700; color: #1e293b; margin: 0; }
+        }
+
+        .config-state-badge {
+          font-size: 0.68rem;
+          color: #15803d;
+          background: #dcfce7;
+          font-weight: 700;
+          padding: 0.15rem 0.5rem;
+          border-radius: 10px;
+        }
+      }
+
+      .config-display-card {
+        background: #0f172a;
+        color: #f8fafc;
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .config-formula {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #38bdf8;
+          letter-spacing: 0.5px;
+        }
+
+        .config-electrons-total {
+          font-size: 0.75rem;
+          color: #94a3b8;
+          strong { color: #ffffff; }
+        }
+      }
+    }
+
+    // ------------------------------------------------------
+    // Sub-grid 2x2 de Propiedades Físicas
+    // ------------------------------------------------------
+    .physical-properties-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1rem 1.15rem;
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        .title-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+
+          i { color: #f59e0b; font-size: 1.1rem; }
+          h4 { font-size: 0.88rem; font-weight: 700; color: #1e293b; margin: 0; }
+        }
+
+        .phase-badge {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: #475569;
+          background: #f1f5f9;
+          padding: 0.15rem 0.55rem;
+          border-radius: 10px;
+        }
+      }
+
+      .properties-2x2-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+
+        .property-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 0.75rem 0.85rem;
+          display: flex;
+          align-items: center;
+          gap: 0.65rem;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+          }
+
+          .prop-icon-box {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2563eb;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+          }
+
+          .prop-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+
+            .prop-label {
+              font-size: 0.68rem;
+              color: #64748b;
+              font-weight: 600;
+              white-space: nowrap;
+            }
+
+            .prop-value {
+              font-size: 0.85rem;
+              color: #0f172a;
+              font-weight: 800;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+        }
+      }
+    }
+
+    // Botón de Acción hacia el Simulador
+    .panel-actions {
+      margin-top: 0.25rem;
+
+      .btn-action-lab {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        padding: 0.85rem 1.25rem;
+        border-radius: 14px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.15s ease;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+
+        i {
+          font-size: 1.15rem;
+        }
+
+        &:hover {
+          background: #1d4ed8;
+          transform: translateY(-1px);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// Animaciones
+// ----------------------------------------------------------
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseElectron {
+  0% {
+    r: 3.2;
+    opacity: 0.9;
+  }
+  100% {
+    r: 4.2;
+    opacity: 1;
+  }
+}
+
+// ----------------------------------------------------------
+// Ajustes Responsivos
+// ----------------------------------------------------------
+@media (max-width: 1200px) {
+  .periodic-page {
+    flex-direction: column;
+    padding: 1.25rem;
+
+    .element-detail-sidebar {
+      width: 100%;
+      position: static;
+      max-height: none;
+    }
+  }
+}
