@@ -1,6 +1,6 @@
-<div class="app-layout" [class.no-sidebar]="isLoginPage()">
-  <!-- Solo renderiza el sidebar si no estamos en login -->
-  @if (!isLoginPage()) {
+<div class="app-layout" [class.no-sidebar]="isAuthPage()">
+  <!-- Solo renderiza el sidebar si no estamos en páginas de autenticación (login o register) -->
+  @if (!isAuthPage()) {
     <app-sidebar></app-sidebar>
   }
 
