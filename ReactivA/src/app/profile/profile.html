@@ -1,0 +1,369 @@
+<div class="profile-page">
+    <!-- Toast Informativo -->
+    @if (toastMessage) {
+    <div class="toast-banner" role="status">
+        <i class="ph ph-check-circle"></i>
+        <span>{{ toastMessage }}</span>
+    </div>
+    }
+
+    <!-- 1. Banner Superior de Perfil y Acciones -->
+    <header class="profile-banner-card">
+        <div class="student-profile-lead">
+            <div class="avatar-pill-container">
+                <img [src]="student.avatarUrl" [alt]="student.name" class="avatar-photo"
+                    (error)="onAvatarError($event)" />
+                <span class="active-dot" title="Estudiante Activo"></span>
+            </div>
+
+            <div class="student-headings">
+                <div class="rank-tagline">
+                    <span class="rank-symbol">✦</span>
+                    <span class="rank-name">{{ student.rank }}</span>
+                </div>
+                <h1 class="student-title">{{ student.name }}</h1>
+            </div>
+        </div>
+
+        <div class="banner-controls">
+            <button type="button" class="pill-btn btn-secondary-pill" (click)="openEditProfileModal()"
+                aria-label="Editar Perfil / Avatar">
+                <i class="ph ph-pencil-simple"></i>
+                <span>Editar Perfil / Avatar</span>
+            </button>
+
+            <button type="button" class="pill-btn btn-primary-pill" (click)="downloadReportPdf()"
+                [disabled]="isDownloadingPdf" aria-label="Descargar Ficha en formato PDF">
+                <i class="ph ph-download-simple"></i>
+                <span>{{ isDownloadingPdf ? 'Generando...' : 'Descargar Ficha (PDF)' }}</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. Tarjetas de Métricas Principales (Grid de 4 KPIs) -->
+    <section class="kpi-row" aria-label="Tarjetas de Métricas Principales">
+        @for (kpi of metrics; track kpi.id) {
+        <div class="kpi-box" [ngClass]="'theme-' + kpi.colorTheme">
+            <div class="kpi-icon-cell">
+                <i [class]="kpi.icon"></i>
+            </div>
+            <div class="kpi-content-cell">
+                <span class="kpi-header-label">{{ kpi.label }}</span>
+                <div class="kpi-stat-line">
+                    <span class="kpi-stat-number">{{ kpi.value }}</span>
+                    @if (kpi.suffix) {
+                    <span class="kpi-stat-suffix">{{ kpi.suffix }}</span>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+    </section>
+
+    <!-- 3. Sección Central: Dominio por Ramas & Horas de Investigación -->
+    <div class="mid-split-grid">
+        <!-- Tarjeta Principal: Dominio por Ramas de la Química -->
+        <section class="branches-panel">
+            <div class="panel-top-bar">
+                <div class="title-cluster">
+                    <h2 class="panel-heading">Dominio por Ramas de la Química</h2>
+                    <p class="panel-subheading">
+                        Rendimiento evaluado según normativas curriculares y prácticas de simulación
+                    </p>
+                </div>
+                <div class="academic-cycle-chip" title="Período académico activo">
+                    <span class="cycle-title">Año Lectivo</span>
+                    <strong class="cycle-year">{{ student.academicYear }}</strong>
+                </div>
+            </div>
+
+            <div class="branches-stack">
+                @for (branch of branches; track branch.id) {
+                <div class="branch-row">
+                    <div class="branch-labels">
+                        <div class="branch-name-wrap">
+                            <span class="dot-indicator" [style.background-color]="branch.bulletColor"></span>
+                            <span class="branch-title-text">{{ branch.name }}</span>
+                        </div>
+                        <div class="branch-stats-wrap">
+                            <span class="level-badge" [ngClass]="branch.tagClass">{{ branch.level }}</span>
+                            <span class="percentage-digits">{{ branch.percentage }}%</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar-rail" role="progressbar" [attr.aria-valuenow]="branch.percentage"
+                        aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar-fill" [ngClass]="'fill-' + branch.colorTheme"
+                            [style.width.%]="branch.percentage"></div>
+                    </div>
+                </div>
+                }
+            </div>
+        </section>
+
+        <!-- Panel Lateral: Horas de Investigación -->
+        <aside class="research-panel">
+            <div class="panel-top-bar">
+                <div class="title-cluster">
+                    <h2 class="panel-heading">Horas de Investigación</h2>
+                    <p class="panel-subheading">Telemetría acumulada en ChemLab Cloud</p>
+                </div>
+            </div>
+
+            <div class="research-stack">
+                @for (item of researchMetrics; track item.id) {
+                <div class="research-widget" [ngClass]="'widget-' + item.colorTheme">
+                    <div class="widget-left">
+                        <div class="widget-icon-cell">
+                            <i [class]="item.icon"></i>
+                        </div>
+                        <div class="widget-text-cell">
+                            <h3 class="widget-title">{{ item.title }}</h3>
+                            <span class="widget-line">{{ item.subtitleLine1 }}</span>
+                            @if (item.subtitleLine2) {
+                            <span class="widget-line">{{ item.subtitleLine2 }}</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="widget-right">
+                        <span class="widget-num">{{ item.value }}</span>
+                        @if (item.unit) {
+                        <span class="widget-unit">{{ item.unit }}</span>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </aside>
+    </div>
+
+    <!-- 4. Historial de Prácticas, Evaluaciones y Retroalimentación Pedagógica -->
+    <section class="practices-panel">
+        <div class="panel-top-bar">
+            <div class="title-cluster">
+                <h2 class="panel-heading">Historial de Prácticas y Calificaciones</h2>
+                <p class="panel-subheading">
+                    Evaluadas y validadas por el Prof. Roberto Méndez (Cátedra de Ciencias Experimentales)
+                </p>
+            </div>
+            <button type="button" class="rubrics-link-pill" (click)="openRubricsModal()"
+                aria-label="Ver Rúbricas Oficiales">
+                <span>Ver Rúbricas Oficiales</span>
+                <i class="ph ph-caret-right"></i>
+            </button>
+        </div>
+
+        <div class="practices-stack">
+            @for (practice of practices; track practice.id) {
+            <article class="practice-card-item">
+                <!-- Icono Distintivo -->
+                <div class="practice-symbol-cell" [ngClass]="'symbol-' + practice.iconTheme">
+                    <i [class]="practice.icon"></i>
+                </div>
+
+                <!-- Contenido y Feedback Pedagógico -->
+                <div class="practice-details-cell">
+                    <div class="practice-title-line">
+                        <h3 class="practice-item-name">{{ practice.title }}</h3>
+                        <span class="practice-tag-chip" [ngClass]="'chip-' + practice.statusType">
+                            {{ practice.statusTag }}
+                        </span>
+                    </div>
+
+                    <div class="pedagogical-feedback-quote">
+                        <span class="prof-tag">Feedback del Prof:</span>
+                        <span class="feedback-sentence">"{{ practice.professorFeedback }}"</span>
+                    </div>
+
+                    <div class="practice-footnote">
+                        <span>{{ practice.deliveryTime }}</span>
+                        <span class="footnote-separator">•</span>
+                        <span>{{ practice.modality }}</span>
+                    </div>
+                </div>
+
+                <!-- Nota y Acción de Rúbrica -->
+                <div class="practice-evaluation-cell">
+                    <div class="grade-score-wrap">
+                        <span class="grade-caption">Nota</span>
+                        <div class="grade-numbers-block">
+                            <span class="grade-main" [class.grade-perfect]="practice.score === 10">{{ practice.score
+                                }}</span>
+                            <span class="grade-slash">/</span>
+                            <span class="grade-out-of">{{ practice.maxScore }}</span>
+                        </div>
+                    </div>
+                    <button type="button" class="eye-inspect-btn" (click)="openRubricsModal(practice)"
+                        [title]="'Inspeccionar rúbrica de ' + practice.code" aria-label="Ver rúbrica detallada">
+                        <i class="ph ph-eye"></i>
+                    </button>
+                </div>
+            </article>
+            }
+        </div>
+    </section>
+
+    <!-- 5. Botón Flotante: Preguntar al Asistente Átomo -->
+    <button type="button" class="floating-atom-launcher" (click)="openAskAssistantModal()"
+        aria-label="Preguntar al Asistente Átomo">
+        <div class="atom-launcher-inner">
+            <i class="ph ph-robot"></i>
+            <span>Preguntar al Asistente Átomo</span>
+        </div>
+    </button>
+
+    <!-- MODAL: Editar Perfil / Avatar -->
+    @if (isEditModalOpen) {
+    <div class="modal-overlay" (click)="closeEditProfileModal()">
+        <div class="modal-dialog-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+            <div class="dialog-header">
+                <div class="dialog-title-group">
+                    <i class="ph ph-user-circle dialog-icon"></i>
+                    <h2>Editar Perfil del Estudiante</h2>
+                </div>
+                <button type="button" class="btn-dismiss" (click)="closeEditProfileModal()" aria-label="Cerrar modal">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <form [formGroup]="editProfileForm" (ngSubmit)="saveProfile()" class="dialog-form">
+                <div class="input-block">
+                    <label for="nameInput">Nombre y Apellidos</label>
+                    <input id="nameInput" type="text" formControlName="name" class="text-input" />
+                </div>
+
+                <div class="input-block">
+                    <label for="rankSelect">Rango Académico</label>
+                    <select id="rankSelect" formControlName="rank" class="select-input">
+                        @for (rank of availableRanks; track rank) {
+                        <option [value]="rank">{{ rank }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="input-block">
+                    <label for="yearInput">Año Lectivo</label>
+                    <input id="yearInput" type="text" formControlName="academicYear" class="text-input" />
+                </div>
+
+                <div class="input-block">
+                    <label for="emailInput">Correo Electrónico Institucional</label>
+                    <input id="emailInput" type="email" formControlName="email" class="text-input" />
+                </div>
+
+                <div class="dialog-footer">
+                    <button type="button" class="btn-ghost" (click)="closeEditProfileModal()">Cancelar</button>
+                    <button type="submit" class="btn-solid" [disabled]="editProfileForm.invalid">Guardar
+                        Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    }
+
+    <!-- MODAL: Rúbricas Oficiales -->
+    @if (isRubricsModalOpen && selectedPracticeForRubric) {
+    <div class="modal-overlay" (click)="closeRubricsModal()">
+        <div class="modal-dialog-box rubrics-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+            <div class="dialog-header">
+                <div class="dialog-title-group">
+                    <i class="ph ph-certificate dialog-icon green-icon"></i>
+                    <div>
+                        <h2>Rúbrica Oficial de Calificación</h2>
+                        <p class="dialog-subtitle">{{ selectedPracticeForRubric.title }}</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-dismiss" (click)="closeRubricsModal()" aria-label="Cerrar">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div class="dialog-scroll-body">
+                <div class="official-score-banner">
+                    <span class="score-caption-text">Nota Registrada:</span>
+                    <strong class="score-highlight">{{ selectedPracticeForRubric.score }} / {{
+                        selectedPracticeForRubric.maxScore }}</strong>
+                    <span class="status-pill">{{ selectedPracticeForRubric.statusTag }}</span>
+                </div>
+
+                <div class="criteria-container">
+                    <h3>Criterios Evaluados por la Cátedra</h3>
+                    @for (crit of selectedPracticeForRubric.criteria; track crit.name) {
+                    <div class="criterion-card">
+                        <div class="criterion-top">
+                            <span class="criterion-label">{{ crit.name }}</span>
+                            <span class="criterion-point">{{ crit.score }}</span>
+                        </div>
+                        <p class="criterion-desc">{{ crit.comment }}</p>
+                    </div>
+                    }
+                </div>
+
+                <div class="cert-endorsement">
+                    <i class="ph ph-seal-check seal-icon"></i>
+                    <div>
+                        <strong>Validación Docente Oficial:</strong>
+                        <p>Prof. Roberto Méndez • Cátedra de Ciencias Experimentales</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-solid" (click)="closeRubricsModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- MODAL: Asistente Átomo -->
+    @if (isAssistantModalOpen) {
+    <div class="modal-overlay" (click)="closeAskAssistantModal()">
+        <div class="modal-dialog-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+            <div class="dialog-header">
+                <div class="dialog-title-group">
+                    <div class="atom-badge-icon">
+                        <i class="ph ph-robot"></i>
+                    </div>
+                    <div>
+                        <h2>Asistente Átomo</h2>
+                        <p class="dialog-subtitle">Tutor inteligente de laboratorio y ciencias químicas</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-dismiss" (click)="closeAskAssistantModal()" aria-label="Cerrar">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div class="dialog-scroll-body">
+                <p class="atom-greeting">
+                    ¡Hola Alex! Puedo ayudarte con tus dudas teóricas o repasar los conceptos de titulación volumétrica
+                    y enlaces químicos.
+                </p>
+
+                <div class="suggestions-list">
+                    <button type="button" class="suggestion-btn"
+                        (click)="assistantQuestionText = '¿Por qué la fenolftaleína vira a rosa en pH alcalino?'">
+                        🧪 ¿Por qué la fenolftaleína vira a rosa en medio básico?
+                    </button>
+                    <button type="button" class="suggestion-btn"
+                        (click)="assistantQuestionText = 'Explica la diferencia entre enlaces covalentes polares y no polares.'">
+                        ⚡ Diferencia entre covalente polar y no polar
+                    </button>
+                </div>
+
+                <div class="input-block">
+                    <textarea [(ngModel)]="assistantQuestionText" rows="3" class="textarea-input"
+                        placeholder="Escribe tu consulta química aquí..."></textarea>
+                </div>
+            </div>
+
+            <div class="dialog-footer">
+                <button type="button" class="btn-ghost" (click)="closeAskAssistantModal()">Cancelar</button>
+                <button type="button" class="btn-solid" [disabled]="!assistantQuestionText.trim()"
+                    (click)="sendAssistantQuestion()">
+                    Enviar Consulta
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+</div>
