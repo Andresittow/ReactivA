@@ -13,12 +13,22 @@ $text-muted: #8c9ba5;
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
+  border-right: 1px solid #e2e8f0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   .brand {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.75rem;
     margin-bottom: 2rem;
+
+    .brand-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
 
     .logo-icon {
       width: 40px;
@@ -30,9 +40,13 @@ $text-muted: #8c9ba5;
       align-items: center;
       justify-content: center;
       font-size: 1.25rem;
+      flex-shrink: 0;
     }
 
     .brand-text {
+      white-space: nowrap;
+      overflow: hidden;
+
       h2 {
         font-size: 1.1rem;
         font-weight: 700;
@@ -43,6 +57,31 @@ $text-muted: #8c9ba5;
       span {
         font-size: 0.75rem;
         color: $text-muted;
+      }
+    }
+
+    .btn-toggle {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $text-muted;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $primary-blue;
+        color: #ffffff;
+        border-color: $primary-blue;
+      }
+
+      i {
+        font-size: 0.95rem;
       }
     }
   }
@@ -67,9 +106,11 @@ $text-muted: #8c9ba5;
           font-weight: 500;
           font-size: 0.9rem;
           transition: all 0.2s ease;
+          white-space: nowrap;
 
           i {
             font-size: 1.2rem;
+            flex-shrink: 0;
           }
 
           &.active, &:hover {
@@ -99,10 +140,64 @@ $text-muted: #8c9ba5;
       font-weight: 600;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(99, 91, 252, 0.3);
+      white-space: nowrap;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+
+      &:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
+      }
+
+      i {
+        font-size: 1.15rem;
+        flex-shrink: 0;
+      }
     }
   }
 
   .footer-menu {
     margin-top: auto;
+  }
+
+  // Estilos del estado colapsado (Clase 4b)
+  &.collapsed {
+    width: 80px;
+    padding: 1.5rem 0.65rem;
+
+    .brand {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+
+      .brand-info {
+        justify-content: center;
+      }
+
+      .btn-toggle {
+        margin: 0;
+      }
+    }
+
+    .nav-menu, .footer-menu {
+      ul li a {
+        justify-content: center;
+        padding: 0.75rem 0;
+
+        i {
+          font-size: 1.3rem;
+        }
+      }
+    }
+
+    .sidebar-action {
+      .btn-assistant {
+        padding: 0.75rem 0;
+        justify-content: center;
+
+        i {
+          font-size: 1.3rem;
+        }
+      }
+    }
   }
 }

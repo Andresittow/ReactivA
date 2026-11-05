@@ -239,6 +239,16 @@ $radius: 12px;
       &:hover {
         background-color: #f8fafc;
       }
+
+      .google-icon {
+        font-weight: 800;
+        color: #4285f4;
+      }
+
+      .ms-icon {
+        font-weight: 800;
+        color: #00a4ef;
+      }
     }
   }
 
@@ -369,6 +379,12 @@ $radius: 12px;
       gap: 0.5rem;
       color: $text-muted;
       cursor: pointer;
+
+      input[type="checkbox"] {
+        accent-color: $primary-color;
+        width: 15px;
+        height: 15px;
+      }
     }
 
     .tls-badge {
@@ -426,6 +442,7 @@ $radius: 12px;
         background-color: #ffedd5;
         padding: 0.5rem;
         border-radius: 8px;
+        font-size: 1.1rem;
       }
 
       strong {
@@ -587,6 +604,10 @@ $radius: 12px;
       align-items: center;
       gap: 0.75rem;
 
+      .achievement-icon {
+        font-size: 1.5rem;
+      }
+
       .achievement-text {
         flex: 1;
 
@@ -628,6 +649,10 @@ $radius: 12px;
     gap: 0.5rem;
     font-size: 0.75rem;
     color: $text-muted;
+
+    .quote-icon {
+      font-size: 1rem;
+    }
 
     p {
       margin: 0;
