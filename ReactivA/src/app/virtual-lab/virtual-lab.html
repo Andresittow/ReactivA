@@ -1,0 +1,464 @@
+<div class="virtual-lab-layout">
+  <!-- COLUMNA CENTRAL: ZONA DE SIMULACIÓN Y BALANCEADOR DE ECUACIONES -->
+  <section class="simulation-workspace">
+    <!-- Encabezado del Laboratorio y Telemetría -->
+    <header class="lab-header">
+      <div class="experiment-info">
+        <div class="badge-tag">
+          <i class="ph ph-atom"></i>
+          <span>Síntesis Molecular</span>
+        </div>
+        <h1>Laboratorio Virtual: Formación de Agua</h1>
+        <p class="subtitle">
+          Reacción exotérmica: Combina hidrógeno diatómico y oxígeno para sintetizar moléculas de agua (H₂O).
+        </p>
+      </div>
+
+      <div class="lab-telemetry">
+        <div class="telemetry-pill" [class.heated]="isItemActive('bunsen')" title="Temperatura de Reacción">
+          <i class="ph" [class.ph-thermometer]="!isItemActive('bunsen')" [class.ph-fire]="isItemActive('bunsen')"></i>
+          <div class="telemetry-data">
+            <span class="label">Temperatura</span>
+            <strong>{{ baseTemperature }} K <small>({{ baseTemperature - 273 }} °C)</small></strong>
+          </div>
+        </div>
+
+        <div class="telemetry-pill" title="Presión Atmosférica">
+          <i class="ph ph-gauge"></i>
+          <div class="telemetry-data">
+            <span class="label">Presión</span>
+            <strong>{{ pressure.toFixed(1) }} atm</strong>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn-control-play"
+          (click)="toggleSimulation()"
+          [title]="simulationRunning ? 'Pausar simulación' : 'Reanudar simulación'"
+        >
+          <i class="ph" [class.ph-pause]="simulationRunning" [class.ph-play]="!simulationRunning"></i>
+          <span>{{ simulationRunning ? 'Pausar' : 'Reanudar' }}</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ZONA DE SIMULACIÓN VIRTUAL (Canvas Central con fondo cuadriculado) -->
+    <div class="simulation-canvas-wrapper">
+      <div class="simulation-canvas" [class.simulation-paused]="!simulationRunning">
+        <!-- Marca de agua de la reacción -->
+        <div class="canvas-watermark">
+          <span class="watermark-title">Synthesis Reaction</span>
+          <span class="watermark-formula">2 H₂(g) + O₂(g) &rarr; 2 H₂O(l) + 483.6 kJ</span>
+        </div>
+
+        <!-- Órbitas Concéntricas de Reacción -->
+        <div class="orbit-system">
+          <div class="orbit-ring ring-outer"></div>
+          <div class="orbit-ring ring-mid"></div>
+          <div class="orbit-ring ring-inner"></div>
+
+          <!-- Rayos de enlace de energía que convergen al centro -->
+          <div class="bond-rays" [class.bonding-active]="isBalanced">
+            <div class="ray ray-1"></div>
+            <div class="ray ray-2"></div>
+            <div class="ray ray-3"></div>
+          </div>
+
+          <!-- Mapeo visual de Reactivos Activos (2H y O) -->
+          @for (reactant of activeReactants; track reactant.id) {
+            <div
+              class="reactant-node"
+              [ngClass]="[reactant.position, reactant.orbitType]"
+              [style.--node-color]="reactant.color"
+            >
+              <div class="atom-halo"></div>
+              <div class="atom-core">
+                <span class="atom-symbol">{{ reactant.symbol }}</span>
+                <span class="atom-charge">{{ reactant.charge }}</span>
+              </div>
+              <div class="atom-electrons">
+                <span class="electron electron-1"></span>
+                @if (reactant.symbol === 'O') {
+                  <span class="electron electron-2"></span>
+                  <span class="electron electron-3"></span>
+                  <span class="electron electron-4"></span>
+                }
+              </div>
+              <div class="atom-label">
+                <strong>{{ reactant.formula }}</strong>
+                <small>{{ reactant.name }}</small>
+              </div>
+            </div>
+          }
+
+          <!-- Núcleo Central de Reacción / Síntesis de Agua -->
+          <div class="synthesis-core" [class.synthesized]="isBalanced">
+            @if (isBalanced) {
+              <div class="molecule-h2o">
+                <div class="water-core oxygen">
+                  <span>O</span>
+                  <div class="bond-arm arm-left"></div>
+                  <div class="bond-arm arm-right"></div>
+                  <div class="water-satellite hydrogen-left"><span>H</span></div>
+                  <div class="water-satellite hydrogen-right"><span>H</span></div>
+                </div>
+                <div class="water-label">
+                  <span class="formula">H₂O</span>
+                  <small>Molécula Estable (104.5°)</small>
+                </div>
+                <div class="energy-burst">
+                  <i class="ph ph-sparkle"></i>
+                  <span>¡Reacción Completa!</span>
+                </div>
+              </div>
+            } @else {
+              <div class="awaiting-state">
+                <div class="pulse-indicator">
+                  <i class="ph ph-atom"></i>
+                </div>
+                <span class="awaiting-title">Zona de Síntesis</span>
+                <p>Ingresa los coeficientes correctos para iniciar la reacción</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Mesa de Trabajo con Equipos Activos seleccionados desde el panel lateral -->
+        <div class="workbench-bar">
+          <div class="workbench-header">
+            <span class="wb-title">
+              <i class="ph ph-flask"></i>
+              Equipos activos en la mesa de experimentación ({{ activeEquipment.length }}):
+            </span>
+          </div>
+
+          <div class="workbench-items">
+            @for (eq of activeEquipment; track eq.id) {
+              <div class="wb-item-chip" [style.border-color]="eq.color">
+                <i class="ph" [ngClass]="eq.icon" [style.color]="eq.color"></i>
+                <div class="chip-text">
+                  <span class="chip-name">{{ eq.name }}</span>
+                  @if (eq.formula) {
+                    <small class="chip-sub">{{ eq.formula }}</small>
+                  }
+                </div>
+                <button
+                  type="button"
+                  class="btn-chip-remove"
+                  (click)="toggleEquipment(eq)"
+                  title="Retirar equipo de la simulación"
+                >
+                  <i class="ph ph-x"></i>
+                </button>
+              </div>
+            } @empty {
+              <div class="wb-empty-prompt">
+                <i class="ph ph-hand-tap"></i>
+                <span>Selecciona herramientas o reactivos del panel lateral derecho para activarlos en el simulador.</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BALANCEADOR DE ECUACIONES QUÍMICAS (Barra Interactiva Inferior) -->
+    <footer class="equation-balancer-section">
+      <div class="balancer-card">
+        <div class="balancer-header">
+          <div class="balancer-title-group">
+            <div class="balancer-icon-box">
+              <i class="ph ph-scales"></i>
+            </div>
+            <div class="balancer-headings">
+              <h2>Balanceador de Ecuaciones Químicas</h2>
+              <p>Ajusta los coeficientes estequiométricos para conservar la masa atómica en reactivos y productos.</p>
+            </div>
+          </div>
+
+          <div class="balancer-actions">
+            <!-- Badge de estado reactivo con clase [class.balanced]="isBalanced" -->
+            <div
+              class="balance-badge"
+              [class.balanced]="isBalanced"
+              [attr.aria-label]="isBalanced ? 'Ecuación balanceada' : 'Ecuación sin balancear'"
+            >
+              @if (isBalanced) {
+                <i class="ph ph-check-circle"></i>
+                <span>¡Ecuación Balanceada!</span>
+              } @else {
+                <i class="ph ph-warning-circle"></i>
+                <span>Sin Balancear</span>
+              }
+            </div>
+
+            <!-- Botón para reiniciar coeficientes -->
+            <button
+              type="button"
+              class="btn-reset-equation"
+              (click)="resetEquation()"
+              title="Reiniciar campos de la ecuación"
+            >
+              <i class="ph ph-arrow-counter-clockwise"></i>
+              <span>Reiniciar</span>
+            </button>
+
+            <!-- Botón de ayuda pedagógica -->
+            <button
+              type="button"
+              class="btn-help-equation"
+              (click)="autoBalanceHelp()"
+              title="Cargar solución estequiométrica (2, 1, 2)"
+            >
+              <i class="ph ph-lightbulb"></i>
+              <span>Auto-Balance</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Expresión de la Ecuación Interactiva -->
+        <div class="equation-formula-box">
+          <!-- Reactivo 1: Hidrógeno -->
+          <div class="reactant-block">
+            <div class="input-wrapper">
+              <input
+                type="number"
+                min="1"
+                max="9"
+                class="coeff-input"
+                [class.valid-coeff]="isBalanced"
+                [value]="coeffH2 ?? ''"
+                (input)="onCoeffInput('H2', $event)"
+                placeholder="?"
+                aria-label="Coeficiente de Hidrógeno H2"
+              />
+            </div>
+            <span class="chemical-formula">
+              H<sub>2</sub>
+              <span class="state-sub">(g)</span>
+            </span>
+          </div>
+
+          <span class="math-operator">+</span>
+
+          <!-- Reactivo 2: Oxígeno -->
+          <div class="reactant-block">
+            <div class="input-wrapper">
+              <input
+                type="number"
+                min="1"
+                max="9"
+                class="coeff-input"
+                [class.valid-coeff]="isBalanced"
+                [value]="coeffO2 ?? ''"
+                (input)="onCoeffInput('O2', $event)"
+                placeholder="?"
+                aria-label="Coeficiente de Oxígeno O2"
+              />
+            </div>
+            <span class="chemical-formula">
+              O<sub>2</sub>
+              <span class="state-sub">(g)</span>
+            </span>
+          </div>
+
+          <!-- Flecha de Reacción -->
+          <div class="reaction-arrow-block">
+            <i class="ph ph-arrow-right"></i>
+            <small class="heat-symbol">&#916;</small>
+          </div>
+
+          <!-- Producto: Agua -->
+          <div class="product-block">
+            <div class="input-wrapper">
+              <input
+                type="number"
+                min="1"
+                max="9"
+                class="coeff-input"
+                [class.valid-coeff]="isBalanced"
+                [value]="coeffH2O ?? ''"
+                (input)="onCoeffInput('H2O', $event)"
+                placeholder="?"
+                aria-label="Coeficiente de Agua H2O"
+              />
+            </div>
+            <span class="chemical-formula">
+              H<sub>2</sub>O
+              <span class="state-sub">(l)</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Telemetría didáctica de conteo atómico -->
+        <div class="atomic-conservation-bar">
+          <div class="atomic-counts left-counts">
+            <span class="group-label">Reactivos:</span>
+            <span class="count-tag" [class.matched]="isBalanced && leftHCount > 0">
+              H: <strong>{{ leftHCount }}</strong>
+            </span>
+            <span class="count-tag" [class.matched]="isBalanced && leftOCount > 0">
+              O: <strong>{{ leftOCount }}</strong>
+            </span>
+          </div>
+
+          <div class="conservation-status">
+            @if (isBalanced) {
+              <span class="conservation-match">
+                <i class="ph ph-check-fat"></i> ¡Ley de Conservación de la Materia cumplida!
+              </span>
+            } @else {
+              <span class="conservation-mismatch">
+                <i class="ph ph-scales"></i> Los átomos a la izquierda deben igualar a los de la derecha (2 H₂ + 1 O₂ &rarr; 2 H₂O)
+              </span>
+            }
+          </div>
+
+          <div class="atomic-counts right-counts">
+            <span class="group-label">Productos:</span>
+            <span class="count-tag" [class.matched]="isBalanced && rightHCount > 0">
+              H: <strong>{{ rightHCount }}</strong>
+            </span>
+            <span class="count-tag" [class.matched]="isBalanced && rightOCount > 0">
+              O: <strong>{{ rightOCount }}</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- COLUMNA DERECHA: PANEL LATERAL DE HERRAMIENTAS Y EQUIPAMIENTO ("Equipment") -->
+  <aside class="equipment-panel">
+    <!-- Cabecera del Panel -->
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <div class="panel-icon">
+          <i class="ph ph-toolbox"></i>
+        </div>
+        <div>
+          <h2>Equipment</h2>
+          <span>Herramientas & Reactivos</span>
+        </div>
+      </div>
+      <span class="active-count-badge">
+        {{ activeEquipment.length }} activos
+      </span>
+    </div>
+
+    <!-- 1. Buscador Reactivo de Herramientas con FormControl (Requerimiento 1) -->
+    <div class="search-equipment-box">
+      <i class="ph ph-magnifying-glass search-icon"></i>
+      <input
+        type="text"
+        [formControl]="searchControl"
+        placeholder="Buscar equipos o reactivos..."
+        class="search-input"
+        aria-label="Buscar equipos o reactivos de laboratorio"
+      />
+      @if (searchTerm) {
+        <button
+          type="button"
+          class="btn-clear-search"
+          (click)="clearSearch()"
+          title="Limpiar búsqueda"
+          aria-label="Limpiar búsqueda"
+        >
+          <i class="ph ph-x"></i>
+        </button>
+      }
+    </div>
+
+    <!-- Píldoras de Categorías para Filtrado Rápido -->
+    <div class="category-tabs">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedCategory === 'all'"
+        (click)="setCategory('all')"
+      >
+        Todos
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedCategory === 'glassware'"
+        (click)="setCategory('glassware')"
+      >
+        Vidriería
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedCategory === 'burner'"
+        (click)="setCategory('burner')"
+      >
+        Calor
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedCategory === 'reagent'"
+        (click)="setCategory('reagent')"
+      >
+        Reactivos
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedCategory === 'instrument'"
+        (click)="setCategory('instrument')"
+      >
+        Sensores
+      </button>
+    </div>
+
+    <!-- 2. Lista de Herramientas con @for y selección interactiva (Requerimiento 2) -->
+    <div class="equipment-list-container">
+      <div class="equipment-list">
+        @for (item of filteredEquipment; track item.id) {
+          <div
+            class="equipment-card"
+            [class.active]="item.active"
+            (click)="toggleEquipment(item)"
+            role="button"
+            tabindex="0"
+            [attr.aria-pressed]="item.active"
+          >
+            <div class="card-icon-box" [style.background-color]="item.color + '18'" [style.color]="item.color">
+              <i class="ph" [ngClass]="item.icon"></i>
+            </div>
+
+            <div class="card-info">
+              <div class="card-title-row">
+                <h3 class="card-name">{{ item.name }}</h3>
+                @if (item.formula) {
+                  <span class="card-formula-tag">{{ item.formula }}</span>
+                }
+              </div>
+              <p class="card-desc">{{ item.description }}</p>
+              <div class="card-footer-meta">
+                <span class="category-tag">{{ item.categoryLabel }}</span>
+                <span class="status-indicator" [class.status-active]="item.active">
+                  <i class="ph" [class.ph-check-circle]="item.active" [class.ph-plus-circle]="!item.active"></i>
+                  {{ item.active ? 'En Simulación' : 'Agregar' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-equipment-state">
+            <i class="ph ph-flask-slash"></i>
+            <h4>No se encontraron elementos</h4>
+            <p>No hay herramientas que coincidan con "{{ searchTerm }}".</p>
+            <button type="button" class="btn-reset-filter" (click)="clearSearch()">
+              Ver todo el catálogo
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </aside>
+</div>
+
