@@ -7,6 +7,12 @@ export const routes: Routes = [
     loadComponent: () => import('./login/login').then(m => m.LoginComponent)
   },
 
+  // Ruta de registro
+  {
+    path: 'register',
+    loadComponent: () => import('./register/register').then(m => m.RegisterComponent)
+  },
+
   // Ruta del Dashboard (Dentro del Layout con Sidebar)
   {
     path: 'dashboard',
