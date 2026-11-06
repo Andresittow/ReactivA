@@ -1,6 +1,5 @@
-// ==========================================
-// VARIABLES DE COLOR Y SISTEMA DE DISEÑO
-// ==========================================
+@use 'sass:color';
+
 $primary-blue: #00a2ed;
 $primary-dark: #1a4da1;
 $secondary-purple: #635bfc;
@@ -17,12 +16,13 @@ $text-dark: #1e293b;
 $text-muted: #64748b;
 $text-light: #94a3b8;
 $border-color: #e2e8f0;
-$border-focus: #00a2ed;
 
-// ==========================================
-// CONTENEDOR PRINCIPAL: LAYOUT DE 3 COLUMNAS
-// (Sidebar integrado en app.html + Workspace Central + Equipment Panel)
-// ==========================================
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .virtual-lab-layout {
   display: flex;
   width: 100%;
@@ -33,9 +33,25 @@ $border-focus: #00a2ed;
   box-sizing: border-box;
 }
 
-// ==========================================
-// COLUMNA CENTRAL: ÁREA DE SIMULACIÓN Y BALANCEADOR
-// ==========================================
+.toast-popup {
+  position: fixed;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #0f172a;
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: slideInDown 0.3s ease;
+  i { color: #34d399; font-size: 1.15rem; }
+}
+
 .simulation-workspace {
   flex: 1;
   min-width: 0;
@@ -43,22 +59,14 @@ $border-focus: #00a2ed;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   box-sizing: border-box;
-  gap: 1.25rem;
+  gap: 1.15rem;
 
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-  }
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 }
 
-// ------------------------------------------
-// Encabezado del Laboratorio y Telemetría
-// ------------------------------------------
 .lab-header {
   display: flex;
   align-items: center;
@@ -66,135 +74,145 @@ $border-focus: #00a2ed;
   flex-wrap: wrap;
   gap: 1rem;
   background: $bg-card;
-  padding: 1.25rem 1.5rem;
+  padding: 1.1rem 1.3rem;
   border-radius: 16px;
   border: 1px solid $border-color;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
 
-  .experiment-info {
-    .badge-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      background: rgba(0, 162, 237, 0.1);
-      color: $primary-blue;
-      padding: 0.25rem 0.65rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.4rem;
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(0, 162, 237, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
 
-      i {
-        font-size: 0.9rem;
-      }
-    }
+.experiment-info {
+  h1 { margin: 0; font-size: 1.25rem; font-weight: 800; color: $text-dark; letter-spacing: -0.02em; }
+  .subtitle { margin: 0.15rem 0 0; font-size: 0.8rem; color: $text-muted; }
+}
 
-    h1 {
-      margin: 0;
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: $text-dark;
-      letter-spacing: -0.02em;
-    }
+.lab-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f1f5f9;
+  padding: 0.25rem;
+  border-radius: 10px;
+}
 
-    .subtitle {
-      margin: 0.25rem 0 0;
-      font-size: 0.85rem;
-      color: $text-muted;
-    }
-  }
+/* Shared button / interactive styles */
+.nav-tab-btn,
+.btn-control-play,
+.btn-wb-action,
+.btn-reset-equation,
+.btn-help-equation,
+.carousel-pill,
+.balance-badge,
+.element-atom-chip {
+  display: inline-flex;
+  align-items: center;
+}
 
-  .lab-telemetry {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+.nav-tab-btn,
+.btn-control-play,
+.btn-wb-action,
+.btn-reset-equation,
+.btn-help-equation,
+.btn-volume-step,
+.btn-vessel-empty,
+.btn-tool-mode,
+.btn-step-arrow,
+.btn-reset-filter,
+.btn-close-modal,
+.btn-modal-action,
+.btn-tool-remove,
+.btn-inspect-modal,
+.tab-btn,
+.carousel-pill {
+  cursor: pointer;
+  font-family: inherit;
+}
 
-    .telemetry-pill {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      background: #f1f5f9;
-      border: 1px solid $border-color;
-      padding: 0.5rem 0.85rem;
-      border-radius: 12px;
-      transition: all 0.2s ease;
+.nav-tab-btn {
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.2s;
 
-      i {
-        font-size: 1.2rem;
-        color: $primary-blue;
-      }
-
-      .telemetry-data {
-        display: flex;
-        flex-direction: column;
-
-        .label {
-          font-size: 0.7rem;
-          color: $text-muted;
-          text-transform: uppercase;
-          font-weight: 600;
-        }
-
-        strong {
-          font-size: 0.85rem;
-          color: $text-dark;
-          font-weight: 700;
-
-          small {
-            font-size: 0.75rem;
-            color: $text-muted;
-            font-weight: 500;
-          }
-        }
-      }
-
-      &.heated {
-        background: #fff7ed;
-        border-color: #fdba74;
-
-        i {
-          color: #ea580c;
-          animation: pulseFlame 1.2s infinite alternate ease-in-out;
-        }
-      }
-    }
-
-    .btn-control-play {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.6rem 1rem;
-      background: $primary-dark;
-      color: #ffffff;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: lighten($primary-dark, 8%);
-        transform: translateY(-1px);
-      }
-
-      i {
-        font-size: 1rem;
-      }
-    }
+  &.active {
+    background: #fff;
+    color: $primary-dark;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   }
 }
 
-// ------------------------------------------
-// Canvas Central de Simulación (Fondo Cuadriculado y Órbitas)
-// ------------------------------------------
+.lab-telemetry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.telemetry-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border: 1px solid $border-color;
+  padding: 0.4rem 0.65rem;
+  border-radius: 10px;
+  i { font-size: 1.1rem; color: $primary-blue; }
+
+  &.heated {
+    background: #fff7ed;
+    border-color: #fdba74;
+    i { color: #ea580c; animation: pulseFlame 1.2s infinite alternate; }
+  }
+
+  &.score-pill {
+    cursor: pointer;
+    background: #fefce8;
+    border-color: #fef08a;
+    i { color: #ca8a04; }
+  }
+}
+
+.telemetry-data {
+  display: flex;
+  flex-direction: column;
+  .label { font-size: 0.62rem; color: $text-muted; text-transform: uppercase; font-weight: 700; }
+  strong { font-size: 0.8rem; color: $text-dark; font-weight: 700; }
+}
+
+.btn-control-play {
+  gap: 0.35rem;
+  padding: 0.5rem 0.8rem;
+  background: $primary-dark;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  &:hover { background: color.adjust($primary-dark, $lightness: 8%); }
+}
+
 .simulation-canvas-wrapper {
   flex: 1;
-  min-height: 420px;
+  min-height: 380px;
   background: $bg-canvas;
-  border-radius: 20px;
+  border-radius: 18px;
   border: 1px solid $border-color;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   position: relative;
@@ -209,57 +227,31 @@ $border-focus: #00a2ed;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1.5rem;
+  padding: 1.1rem;
   box-sizing: border-box;
+  background: #fff radial-gradient(#e2e8f0 1px, transparent 1px) 0 0/24px 24px;
 
-  // Fondo cuadriculado suave (Estilo Blueprint de Laboratorio)
-  background-color: #ffffff;
-  background-image:
-    linear-gradient(to right, rgba(226, 232, 240, 0.65) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(226, 232, 240, 0.65) 1px, transparent 1px);
-  background-size: 26px 26px;
-
-  &.simulation-paused {
-    .orbit-ring,
-    .electron,
-    .pulse-indicator {
-      animation-play-state: paused !important;
-    }
+  &.simulation-paused * {
+    animation-play-state: paused !important;
   }
 }
 
 .canvas-watermark {
   position: absolute;
-  top: 1.25rem;
-  left: 1.5rem;
+  top: 0.85rem;
+  left: 1.1rem;
   display: flex;
   flex-direction: column;
   pointer-events: none;
   z-index: 2;
-
-  .watermark-title {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #94a3b8;
-  }
-
-  .watermark-formula {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #475569;
-    margin-top: 0.15rem;
-  }
+  .watermark-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; }
+  .watermark-formula { font-size: 0.9rem; font-weight: 700; color: #475569; }
 }
 
-// ------------------------------------------
-// Sistema de Órbitas Concéntricas y Reactivos
-// ------------------------------------------
 .orbit-system {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: 290px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -270,807 +262,627 @@ $border-focus: #00a2ed;
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  transition: all 0.3s ease;
-
-  &.ring-outer {
-    width: 340px;
-    height: 340px;
-    border: 1.5px dashed rgba(0, 162, 237, 0.3);
-    animation: rotateOrbit 30s linear infinite;
-  }
-
-  &.ring-mid {
-    width: 240px;
-    height: 240px;
-    border: 1.5px dashed rgba(99, 91, 252, 0.3);
-    animation: rotateOrbitCounter 22s linear infinite;
-  }
-
-  &.ring-inner {
-    width: 150px;
-    height: 150px;
-    border: 1px solid rgba(16, 185, 129, 0.25);
-    background: radial-gradient(circle, rgba(0, 162, 237, 0.04) 0%, transparent 70%);
-  }
 }
+.ring-outer { width: 270px; height: 270px; border: 1.5px dashed rgba(0, 162, 237, 0.28); animation: rotateOrbit 30s linear infinite; }
+.ring-mid { width: 180px; height: 180px; border: 1.5px dashed rgba(99, 91, 252, 0.28); animation: rotateOrbitCounter 22s linear infinite; }
+.ring-inner { width: 100px; height: 100px; border: 1px solid rgba(16, 185, 129, 0.25); }
 
-// Rayos de enlace de energía que convergen al núcleo
 .bond-rays {
   position: absolute;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  opacity: 0.35;
-  transition: opacity 0.4s ease;
-
-  .ray {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    height: 2px;
-    transform-origin: 0% 50%;
-  }
-
-  .ray-1 {
-    width: 140px;
-    background: linear-gradient(90deg, #0284c7, transparent);
-    transform: rotate(215deg);
-  }
-
-  .ray-2 {
-    width: 140px;
-    background: linear-gradient(90deg, #0284c7, transparent);
-    transform: rotate(145deg);
-  }
-
-  .ray-3 {
-    width: 150px;
-    background: linear-gradient(90deg, #e11d48, transparent);
-    transform: rotate(0deg);
-  }
+  opacity: 0.3;
 
   &.bonding-active {
-    opacity: 0.9;
-
-    .ray {
-      height: 3px;
-      box-shadow: 0 0 10px rgba(0, 162, 237, 0.6);
-      animation: pulseRays 1.5s infinite alternate ease-in-out;
-    }
+    opacity: 0.95;
+    .ray { height: 3px; animation: pulseRays 1.5s infinite alternate; }
   }
 }
 
-// Nodos de los reactivos atómicos posicionados visualmente
+.ray { position: absolute; top: 50%; left: 50%; height: 2px; transform-origin: 0% 50%; }
+.ray-1 { width: 110px; background: linear-gradient(90deg, #0284c7, transparent); transform: rotate(215deg); }
+.ray-2 { width: 110px; background: linear-gradient(90deg, #0284c7, transparent); transform: rotate(145deg); }
+.ray-3 { width: 120px; background: linear-gradient(90deg, #e11d48, transparent); transform: rotate(0deg); }
+
 .reactant-node {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
   z-index: 5;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  &:hover {
-    transform: scale(1.1);
-  }
-
-  &.top-left {
-    top: 15%;
-    left: 20%;
-  }
-
-  &.bottom-left {
-    bottom: 15%;
-    left: 20%;
-  }
-
-  &.center-right {
-    top: 42%;
-    right: 20%;
-  }
-
-  .atom-halo {
-    position: absolute;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    background: var(--node-color, $primary-blue);
-    opacity: 0.15;
-    animation: pulseHalo 2s infinite ease-in-out;
-  }
-
-  .atom-core {
-    position: relative;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--node-color, $primary-blue);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-weight: 800;
-
-    .atom-symbol {
-      font-size: 1.15rem;
-    }
-
-    .atom-charge {
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      font-size: 0.65rem;
-      background: #ffffff;
-      color: $text-dark;
-      padding: 0.1rem 0.25rem;
-      border-radius: 6px;
-      border: 1px solid $border-color;
-      font-weight: 700;
-    }
-  }
-
-  .atom-electrons {
-    position: absolute;
-    width: 64px;
-    height: 64px;
-    pointer-events: none;
-    animation: rotateOrbit 4s linear infinite;
-
-    .electron {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--node-color, $primary-blue);
-      border: 1.5px solid #ffffff;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-
-      &.electron-1 {
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      &.electron-2 {
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      &.electron-3 {
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-      }
-      &.electron-4 {
-        top: 50%;
-        right: 0;
-        transform: translateY(-50%);
-      }
-    }
-  }
-
-  .atom-label {
-    margin-top: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 0.2rem 0.5rem;
-    border-radius: 8px;
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-
-    strong {
-      font-size: 0.75rem;
-      color: $text-dark;
-    }
-
-    small {
-      font-size: 0.65rem;
-      color: $text-muted;
-    }
-  }
+  &.top-left { top: 10%; left: 22%; }
+  &.bottom-left { bottom: 10%; left: 22%; }
+  &.center-right { top: 38%; right: 22%; }
+  &.top-right { top: 10%; right: 25%; }
 }
 
-// ------------------------------------------
-// Núcleo Central de Reacción (Synthesis Core)
-// ------------------------------------------
+.atom-halo {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--node-color, $primary-blue);
+  opacity: 0.15;
+  animation: pulseHalo 2s infinite;
+}
+
+.atom-core {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--node-color, $primary-blue);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  .atom-symbol { font-size: 0.95rem; }
+}
+
+.atom-charge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  font-size: 0.58rem;
+  background: #fff;
+  color: $text-dark;
+  padding: 0.05rem 0.2rem;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+}
+
+.atom-electrons {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  animation: rotateOrbit 4s linear infinite;
+}
+
+.electron {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--node-color, $primary-blue);
+  border: 1px solid #fff;
+  &.electron-1 { top: 0; left: 50%; transform: translateX(-50%); }
+  &.electron-2 { bottom: 0; left: 50%; transform: translateX(-50%); }
+}
+
+.atom-label {
+  margin-top: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.1rem 0.35rem;
+  border-radius: 5px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  strong { font-size: 0.68rem; color: $text-dark; }
+  small { font-size: 0.58rem; color: $text-muted; }
+}
+
 .synthesis-core {
   position: relative;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-
-  .awaiting-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #ffffff;
-    border: 1.5px dashed #cbd5e1;
-    border-radius: 20px;
-    padding: 1.25rem 1.5rem;
-    max-width: 220px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-
-    .pulse-indicator {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(0, 162, 237, 0.1);
-      color: $primary-blue;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      animation: pulseCore 2s infinite ease-in-out;
-    }
-
-    .awaiting-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: $text-dark;
-    }
-
-    p {
-      margin: 0.35rem 0 0;
-      font-size: 0.7rem;
-      color: $text-muted;
-      line-height: 1.3;
-    }
-  }
-
-  // Molécula de H2O sintetizada exitosamente
-  &.synthesized {
-    .molecule-h2o {
-      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-  }
-
-  .molecule-h2o {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    .water-core {
-      position: relative;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: #e11d48;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      font-weight: 800;
-      box-shadow: 0 0 24px rgba(225, 29, 72, 0.45);
-
-      .bond-arm {
-        position: absolute;
-        width: 32px;
-        height: 6px;
-        background: #94a3b8;
-        border-radius: 3px;
-        top: 25px;
-      }
-
-      .arm-left {
-        left: -22px;
-        transform: rotate(-38deg);
-      }
-
-      .arm-right {
-        right: -22px;
-        transform: rotate(38deg);
-      }
-
-      .water-satellite {
-        position: absolute;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #0284c7;
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        font-weight: 800;
-        box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
-
-        &.hydrogen-left {
-          top: -14px;
-          left: -38px;
-        }
-
-        &.hydrogen-right {
-          top: -14px;
-          right: -38px;
-        }
-      }
-    }
-
-    .water-label {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .formula {
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: $primary-dark;
-      }
-
-      small {
-        font-size: 0.75rem;
-        color: $text-muted;
-        font-weight: 600;
-      }
-    }
-
-    .energy-burst {
-      margin-top: 0.4rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      background: #ecfdf5;
-      color: $success-dark;
-      padding: 0.3rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      border: 1px solid #a7f3d0;
-      animation: bounceSmall 1.5s infinite;
-
-      i {
-        font-size: 0.95rem;
-      }
-    }
-  }
 }
 
-// ------------------------------------------
-// Barra de Mesa de Trabajo (Equipos Activos)
-// ------------------------------------------
+.awaiting-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 0.85rem 1.15rem;
+  max-width: 190px;
+  text-align: center;
+  p { margin: 0.2rem 0 0; font-size: 0.62rem; color: $text-muted; }
+}
+
+.pulse-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 162, 237, 0.1);
+  color: $primary-blue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 0.35rem;
+  animation: pulseCore 2s infinite;
+}
+
+.awaiting-title { font-size: 0.78rem; font-weight: 700; color: $text-dark; }
+
+.molecule-synthesized {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: popIn 0.4s ease;
+}
+
+.synth-sparkle-halo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+}
+
+.molecule-badge {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  padding: 0.4rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #a7f3d0;
+  .synth-name { font-size: 0.65rem; font-weight: 700; color: #059669; }
+  .synth-formula { font-size: 0.95rem; font-weight: 800; color: #0f172a; }
+  .synth-law { font-size: 0.6rem; color: #047857; }
+}
+
 .workbench-bar {
   background: rgba(248, 250, 252, 0.95);
-  backdrop-filter: blur(8px);
   border: 1px solid $border-color;
   border-radius: 14px;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.8rem;
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
 
-  .workbench-header {
-    margin-bottom: 0.5rem;
+.workbench-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    .wb-title {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: $text-muted;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
+.wb-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $text-muted;
+  text-transform: uppercase;
+  i { font-size: 0.85rem; color: $primary-blue; }
+}
 
-      i {
-        font-size: 0.9rem;
-        color: $primary-blue;
-      }
-    }
-  }
+.wb-actions {
+  display: flex;
+  gap: 0.3rem;
+}
 
-  .workbench-items {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+.btn-wb-action {
+  gap: 0.2rem;
+  background: #fff;
+  border: 1px solid $border-color;
+  border-radius: 6px;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  &.btn-danger-action:hover { color: $danger-red; background: #fef2f2; }
+}
 
-    .wb-item-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      background: #ffffff;
-      border: 1.5px solid;
-      padding: 0.35rem 0.65rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-      transition: all 0.2s ease;
+.workbench-benchtop {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  min-height: 75px;
+  padding: 0.35rem;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid $border-color;
+}
 
-      i {
-        font-size: 1rem;
-      }
+.bench-empty-guide {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: $text-muted;
+  font-size: 0.74rem;
+  i { font-size: 1.1rem; color: $primary-blue; }
+}
 
-      .chip-text {
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
+.bench-tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.25rem 0.45rem;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1.5px solid transparent;
 
-        .chip-name {
-          font-size: 0.8rem;
-          font-weight: 700;
-          color: $text-dark;
-        }
-
-        .chip-sub {
-          font-size: 0.7rem;
-          background: #f1f5f9;
-          color: $text-muted;
-          padding: 0.1rem 0.3rem;
-          border-radius: 4px;
-        }
-      }
-
-      .btn-chip-remove {
-        background: transparent;
-        border: none;
-        color: $text-light;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.1rem;
-        margin-left: 0.25rem;
-        border-radius: 50%;
-        transition: all 0.2s ease;
-
-        &:hover {
-          color: $danger-red;
-          background: #fee2e2;
-        }
-
-        i {
-          font-size: 0.75rem;
-        }
-      }
-    }
-
-    .wb-empty-prompt {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: $text-muted;
-      font-size: 0.8rem;
-      font-style: italic;
-
-      i {
-        font-size: 1rem;
-        color: $primary-blue;
-      }
-    }
+  &.selected {
+    background: #eff6ff;
+    border-color: $primary-blue;
   }
 }
 
-// ==========================================
-// BALANCEADOR DE ECUACIONES QUÍMICAS (Req 4)
-// ==========================================
-.equation-balancer-section {
+.glassware-flask-visual {
+  position: relative;
+  width: 36px;
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .flask-neck { width: 9px; height: 12px; border: 2px solid #94a3b8; border-bottom: none; }
+  .flask-reading { font-size: 0.58rem; font-weight: 700; color: $text-muted; }
+}
+
+.flask-body {
+  position: relative;
+  width: 32px;
+  height: 30px;
+  border: 2px solid #94a3b8;
+  border-radius: 4px 4px 12px 12px;
+  overflow: hidden;
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.flask-liquid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
   width: 100%;
+  transition: height 0.3s;
+  .liquid-meniscus { width: 100%; height: 3px; background: rgba(255, 255, 255, 0.4); }
 }
+
+.boiling-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  animation: riseBubble 1.5s infinite;
+  &.b1 { width: 3px; height: 3px; left: 20%; }
+  &.b2 { width: 3px; height: 3px; left: 55%; animation-delay: 0.5s; }
+}
+
+.bunsen-burner-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .bunsen-barrel { width: 7px; height: 22px; background: #64748b; }
+  .bunsen-base { width: 22px; height: 5px; background: #334155; border-radius: 2px; }
+  .flame-label { font-size: 0.58rem; font-weight: 700; color: #ea580c; }
+}
+
+.flame-cone {
+  width: 12px;
+  height: 18px;
+  border-radius: 50% 50% 20% 20%;
+  &.flame-off { opacity: 0; height: 0; }
+  &.flame-low { background: linear-gradient(to top, #0284c7, #facc15); animation: pulseFlame 1s infinite alternate; }
+  &.flame-medium { width: 14px; height: 22px; background: linear-gradient(to top, #2563eb, #38bdf8, #fbbf24); animation: pulseFlame 0.8s infinite alternate; }
+  &.flame-high { width: 16px; height: 26px; background: linear-gradient(to top, #1d4ed8, #00f0ff, #fff); animation: pulseFlame 0.5s infinite alternate; }
+}
+
+.generic-tool-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .tool-icon-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .tool-value-tag { font-size: 0.6rem; font-weight: 700; color: $text-dark; }
+}
+
+.bench-tool-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 0.2rem;
+  .tool-name { font-size: 0.65rem; font-weight: 700; color: $text-dark; }
+  .btn-tool-remove { border: none; background: transparent; color: $text-light; }
+}
+
+.tool-control-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.4rem 0.6rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.control-lead {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  strong { font-size: 0.75rem; }
+}
+
+.control-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.volume-slider { width: 80px; accent-color: $primary-blue; }
+
+.btn-volume-step, .volume-badge, .btn-tool-mode {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  background: #fff;
+}
+
+.btn-vessel-empty {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid $border-color;
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.equation-balancer-section { width: 100%; }
 
 .balancer-card {
   background: $bg-card;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px solid $border-color;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.2rem;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.75rem;
+}
 
-  .balancer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
+.balancer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
 
-    .balancer-title-group {
-      display: flex;
-      align-items: center;
-      gap: 0.85rem;
+.balancer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
 
-      .balancer-icon-box {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: rgba(0, 162, 237, 0.1);
-        color: $primary-blue;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.35rem;
-      }
+.balancer-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 162, 237, 0.1);
+  color: $primary-blue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
 
-      .balancer-headings {
-        h2 {
-          margin: 0;
-          font-size: 1.15rem;
-          font-weight: 800;
-          color: $text-dark;
-        }
+.title-with-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  h2 { margin: 0; font-size: 1rem; font-weight: 800; color: $text-dark; }
+}
 
-        p {
-          margin: 0.2rem 0 0;
-          font-size: 0.8rem;
-          color: $text-muted;
-        }
-      }
-    }
+.exercise-badge-number { font-size: 0.65rem; font-weight: 700; background: #e0f2fe; color: #0284c7; padding: 0.1rem 0.35rem; border-radius: 8px; }
 
-    .balancer-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
+.balancer-headings p { margin: 0.1rem 0 0; font-size: 0.7rem; color: $text-muted; }
 
-      // Badge de estado reactivo (Requerimiento 4)
-      .balance-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.5rem 0.9rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        background: #f1f5f9;
-        color: #64748b;
-        border: 1px solid #cbd5e1;
-        transition: all 0.3s ease;
+.balancer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
 
-        i {
-          font-size: 1rem;
-        }
+.exercise-filter-select { padding: 0.25rem 0.45rem; border-radius: 6px; border: 1px solid $border-color; font-size: 0.7rem; font-weight: 600; }
+.btn-step-arrow { width: 26px; height: 26px; border-radius: 5px; border: 1px solid $border-color; background: #fff; }
 
-        // Tinte verde cuando la ecuación esté balanceada (Requerimiento 4)
-        &.balanced {
-          background: #ecfdf5;
-          color: #047857;
-          border-color: #6ee7b7;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+.balance-badge {
+  gap: 0.25rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  &.balanced { background: #ecfdf5; color: #047857; border-color: #6ee7b7; i { color: #10b981; } }
+}
 
-          i {
-            color: #10b981;
-          }
-        }
-      }
+.btn-reset-equation {
+  gap: 0.2rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  border: 1px solid $border-color;
+  background: #fff;
+}
 
-      .btn-reset-equation {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.5rem 0.85rem;
-        background: #ffffff;
-        color: $text-dark;
-        border: 1px solid $border-color;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
+.btn-help-equation {
+  gap: 0.2rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  border: 1px solid #fde68a;
+  background: #fef3c7;
+  color: #92400e;
+}
 
-        &:hover {
-          background: #f8fafc;
-          border-color: #cbd5e1;
-          color: $danger-red;
-        }
+.exercise-carousel-tabs {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
 
-        i {
-          font-size: 0.95rem;
-        }
-      }
+.carousel-pill {
+  gap: 0.2rem;
+  white-space: nowrap;
+  padding: 0.2rem 0.45rem;
+  background: #f8fafc;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: $text-muted;
 
-      .btn-help-equation {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.5rem 0.85rem;
-        background: #fef3c7;
-        color: #92400e;
-        border: 1px solid #fde68a;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
+  .pill-index { width: 12px; height: 12px; border-radius: 50%; background: #e2e8f0; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
+  .pill-check { color: #10b981; }
+  &.active { background: $primary-dark; color: #fff; border-color: $primary-dark; .pill-index { background: #fff; color: $primary-dark; } }
+}
 
-        &:hover {
-          background: #fde68a;
-        }
+.equation-formula-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid $border-color;
+}
 
-        i {
-          font-size: 0.95rem;
-        }
-      }
-    }
-  }
+.formula-side { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 
-  // ------------------------------------------
-  // Expresión de la Fórmula Química Interactiva
-  // ------------------------------------------
-  .equation-formula-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    padding: 1.25rem;
-    background: #f8fafc;
-    border-radius: 14px;
-    border: 1px solid $border-color;
+.chemical-species-block {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
 
-    .reactant-block,
-    .product-block {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
+.coeff-input {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-align: center;
+  color: $primary-dark;
+  outline: none;
+  &:focus { border-color: $primary-blue; }
+  &.valid-coeff { border-color: $success-green; background-color: #f0fdf4; color: $success-dark; }
+  &::-webkit-outer-spin-button, &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  -moz-appearance: textfield;
+}
 
-      .input-wrapper {
-        .coeff-input {
-          width: 50px;
-          height: 50px;
-          border-radius: 12px;
-          border: 2px solid #cbd5e1;
-          background: #ffffff;
-          font-size: 1.25rem;
-          font-weight: 800;
-          text-align: center;
-          color: $primary-dark;
-          outline: none;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+.chemical-formula {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: $text-dark;
+  sub { font-size: 0.72rem; }
+  .state-sub { font-size: 0.68rem; color: $text-muted; }
+}
 
-          &::placeholder {
-            color: #94a3b8;
-            font-weight: 500;
-          }
+.math-operator { font-size: 1.15rem; font-weight: 700; color: $text-muted; }
 
-          &:focus {
-            border-color: $primary-blue;
-            box-shadow: 0 0 0 3px rgba(0, 162, 237, 0.2);
-          }
+.reaction-arrow-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: $primary-blue;
+  i { font-size: 1.3rem; font-weight: 800; }
+  .heat-symbol { font-size: 0.62rem; font-weight: 800; color: #f97316; }
+}
 
-          &.valid-coeff {
-            border-color: $success-green;
-            background-color: #f0fdf4;
-            color: $success-dark;
-          }
+.atomic-conservation-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.3rem;
+  border-top: 1px dashed $border-color;
+}
 
-          // Elimina spinners nativos en Chrome/Safari/Edge/Firefox
-          &::-webkit-outer-spin-button,
-          &::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-          }
-          -moz-appearance: textfield;
-        }
-      }
+.atomic-pills-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
 
-      .chemical-formula {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: $text-dark;
-        letter-spacing: -0.01em;
+.conservation-label { font-size: 0.65rem; font-weight: 700; color: $text-muted; text-transform: uppercase; }
 
-        sub {
-          font-size: 0.9rem;
-          font-weight: 700;
-        }
-
-        .state-sub {
-          font-size: 0.8rem;
-          color: $text-muted;
-          font-weight: 600;
-          margin-left: 0.2rem;
-        }
-      }
-    }
-
-    .math-operator {
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: $text-muted;
-    }
-
-    .reaction-arrow-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: $primary-blue;
-      padding: 0 0.5rem;
-
-      i {
-        font-size: 1.8rem;
-        font-weight: 800;
-      }
-
-      .heat-symbol {
-        font-size: 0.8rem;
-        font-weight: 800;
-        color: #f97316;
-        margin-top: -0.25rem;
-      }
-    }
-  }
-
-  // ------------------------------------------
-  // Telemetría Didáctica de Conservación Atómica
-  // ------------------------------------------
-  .atomic-conservation-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding-top: 0.5rem;
-    border-top: 1px dashed $border-color;
-
-    .atomic-counts {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      .group-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: $text-muted;
-        text-transform: uppercase;
-      }
-
-      .count-tag {
-        font-size: 0.8rem;
-        background: #f1f5f9;
-        color: $text-dark;
-        padding: 0.25rem 0.5rem;
-        border-radius: 8px;
-        border: 1px solid $border-color;
-
-        strong {
-          color: $primary-dark;
-        }
-
-        &.matched {
-          background: #ecfdf5;
-          color: #065f46;
-          border-color: #a7f3d0;
-
-          strong {
-            color: #059669;
-          }
-        }
-      }
-    }
-
-    .conservation-status {
-      font-size: 0.8rem;
-      font-weight: 600;
-
-      .conservation-match {
-        color: $success-dark;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-      }
-
-      .conservation-mismatch {
-        color: $text-muted;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-      }
-    }
+.element-atom-chip {
+  gap: 0.2rem;
+  background: #f1f5f9;
+  border: 1px solid $border-color;
+  border-radius: 5px;
+  padding: 0.12rem 0.4rem;
+  font-size: 0.7rem;
+  .element-symbol { font-weight: 800; color: $primary-dark; }
+  &.balanced {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
+    .element-symbol { color: #059669; }
   }
 }
 
-// ==========================================
-// COLUMNA DERECHA: PANEL DE HERRAMIENTAS ("Equipment")
-// ==========================================
+.conservation-status-message {
+  font-size: 0.7rem;
+  font-weight: 600;
+  .conservation-match { color: $success-dark; display: inline-flex; align-items: center; gap: 0.2rem; }
+  .conservation-mismatch { color: $text-muted; display: inline-flex; align-items: center; gap: 0.2rem; }
+}
+
+.lab-guide-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.guide-card {
+  background: #fff;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: 1rem;
+  h2 { margin: 0 0 0.5rem; font-size: 0.95rem; font-weight: 800; color: $text-dark; display: flex; align-items: center; gap: 0.35rem; i { color: $primary-blue; } }
+  p { font-size: 0.78rem; color: $text-muted; line-height: 1.35; margin: 0 0 0.45rem; }
+  ul { margin: 0; padding-left: 1rem; li { font-size: 0.75rem; margin-bottom: 0.25rem; } }
+}
+
+.guide-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.55rem;
+}
+
+.type-box {
+  background: #f8fafc;
+  border: 1px solid $border-color;
+  border-radius: 6px;
+  padding: 0.55rem;
+  font-size: 0.72rem;
+  color: $text-muted;
+  strong { display: block; color: $text-dark; margin-bottom: 0.1rem; }
+}
+
 .equipment-panel {
-  width: 350px;
+  width: 340px;
   flex-shrink: 0;
   height: 100vh;
   background: $bg-card;
@@ -1078,458 +890,278 @@ $border-focus: #00a2ed;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
 
-  .panel-header {
-    padding: 1.5rem 1.25rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #f1f5f9;
+.panel-header {
+  padding: 0.9rem 1rem 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
 
-    .panel-title-group {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
+.panel-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  .panel-icon { width: 30px; height: 30px; border-radius: 6px; background: rgba(0, 162, 237, 0.1); color: $primary-blue; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  h2 { margin: 0; font-size: 0.95rem; font-weight: 800; color: $text-dark; }
+  span { font-size: 0.65rem; color: $text-muted; }
+}
 
-      .panel-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        background: rgba(0, 162, 237, 0.1);
-        color: $primary-blue;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-      }
+.active-count-badge { font-size: 0.65rem; font-weight: 700; background: #eff6ff; color: $primary-blue; padding: 0.12rem 0.45rem; border-radius: 10px; }
 
-      h2 {
-        margin: 0;
-        font-size: 1.15rem;
-        font-weight: 800;
-        color: $text-dark;
-      }
+.search-equipment-box {
+  position: relative;
+  padding: 0.55rem 1rem 0.3rem;
+  .search-icon { position: absolute; left: 1.55rem; top: 50%; transform: translateY(-20%); color: $text-light; font-size: 0.9rem; }
+}
 
-      span {
-        font-size: 0.75rem;
-        color: $text-muted;
-      }
-    }
+.search-input {
+  width: 100%;
+  padding: 0.45rem 1.6rem 0.45rem 1.8rem;
+  border: 1.5px solid $border-color;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  background: #f8fafc;
+  outline: none;
+  box-sizing: border-box;
+  &:focus { background: #fff; border-color: $primary-blue; }
+}
 
-    .active-count-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: #eff6ff;
-      color: $primary-blue;
-      padding: 0.25rem 0.65rem;
-      border-radius: 20px;
-      border: 1px solid rgba(0, 162, 237, 0.2);
-    }
-  }
+.btn-clear-search {
+  position: absolute;
+  right: 1.55rem;
+  top: 50%;
+  transform: translateY(-20%);
+  background: #e2e8f0;
+  border: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+}
 
-  // ------------------------------------------
-  // 1. Buscador Reactivo de Herramientas con FormControl
-  // ------------------------------------------
-  .search-equipment-box {
-    position: relative;
-    padding: 1rem 1.25rem 0.5rem;
+.category-tabs {
+  display: flex;
+  gap: 0.2rem;
+  padding: 0.25rem 1rem 0.45rem;
+  overflow-x: auto;
+  &::-webkit-scrollbar { display: none; }
+}
 
-    .search-icon {
-      position: absolute;
-      left: 2rem;
-      top: 50%;
-      transform: translateY(-20%);
-      color: $text-light;
-      font-size: 1.1rem;
-      pointer-events: none;
-    }
+.tab-btn {
+  white-space: nowrap;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  color: $text-muted;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.18rem 0.5rem;
+  border-radius: 12px;
+  &.active { background: $primary-blue; color: #fff; }
+}
 
-    .search-input {
-      width: 100%;
-      padding: 0.7rem 2.2rem 0.7rem 2.4rem;
-      border: 1.5px solid $border-color;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      font-family: inherit;
-      color: $text-dark;
-      background: #f8fafc;
-      outline: none;
-      box-sizing: border-box;
-      transition: all 0.2s ease;
+.equipment-list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.25rem 1rem 1rem;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+}
 
-      &::placeholder {
-        color: $text-light;
-      }
+.equipment-list { display: flex; flex-direction: column; gap: 0.45rem; }
 
-      &:focus {
-        background: #ffffff;
-        border-color: $primary-blue;
-        box-shadow: 0 0 0 3px rgba(0, 162, 237, 0.15);
-      }
-    }
+.equipment-card {
+  display: flex;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1.5px solid $border-color;
+  border-radius: 7px;
+  padding: 0.5rem;
+  transition: all 0.2s;
+  &:hover { border-color: #cbd5e1; transform: translateY(-1px); }
+  &.active { border-color: $primary-blue; background: #f0f9ff; }
+}
 
-    .btn-clear-search {
-      position: absolute;
-      right: 2rem;
-      top: 50%;
-      transform: translateY(-20%);
-      background: #e2e8f0;
-      border: none;
-      color: $text-muted;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.75rem;
-      transition: all 0.2s ease;
+.card-icon-box { width: 30px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
 
-      &:hover {
-        background: #cbd5e1;
-        color: $text-dark;
-      }
-    }
-  }
+.card-info {
+  flex: 1;
+  min-width: 0;
+  .card-desc { margin: 0.1rem 0 0.25rem; font-size: 0.65rem; color: $text-muted; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
 
-  // ------------------------------------------
-  // Píldoras de Filtro de Categoría
-  // ------------------------------------------
-  .category-tabs {
-    display: flex;
-    gap: 0.35rem;
-    padding: 0.5rem 1.25rem 0.75rem;
-    overflow-x: auto;
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .card-name { margin: 0; font-size: 0.75rem; font-weight: 700; color: $text-dark; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-formula-tag { font-size: 0.58rem; font-weight: 700; background: #e2e8f0; color: #475569; padding: 0.05rem 0.2rem; border-radius: 3px; }
+}
 
-    &::-webkit-scrollbar {
-      display: none;
-    }
+.card-footer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  .category-tag { color: $text-light; font-weight: 600; }
+  .status-indicator { font-weight: 700; color: $text-muted; &.status-active { color: $primary-blue; } }
+  .btn-inspect-modal { background: transparent; border: none; color: $text-light; &:hover { color: $primary-blue; } }
+}
 
-    .tab-btn {
-      white-space: nowrap;
-      background: #f1f5f9;
-      border: 1px solid transparent;
-      color: $text-muted;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 0.35rem 0.75rem;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
+.empty-equipment-state {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: $text-muted;
+  i { font-size: 1.6rem; color: #cbd5e1; }
+  h4 { margin: 0.2rem 0; font-size: 0.78rem; color: $text-dark; }
+  p { margin: 0 0 0.4rem; font-size: 0.68rem; }
+}
 
-      &:hover {
-        background: #e2e8f0;
-        color: $text-dark;
-      }
+.btn-reset-filter {
+  padding: 0.3rem 0.55rem;
+  background: $primary-blue;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.68rem;
+}
 
-      &.active {
-        background: $primary-blue;
-        color: #ffffff;
-        border-color: $primary-blue;
-        box-shadow: 0 2px 6px rgba(0, 162, 237, 0.3);
-      }
-    }
-  }
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  box-sizing: border-box;
+}
 
-  // ------------------------------------------
-  // 2. Lista de Herramientas y Reactivos (@for)
-  // ------------------------------------------
-  .equipment-list-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.5rem 1.25rem 1.5rem;
+.modal-card {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
 
-    &::-webkit-scrollbar {
-      width: 5px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
-      border-radius: 4px;
-    }
-  }
+.modal-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  .tool-head-badge { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .trophy-icon { font-size: 1.3rem; color: #ca8a04; }
+  h3 { margin: 0; font-size: 1rem; font-weight: 800; color: $text-dark; }
+  span { font-size: 0.68rem; color: $text-muted; }
+  .btn-close-modal { margin-left: auto; border: none; background: transparent; color: $text-muted; font-size: 1.1rem; }
+}
 
-  .equipment-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  .modal-desc { font-size: 0.75rem; color: $text-dark; line-height: 1.3; margin: 0; }
+}
 
-  .equipment-card {
-    display: flex;
-    gap: 0.85rem;
-    background: #ffffff;
-    border: 1.5px solid $border-color;
-    border-radius: 14px;
-    padding: 0.85rem;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    outline: none;
-
-    &:hover {
-      border-color: #cbd5e1;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    &.active {
-      border-color: $primary-blue;
-      background: #f0f9ff;
-      box-shadow: 0 4px 14px rgba(0, 162, 237, 0.12);
-
-      .card-name {
-        color: $primary-dark;
-      }
-    }
-
-    .card-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.35rem;
-      flex-shrink: 0;
-    }
-
-    .card-info {
-      flex: 1;
-      min-width: 0;
-
-      .card-title-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.35rem;
-
-        .card-name {
-          margin: 0;
-          font-size: 0.88rem;
-          font-weight: 700;
-          color: $text-dark;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .card-formula-tag {
-          font-size: 0.7rem;
-          font-weight: 700;
-          background: #e2e8f0;
-          color: #475569;
-          padding: 0.1rem 0.35rem;
-          border-radius: 4px;
-          flex-shrink: 0;
-        }
-      }
-
-      .card-desc {
-        margin: 0.3rem 0 0.5rem;
-        font-size: 0.75rem;
-        color: $text-muted;
-        line-height: 1.35;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-
-      .card-footer-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.72rem;
-
-        .category-tag {
-          color: $text-light;
-          font-weight: 600;
-        }
-
-        .status-indicator {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.25rem;
-          font-weight: 700;
-          color: $text-muted;
-
-          i {
-            font-size: 0.85rem;
-          }
-
-          &.status-active {
-            color: $primary-blue;
-          }
-        }
-      }
-    }
-  }
-
-  // Estado vacío cuando no hay resultados de búsqueda
-  .empty-equipment-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 3rem 1rem;
-    color: $text-muted;
-
-    i {
-      font-size: 2.5rem;
-      color: #cbd5e1;
-      margin-bottom: 0.75rem;
-    }
-
-    h4 {
-      margin: 0 0 0.25rem;
-      font-size: 0.95rem;
-      color: $text-dark;
-      font-weight: 700;
-    }
-
-    p {
-      margin: 0 0 1rem;
-      font-size: 0.8rem;
-    }
-
-    .btn-reset-filter {
-      padding: 0.5rem 1rem;
-      background: $primary-blue;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s ease;
-
-      &:hover {
-        background: darken($primary-blue, 8%);
-      }
-    }
+.tech-spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  background: #f8fafc;
+  padding: 0.55rem;
+  border-radius: 6px;
+  border: 1px solid $border-color;
+  .spec-cell {
+    strong { font-size: 0.65rem; color: $text-muted; }
+    span { font-size: 0.72rem; font-weight: 700; color: $text-dark; }
+    .text-green { color: $success-dark; }
   }
 }
 
-// ==========================================
-// ANIMACIONES KEYFRAMES
-// ==========================================
-@keyframes rotateOrbit {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes rotateOrbitCounter {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-360deg);
+.score-overview-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.45rem;
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  padding: 0.55rem;
+  border-radius: 6px;
+  text-align: center;
+  .score-unit {
+    strong { font-size: 1rem; font-weight: 800; color: #a16207; display: block; }
+    small { font-size: 0.6rem; color: #854d0e; font-weight: 600; }
   }
 }
 
-@keyframes pulseHalo {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.15;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 0.3;
-  }
+.solved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
-@keyframes pulseCore {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.12);
-  }
+.solved-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.45rem;
+  background: #f8fafc;
+  border-radius: 5px;
+  font-size: 0.68rem;
+  .row-name { font-weight: 600; color: $text-dark; }
+  .row-tag { font-size: 0.6rem; background: #e2e8f0; padding: 0.05rem 0.2rem; border-radius: 3px; }
+  .row-status { font-weight: 700; color: $text-muted; }
+  &.is-done { background: #ecfdf5; .row-status { color: #059669; } }
 }
 
-@keyframes pulseFlame {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.2);
-  }
+.modal-foot {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
-@keyframes pulseRays {
-  from {
-    opacity: 0.5;
-  }
-  to {
-    opacity: 1;
-  }
+.btn-modal-action {
+  background: $primary-dark;
+  color: #fff;
+  border: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.74rem;
 }
 
-@keyframes popIn {
-  0% {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
+@keyframes rotateOrbit { to { transform: rotate(360deg); } }
+@keyframes rotateOrbitCounter { to { transform: rotate(-360deg); } }
+@keyframes pulseHalo { 50% { transform: scale(1.2); opacity: 0.3; } }
+@keyframes pulseCore { 50% { transform: scale(1.1); } }
+@keyframes pulseFlame { to { transform: scale(1.18); } }
+@keyframes pulseRays { to { opacity: 1; } }
+@keyframes popIn { 0% { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes riseBubble { 0% { bottom: 0; opacity: 0; } 50% { opacity: 0.8; } 100% { bottom: 90%; opacity: 0; } }
+@keyframes slideInDown { from { opacity: 0; transform: translateY(-16px); } }
 
-@keyframes bounceSmall {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
-// ==========================================
-// RESPONSIVIDAD (PANTALLAS MEDIANAS Y MÓVILES)
-// ==========================================
 @media (max-width: 1200px) {
-  .equipment-panel {
-    width: 300px;
-  }
-
-  .orbit-system {
-    height: 320px;
-  }
-
-  .orbit-ring.ring-outer {
-    width: 290px;
-    height: 290px;
-  }
-
-  .orbit-ring.ring-mid {
-    width: 200px;
-    height: 200px;
-  }
+  .equipment-panel { width: 300px; }
+  .orbit-system { height: 250px; }
 }
 
 @media (max-width: 992px) {
-  .virtual-lab-layout {
-    flex-direction: column;
-    height: auto;
-    overflow-y: visible;
-  }
-
-  .simulation-workspace {
-    height: auto;
-    overflow: visible;
-  }
-
-  .equipment-panel {
-    width: 100%;
-    height: auto;
-    border-left: none;
-    border-top: 1px solid $border-color;
-  }
+  .virtual-lab-layout { flex-direction: column; height: auto; overflow-y: visible; }
+  .simulation-workspace { height: auto; overflow: visible; }
+  .equipment-panel { width: 100%; height: auto; border-left: none; border-top: 1px solid $border-color; }
 }
-
