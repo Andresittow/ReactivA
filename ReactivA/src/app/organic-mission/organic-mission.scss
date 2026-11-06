@@ -560,13 +560,75 @@ $shadow-sm:      0 2px 8px rgba(0,0,0,.06);
   white-space: nowrap;
 }
 
-// Vidas
-.lives-display {
+// Vidas – 5 corazones SVG en fila horizontal
+.lives-bar {
   display: flex;
-  gap: 4px;
-  align-self: flex-start;
-  .life { font-size: 1.2rem; }
-  .life.lost { opacity: .3; filter: grayscale(1); }
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 14px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 50px;
+  box-shadow: $shadow-sm;
+}
+
+.lives-label {
+  font-size: .78rem;
+  font-weight: 700;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.hearts-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+.heart-wrap {
+  width: 30px;
+  height: 28px;
+  flex-shrink: 0;
+  transition: transform .3s ease, opacity .3s ease;
+
+  &.heart-lost {
+    opacity: .35;
+    transform: scale(.85);
+  }
+
+  &.heart-breaking {
+    animation: heartBreak .6s ease forwards;
+  }
+}
+
+.heart-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.12));
+}
+
+@keyframes heartBreak {
+  0%   { transform: scale(1);    opacity: 1; }
+  20%  { transform: scale(1.25); opacity: 1; }
+  50%  { transform: scale(.7);   opacity: .6; }
+  100% { transform: scale(.85);  opacity: .35; }
+}
+
+.lives-count {
+  font-size: .82rem;
+  font-weight: 700;
+  color: $danger;
+  white-space: nowrap;
+  min-width: 28px;
+  text-align: right;
 }
 
 // Tarjeta de pregunta
@@ -965,12 +1027,24 @@ $shadow-sm:      0 2px 8px rgba(0,0,0,.06);
 
 .remaining-lives {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   font-size: .9rem;
   color: $text-mid;
   font-weight: 500;
-  span { font-size: 1.1rem; }
+}
+
+.hearts-row-sm {
+  gap: 4px;
+}
+
+.heart-svg-sm {
+  width: 22px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.1));
 }
 
 .bonuses-list {

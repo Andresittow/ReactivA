@@ -494,8 +494,17 @@
           <!-- Vidas restantes -->
           <div class="remaining-lives">
             <span>Vidas restantes:</span>
-            @for (life of livesArray(); track $index) { <span>❤️</span> }
-            @for (life of lostLivesArray(); track $index) { <span>🖤</span> }
+            <div class="hearts-row hearts-row-sm">
+              @for (alive of livesArray(); track $index) {
+                <svg class="heart-svg-sm" viewBox="0 0 32 29" xmlns="http://www.w3.org/2000/svg">
+                  @if (alive) {
+                    <path d="M16 27S2 18.5 2 9.5A7.5 7.5 0 0 1 16 5.4 7.5 7.5 0 0 1 30 9.5C30 18.5 16 27 16 27Z" fill="#ef4444" stroke="#c41d1d" stroke-width="1.5"/>
+                  } @else {
+                    <path d="M16 27S2 18.5 2 9.5A7.5 7.5 0 0 1 16 5.4 7.5 7.5 0 0 1 30 9.5C30 18.5 16 27 16 27Z" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+                  }
+                </svg>
+              }
+            </div>
           </div>
 
           <!-- Bonificaciones -->
