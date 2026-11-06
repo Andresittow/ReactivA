@@ -19,7 +19,6 @@ export const routes: Routes = [
     loadComponent: () => import('./virtual-lab/virtual-lab').then(m => m.VirtualLabComponent)
   },
 
-  // Ruta de la Tabla Periódica (Dentro del Layout con Sidebar)
   {
     path: 'periodic-table',
     loadComponent: () => import('./periodic-table/periodic-table').then(m => m.PeriodicTableComponent)
@@ -28,6 +27,12 @@ export const routes: Routes = [
     path: 'tabla-periodica',
     redirectTo: 'periodic-table',
     pathMatch: 'full'
+  },
+
+  // Ruta del Perfil del Estudiante y Reporte Académico
+  {
+    path: 'profile',
+    loadComponent: () => import('./profile/profile').then(m => m.ProfileComponent)
   },
 
   // Redirecciones por defecto con las rutas existentes
