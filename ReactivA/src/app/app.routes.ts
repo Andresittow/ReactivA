@@ -41,6 +41,12 @@ export const routes: Routes = [
     loadComponent: () => import('./profile/profile').then(m => m.ProfileComponent)
   },
 
+  // Ruta del juego Misión Orgánica
+  {
+    path: 'mision-organica',
+    loadComponent: () => import('./organic-mission/organic-mission').then(m => m.MisionOrganicaComponent)
+  },
+
   // Redirecciones por defecto con las rutas existentes
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
