@@ -47,6 +47,7 @@ export class SidebarComponent {
     { label: 'Dashboard', icon: 'ph-squares-four', route: '/dashboard' },
     { label: 'Periodic Table', icon: 'ph-table', route: '/tabla-periodica' },
     { label: 'Virtual Lab', icon: 'ph-test-tube', route: '/virtual-lab' },
+    { label: 'Organic Mission', icon: 'ph-tree-structure', route: '/mision-organica' },
     { label: 'Challenges', icon: 'ph-trophy', route: '/challenges' },
     { label: 'Profile', icon: 'ph-user-circle', route: '/profile' }
   ];
