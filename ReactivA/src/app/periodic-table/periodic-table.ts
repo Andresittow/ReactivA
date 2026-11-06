@@ -1125,7 +1125,4 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
   }
 }
 
-
-
-// Alias para mantener compatibilidad total de importaciones
 export { PeriodicTableComponent as TablaPeriodicaComponent };
