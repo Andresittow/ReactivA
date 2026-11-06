@@ -262,8 +262,16 @@ $purple-text: #7e22ce;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.45rem;
     flex-shrink: 0;
+
+    i {
+      font-size: 1.45rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   .kpi-content-cell {
@@ -541,6 +549,14 @@ $purple-text: #7e22ce;
       justify-content: center;
       font-size: 1.3rem;
       flex-shrink: 0;
+
+      i {
+        font-size: 1.3rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
 
     .widget-text-cell {
@@ -686,6 +702,14 @@ $purple-text: #7e22ce;
   justify-content: center;
   font-size: 1.4rem;
   flex-shrink: 0;
+
+  i {
+    font-size: 1.4rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   &.symbol-green {
     background-color: $green-bg;
