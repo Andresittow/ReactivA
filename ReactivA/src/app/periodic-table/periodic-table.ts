@@ -6,6 +6,24 @@ import { Subscription } from 'rxjs';
 /**
  * Estructura de datos completa para un elemento químico
  */
+
+/**
+ * Tarjeta para el mini-juego de Memory / Parejas Periódicas
+ */
+export interface MemoryCard {
+  id: string;
+  pairId: number;
+  type: 'name' | 'symbol';
+  name: string;
+  symbol: string;
+  number: number;
+  category: 'metal' | 'metalloid' | 'nonmetal' | 'noble-gas';
+  categoryLabel: string;
+  phase: string;
+  isFlipped: boolean;
+  isMatched: boolean;
+}
+
 export interface ChemicalElement {
   number: number;
   symbol: string;
@@ -48,6 +66,61 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
 
   // Lista filtrada dinámicamente para el CSS Grid
   filteredElements: ChemicalElement[] = [];
+
+  // --- MODO DE VISTA: TABLA O MINI-JUEGO MEMORY ---
+  activeTab: 'table' | 'memory' = 'table';
+
+  // --- CONFIGURACIÓN Y ESTADO DEL MINI-JUEGO MEMORY ---
+  readonly gameCategoryOptions = [
+    { id: 'all', label: 'Todos (20 pares)' },
+    { id: 'metal', label: 'Metales (5 pares)' },
+    { id: 'nonmetal', label: 'No metales (5 pares)' },
+    { id: 'metalloid', label: 'Metaloides (5 pares)' },
+    { id: 'noble-gas', label: 'Gases nobles (5 pares)' }
+  ];
+  selectedGameCategory: 'all' | 'metal' | 'nonmetal' | 'metalloid' | 'noble-gas' = 'all';
+
+  // Colección curada de 20 elementos (5 de cada categoría química)
+  readonly memoryElements = [
+    // 5 Metales
+    { number: 26, symbol: 'Fe', name: 'Hierro', category: 'metal' as const, categoryLabel: 'Metal de Transición', phase: 'Sólido' },
+    { number: 79, symbol: 'Au', name: 'Oro', category: 'metal' as const, categoryLabel: 'Metal de Transición', phase: 'Sólido' },
+    { number: 29, symbol: 'Cu', name: 'Cobre', category: 'metal' as const, categoryLabel: 'Metal de Transición', phase: 'Sólido' },
+    { number: 11, symbol: 'Na', name: 'Sodio', category: 'metal' as const, categoryLabel: 'Metal Alcalino', phase: 'Sólido' },
+    { number: 22, symbol: 'Ti', name: 'Titanio', category: 'metal' as const, categoryLabel: 'Metal de Transición', phase: 'Sólido' },
+
+    // 5 No metales
+    { number: 6, symbol: 'C', name: 'Carbono', category: 'nonmetal' as const, categoryLabel: 'No metal reactivo', phase: 'Sólido' },
+    { number: 8, symbol: 'O', name: 'Oxígeno', category: 'nonmetal' as const, categoryLabel: 'No metal reactivo', phase: 'Gas' },
+    { number: 7, symbol: 'N', name: 'Nitrógeno', category: 'nonmetal' as const, categoryLabel: 'No metal reactivo', phase: 'Gas' },
+    { number: 16, symbol: 'S', name: 'Azufre', category: 'nonmetal' as const, categoryLabel: 'No metal reactivo', phase: 'Sólido' },
+    { number: 15, symbol: 'P', name: 'Fósforo', category: 'nonmetal' as const, categoryLabel: 'No metal reactivo', phase: 'Sólido' },
+
+    // 5 Metaloides
+    { number: 5, symbol: 'B', name: 'Boro', category: 'metalloid' as const, categoryLabel: 'Metaloide', phase: 'Sólido' },
+    { number: 14, symbol: 'Si', name: 'Silicio', category: 'metalloid' as const, categoryLabel: 'Metaloide', phase: 'Sólido' },
+    { number: 32, symbol: 'Ge', name: 'Germanio', category: 'metalloid' as const, categoryLabel: 'Metaloide', phase: 'Sólido' },
+    { number: 33, symbol: 'As', name: 'Arsénico', category: 'metalloid' as const, categoryLabel: 'Metaloide', phase: 'Sólido' },
+    { number: 51, symbol: 'Sb', name: 'Antimonio', category: 'metalloid' as const, categoryLabel: 'Metaloide', phase: 'Sólido' },
+
+    // 5 Gases nobles
+    { number: 2, symbol: 'He', name: 'Helio', category: 'noble-gas' as const, categoryLabel: 'Gas Noble', phase: 'Gas' },
+    { number: 10, symbol: 'Ne', name: 'Neón', category: 'noble-gas' as const, categoryLabel: 'Gas Noble', phase: 'Gas' },
+    { number: 18, symbol: 'Ar', name: 'Argón', category: 'noble-gas' as const, categoryLabel: 'Gas Noble', phase: 'Gas' },
+    { number: 36, symbol: 'Kr', name: 'Kriptón', category: 'noble-gas' as const, categoryLabel: 'Gas Noble', phase: 'Gas' },
+    { number: 54, symbol: 'Xe', name: 'Xenón', category: 'noble-gas' as const, categoryLabel: 'Gas Noble', phase: 'Gas' }
+  ];
+
+  memoryCards: MemoryCard[] = [];
+  flippedCards: MemoryCard[] = [];
+  isLockBoard: boolean = false;
+  movesCount: number = 0;
+  matchesCount: number = 0;
+  totalPairs: number = 0;
+  gameWon: boolean = false;
+  timerSeconds: number = 0;
+  private timerInterval: any = null;
+
 
   // 2. Base de datos completa de elementos químicos (118 elementos)
   readonly elements: ChemicalElement[] = [
@@ -1035,6 +1108,7 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.searchSubscription?.unsubscribe();
+    this.stopTimer();
   }
 
   /**
@@ -1122,6 +1196,145 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
       });
     }
     return dots;
+  }
+
+  // --------------------------------------------------------
+  // MÉTODOS DEL JUEGO MEMORY / PAREJAS PERIÓDICAS
+  // --------------------------------------------------------
+  switchTab(tab: 'table' | 'memory'): void {
+    this.activeTab = tab;
+    if (tab === 'memory' && this.memoryCards.length === 0) {
+      this.initMemoryGame();
+    }
+    this.cdr.markForCheck();
+  }
+
+  setGameCategory(cat: string): void {
+    this.selectedGameCategory = cat as any;
+    this.initMemoryGame();
+  }
+
+  initMemoryGame(): void {
+    this.stopTimer();
+    this.movesCount = 0;
+    this.matchesCount = 0;
+    this.gameWon = false;
+    this.timerSeconds = 0;
+    this.flippedCards = [];
+    this.isLockBoard = false;
+
+    const pool = this.selectedGameCategory === 'all'
+      ? this.memoryElements
+      : this.memoryElements.filter(el => el.category === this.selectedGameCategory);
+
+    this.totalPairs = pool.length;
+
+    const cards: MemoryCard[] = [];
+    for (const el of pool) {
+      // 1. Tarjeta con el Nombre
+      cards.push({
+        id: `name-${el.number}`,
+        pairId: el.number,
+        type: 'name',
+        name: el.name,
+        symbol: el.symbol,
+        number: el.number,
+        category: el.category,
+        categoryLabel: el.categoryLabel,
+        phase: el.phase,
+        isFlipped: false,
+        isMatched: false
+      });
+
+      // 2. Tarjeta con el Símbolo y N° Atómico
+      cards.push({
+        id: `symbol-${el.number}`,
+        pairId: el.number,
+        type: 'symbol',
+        name: el.name,
+        symbol: el.symbol,
+        number: el.number,
+        category: el.category,
+        categoryLabel: el.categoryLabel,
+        phase: el.phase,
+        isFlipped: false,
+        isMatched: false
+      });
+    }
+
+    this.memoryCards = this.shuffleCards(cards);
+    this.startTimer();
+    this.cdr.markForCheck();
+  }
+
+  private shuffleCards(array: MemoryCard[]): MemoryCard[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  flipCard(card: MemoryCard): void {
+    if (this.isLockBoard || card.isFlipped || card.isMatched) return;
+
+    card.isFlipped = true;
+    this.flippedCards.push(card);
+    this.cdr.markForCheck();
+
+    if (this.flippedCards.length === 2) {
+      this.movesCount++;
+      this.checkMatch();
+    }
+  }
+
+  private checkMatch(): void {
+    const [card1, card2] = this.flippedCards;
+    const isMatch = card1.pairId === card2.pairId && card1.type !== card2.type;
+
+    if (isMatch) {
+      card1.isMatched = true;
+      card2.isMatched = true;
+      this.matchesCount++;
+      this.flippedCards = [];
+
+      if (this.matchesCount === this.totalPairs) {
+        this.gameWon = true;
+        this.stopTimer();
+      }
+      this.cdr.markForCheck();
+    } else {
+      this.isLockBoard = true;
+      setTimeout(() => {
+        card1.isFlipped = false;
+        card2.isFlipped = false;
+        this.flippedCards = [];
+        this.isLockBoard = false;
+        this.cdr.markForCheck();
+      }, 1000);
+    }
+  }
+
+  startTimer(): void {
+    this.stopTimer();
+    this.timerInterval = setInterval(() => {
+      this.timerSeconds++;
+      this.cdr.markForCheck();
+    }, 1000);
+  }
+
+  stopTimer(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
+  get formattedTime(): string {
+    const mins = Math.floor(this.timerSeconds / 60);
+    const secs = this.timerSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 }
 
