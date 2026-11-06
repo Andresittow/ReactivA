@@ -19,6 +19,16 @@ export const routes: Routes = [
     loadComponent: () => import('./virtual-lab/virtual-lab').then(m => m.VirtualLabComponent)
   },
 
+  {
+    path: 'periodic-table',
+    loadComponent: () => import('./periodic-table/periodic-table').then(m => m.PeriodicTableComponent)
+  },
+  {
+    path: 'tabla-periodica',
+    redirectTo: 'periodic-table',
+    pathMatch: 'full'
+  },
+
   // Ruta del Perfil del Estudiante y Reporte Académico
   {
     path: 'profile',
