@@ -1,5 +1,5 @@
 <div class="periodic-page">
-  <!-- Área Principal: Barra Superior, Filtros y Matriz de 18 Columnas -->
+  <!-- Área Principal: Barra Superior, Filtros y Matriz de 18 Columnas / Modo Memory -->
   <main class="table-workspace">
     <!-- Encabezado de la Sección -->
     <header class="table-header">
@@ -9,128 +9,293 @@
           <span>Interactive Chemistry Lab</span>
         </div>
         <h1>Tabla Periódica Interactiva</h1>
-        <p>Explora propiedades atómicas, configuraciones electrónicas y modelos de Bohr en tiempo real.</p>
+        <p>Explora propiedades atómicas, configuraciones electrónicas o desafía tu conocimiento con el Memory Game.</p>
       </div>
 
-      <div class="stats-pills">
-        <div class="stat-item">
-          <span class="stat-number">{{ filteredElements.length }}</span>
-          <span class="stat-label">Elementos Visibles</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">18</span>
-          <span class="stat-label">Grupos</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">7</span>
-          <span class="stat-label">Periodos</span>
-        </div>
+      <!-- Selector de Modo: Tabla Periódica vs Memory Game -->
+      <div class="view-mode-tabs">
+        <button
+          type="button"
+          class="mode-pill-btn"
+          [class.active]="activeTab === 'table'"
+          (click)="switchTab('table')"
+        >
+          <i class="ph ph-table"></i>
+          <span>Tabla Periódica</span>
+        </button>
+        <button
+          type="button"
+          class="mode-pill-btn game-tab-btn"
+          [class.active]="activeTab === 'memory'"
+          (click)="switchTab('memory')"
+        >
+          <i class="ph ph-cards"></i>
+          <span>Memory: Parejas Periódicas</span>
+          <span class="game-badge">🎮 Mini-Juego</span>
+        </button>
       </div>
     </header>
 
-    <!-- Controles de Navegación: Buscador Reactivo y Filtro de Categorías -->
-    <section class="controls-bar">
-      <!-- Buscador Reactivo con FormControl (Clase 5a) -->
-      <div class="search-box">
-        <i class="ph ph-magnifying-glass search-icon"></i>
-        <input
-          type="text"
-          class="search-input"
-          [formControl]="searchElementControl"
-          placeholder="Buscar elemento por nombre, símbolo (ej. Fe) o número..."
-          aria-label="Buscar elemento químico"
-        />
-        @if (searchElementControl.value) {
-          <button
-            type="button"
-            class="btn-clear"
-            (click)="clearSearch()"
-            title="Limpiar búsqueda"
-            aria-label="Limpiar búsqueda"
-          >
-            <i class="ph ph-x"></i>
-          </button>
-        }
+    <!-- ======================================================== -->
+    <!-- VISTA 1: TABLA PERIÓDICA COMPLETA DE 18 COLUMNAS         -->
+    <!-- ======================================================== -->
+    @if (activeTab === 'table') {
+      <!-- Controles de Navegación: Buscador Reactivo y Filtro de Categorías -->
+      <section class="controls-bar">
+        <!-- Buscador Reactivo con FormControl (Clase 5a) -->
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass search-icon"></i>
+          <input
+            type="text"
+            class="search-input"
+            [formControl]="searchElementControl"
+            placeholder="Buscar elemento por nombre, símbolo (ej. Fe) o número..."
+            aria-label="Buscar elemento químico"
+          />
+          @if (searchElementControl.value) {
+            <button
+              type="button"
+              class="btn-clear"
+              (click)="clearSearch()"
+              title="Limpiar búsqueda"
+              aria-label="Limpiar búsqueda"
+            >
+              <i class="ph ph-x"></i>
+            </button>
+          }
+        </div>
+
+        <!-- Pills de Filtro de Categorías (Class Binding / ngClass) -->
+        <nav class="categories-nav" aria-label="Filtro de categorías químicas">
+          @for (category of categories; track category) {
+            <button
+              type="button"
+              class="category-pill"
+              [class.active]="selectedCategory === category"
+              (click)="setCategory(category)"
+            >
+              <span class="dot-indicator"></span>
+              {{ category }}
+            </button>
+          }
+        </nav>
+      </section>
+
+      <!-- Leyenda de Categorías Rápidas -->
+      <div class="category-legend">
+        <span class="legend-item metal"><span class="legend-box"></span> Metals</span>
+        <span class="legend-item metalloid"><span class="legend-box"></span> Metalloids</span>
+        <span class="legend-item nonmetal"><span class="legend-box"></span> Non-metals</span>
+        <span class="legend-item noble-gas"><span class="legend-box"></span> Noble Gases</span>
       </div>
 
-      <!-- Pills de Filtro de Categorías (Class Binding / ngClass) -->
-      <nav class="categories-nav" aria-label="Filtro de categorías químicas">
-        @for (category of categories; track category) {
-          <button
-            type="button"
-            class="category-pill"
-            [class.active]="selectedCategory === category"
-            (click)="setCategory(category)"
-          >
-            <span class="dot-indicator"></span>
-            {{ category }}
-          </button>
-        }
-      </nav>
-    </section>
+      <!-- Matriz CSS Grid de 18 Columnas -->
+      <div class="periodic-grid-viewport">
+        <div class="periodic-grid">
+          <!-- Iteración moderna con @for y track por número atómico -->
+          @for (element of filteredElements; track element.number) {
+            <button
+              type="button"
+              class="element-cell"
+              [ngClass]="element.category"
+              [class.selected]="selectedElement?.number === element.number"
+              [style.grid-column]="element.group"
+              [style.grid-row]="element.period"
+              (click)="onSelectElement(element)"
+              [attr.aria-label]="element.name + ' (' + element.symbol + '), número ' + element.number"
+            >
+              <span class="cell-number">{{ element.number }}</span>
+              <strong class="cell-symbol">{{ element.symbol }}</strong>
+              <span class="cell-name">{{ element.name }}</span>
+              <span class="cell-weight">{{ element.weight | number:'1.2-3' }}</span>
+            </button>
+          } @empty {
+            <div class="no-elements-state">
+              <i class="ph ph-atom"></i>
+              <h3>No se encontraron elementos químicos</h3>
+              <p>Intenta con otro término de búsqueda o selecciona la categoría "All Elements".</p>
+              <button type="button" class="btn-reset-filter" (click)="setCategory('All Elements'); clearSearch();">
+                Restablecer filtros
+              </button>
+            </div>
+          }
 
-    <!-- Leyenda de Categorías Rápidas -->
-    <div class="category-legend">
-      <span class="legend-item metal"><span class="legend-box"></span> Metals</span>
-      <span class="legend-item metalloid"><span class="legend-box"></span> Metalloids</span>
-      <span class="legend-item nonmetal"><span class="legend-box"></span> Non-metals</span>
-      <span class="legend-item noble-gas"><span class="legend-box"></span> Noble Gases</span>
-    </div>
+          <!-- Marcadores guía de series Lantánidos y Actínidos en la tabla principal -->
+          @if (selectedCategory === 'All Elements' || selectedCategory === 'Metals') {
+            <div class="series-placeholder lanthanides-marker" style="grid-column: 3; grid-row: 6;">
+              <span>57-71</span>
+              <small>La-Lu</small>
+            </div>
+            <div class="series-placeholder actinides-marker" style="grid-column: 3; grid-row: 7;">
+              <span>89-103</span>
+              <small>Ac-Lr</small>
+            </div>
+            <div class="series-label lanthanides-label" style="grid-column: 2; grid-row: 9;">
+              <span>Lantánidos *</span>
+            </div>
+            <div class="series-label actinides-label" style="grid-column: 2; grid-row: 10;">
+              <span>Actínidos **</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
 
-    <!-- Matriz CSS Grid de 18 Columnas -->
-    <div class="periodic-grid-viewport">
-      <div class="periodic-grid">
-        <!-- Iteración moderna con @for y track por número atómico -->
-        @for (element of filteredElements; track element.number) {
-          <button
-            type="button"
-            class="element-cell"
-            [ngClass]="element.category"
-            [class.selected]="selectedElement?.number === element.number"
-            [style.grid-column]="element.group"
-            [style.grid-row]="element.period"
-            (click)="onSelectElement(element)"
-            [attr.aria-label]="element.name + ' (' + element.symbol + '), número ' + element.number"
-          >
-            <span class="cell-number">{{ element.number }}</span>
-            <strong class="cell-symbol">{{ element.symbol }}</strong>
-            <span class="cell-name">{{ element.name }}</span>
-            <span class="cell-weight">{{ element.weight | number:'1.2-3' }}</span>
-          </button>
-        } @empty {
-          <div class="no-elements-state">
-            <i class="ph ph-atom"></i>
-            <h3>No se encontraron elementos químicos</h3>
-            <p>Intenta con otro término de búsqueda o selecciona la categoría "All Elements".</p>
-            <button type="button" class="btn-reset-filter" (click)="setCategory('All Elements'); clearSearch();">
-              Restablecer filtros
+    <!-- ======================================================== -->
+    <!-- VISTA 2: MEMORY / PAREJAS DE CELDAS PERIÓDICAS          -->
+    <!-- ======================================================== -->
+    @if (activeTab === 'memory') {
+      <section class="memory-game-section">
+        <!-- HUD / Barra de Estado del Juego -->
+        <div class="memory-hud">
+          <div class="hud-stats">
+            <div class="hud-card">
+              <span class="hud-label"><i class="ph ph-arrows-clockwise"></i> Movimientos</span>
+              <strong class="hud-val">{{ movesCount }}</strong>
+            </div>
+            <div class="hud-card">
+              <span class="hud-label"><i class="ph ph-check-circle"></i> Parejas</span>
+              <strong class="hud-val text-green">{{ matchesCount }} / {{ totalPairs }}</strong>
+            </div>
+            <div class="hud-card">
+              <span class="hud-label"><i class="ph ph-timer"></i> Tiempo</span>
+              <strong class="hud-val text-blue">{{ formattedTime }}</strong>
+            </div>
+          </div>
+
+          <div class="hud-actions">
+            <button
+              type="button"
+              class="btn-restart-game"
+              (click)="initMemoryGame()"
+              title="Reiniciar y barajar cartas"
+            >
+              <i class="ph ph-arrows-counter-clockwise"></i>
+              <span>Reiniciar Partida</span>
             </button>
           </div>
-        }
+        </div>
 
-        <!-- Marcadores guía de series Lantánidos y Actínidos en la tabla principal -->
-        @if (selectedCategory === 'All Elements' || selectedCategory === 'Metals') {
-          <div class="series-placeholder lanthanides-marker" style="grid-column: 3; grid-row: 6;">
-            <span>57-71</span>
-            <small>La-Lu</small>
+        <!-- Filtros por Familia (5 de cada tipo: Metales, No metales, Metaloides, Gases nobles) -->
+        <div class="memory-filter-bar">
+          <span class="filter-instruction">
+            <i class="ph ph-funnel"></i> Selecciona la familia de elementos (5 pares por categoría):
+          </span>
+          <div class="game-filter-pills">
+            @for (option of gameCategoryOptions; track option.id) {
+              <button
+                type="button"
+                class="game-pill"
+                [class.active]="selectedGameCategory === option.id"
+                (click)="setGameCategory(option.id)"
+              >
+                {{ option.label }}
+              </button>
+            }
           </div>
-          <div class="series-placeholder actinides-marker" style="grid-column: 3; grid-row: 7;">
-            <span>89-103</span>
-            <small>Ac-Lr</small>
+        </div>
+
+        <!-- Tablero de Cartas Memory (3D Flip) -->
+        <div class="memory-grid-container">
+          <div class="memory-grid" [class.dense-grid]="memoryCards.length > 20">
+            @for (card of memoryCards; track card.id) {
+              <div
+                class="memory-card-container"
+                [class.flipped]="card.isFlipped"
+                [class.matched]="card.isMatched"
+                (click)="flipCard(card)"
+                [attr.aria-label]="card.type === 'name' ? 'Carta Nombre ' + card.name : 'Carta Símbolo ' + card.symbol"
+              >
+                <div class="card-inner">
+                  <!-- Reverso de la Carta -->
+                  <div class="card-face card-back">
+                    <div class="card-back-pattern">
+                      <div class="back-icon-circle">
+                        <i class="ph ph-atom back-icon"></i>
+                      </div>
+                      <span class="back-text">ReactivA</span>
+                      <small class="back-sub">Memory</small>
+                    </div>
+                  </div>
+
+                  <!-- Frente de la Carta -->
+                  <div class="card-face card-front" [ngClass]="card.category">
+                    @if (card.type === 'name') {
+                      <!-- Tarjeta con el Nombre -->
+                      <div class="card-header-badge">
+                        <span class="type-pill name-type">Nombre</span>
+                        <span class="phase-tag"><i class="ph ph-drop"></i> {{ card.phase }}</span>
+                      </div>
+
+                      <div class="card-body-name">
+                        <h3 class="element-name-text">{{ card.name }}</h3>
+                        <span class="element-category-name">{{ card.categoryLabel }}</span>
+                      </div>
+
+                      <div class="card-footer-hint">
+                        <small>Empareja con su Símbolo y N°</small>
+                      </div>
+                    } @else {
+                      <!-- Tarjeta con el Símbolo y N° Atómico (ej. Au - 79) -->
+                      <div class="card-header-badge">
+                        <span class="type-pill symbol-type">Símbolo & N°</span>
+                        <strong class="number-tag">No. {{ card.number }}</strong>
+                      </div>
+
+                      <div class="card-body-symbol">
+                        <h2 class="element-symbol-text">{{ card.symbol }}</h2>
+                        <span class="atomic-num-sub">Z = {{ card.number }}</span>
+                      </div>
+
+                      <div class="card-footer-hint">
+                        <span class="category-sub-pill">{{ card.categoryLabel }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
           </div>
-          <div class="series-label lanthanides-label" style="grid-column: 2; grid-row: 9;">
-            <span>Lantánidos *</span>
-          </div>
-          <div class="series-label actinides-label" style="grid-column: 2; grid-row: 10;">
-            <span>Actínidos **</span>
+        </div>
+
+        <!-- Pantalla / Modal de Victoria al Completar el Reto -->
+        @if (gameWon) {
+          <div class="victory-overlay">
+            <div class="victory-card">
+              <div class="trophy-badge">
+                <i class="ph ph-trophy"></i>
+              </div>
+              <h2>¡Reto de Memoria Completado!</h2>
+              <p>Has emparejado con éxito los Nombres de los elementos con sus Símbolos y Números Atómicos.</p>
+
+              <div class="victory-stats-grid">
+                <div class="v-stat">
+                  <span>Movimientos</span>
+                  <strong>{{ movesCount }}</strong>
+                </div>
+                <div class="v-stat">
+                  <span>Tiempo</span>
+                  <strong>{{ formattedTime }}</strong>
+                </div>
+                <div class="v-stat">
+                  <span>Parejas</span>
+                  <strong>{{ matchesCount }} / {{ totalPairs }}</strong>
+                </div>
+              </div>
+
+              <button type="button" class="btn-play-again" (click)="initMemoryGame()">
+                <i class="ph ph-arrows-clockwise"></i>
+                <span>Jugar Otra Partida</span>
+              </button>
+            </div>
           </div>
         }
-      </div>
-    </div>
+      </section>
+    }
   </main>
 
-  <!-- Panel Lateral de Detalle del Elemento Fijo a la Derecha -->
-  @if (selectedElement) {
+  <!-- Panel Lateral de Detalle del Elemento Fijo a la Derecha (Visible en modo Tabla) -->
+  @if (activeTab === 'table' && selectedElement) {
     <aside class="element-detail-sidebar" aria-label="Detalles del elemento seleccionado">
       <!-- Cabecera del Panel con Botón de Cierre -->
       <div class="panel-header">
@@ -323,4 +488,3 @@
     </aside>
   }
 </div>
-
