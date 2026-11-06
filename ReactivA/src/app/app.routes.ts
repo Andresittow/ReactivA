@@ -19,6 +19,12 @@ export const routes: Routes = [
     loadComponent: () => import('./virtual-lab/virtual-lab').then(m => m.VirtualLabComponent)
   },
 
+  // Ruta del Perfil del Estudiante y Reporte Académico
+  {
+    path: 'profile',
+    loadComponent: () => import('./profile/profile').then(m => m.ProfileComponent)
+  },
+
   // Redirecciones por defecto con las rutas existentes
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
