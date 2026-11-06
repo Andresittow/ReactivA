@@ -7,13 +7,27 @@
     </div>
     }
 
+    <!-- Input Oculto para Selección Dinámica de Foto de Perfil -->
+    <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        class="file-input-hidden"
+        (change)="onFileSelected($event)"
+        style="display: none;"
+    />
+
     <!-- 1. Banner Superior de Perfil y Acciones -->
     <header class="profile-banner-card">
         <div class="student-profile-lead">
-            <div class="avatar-pill-container">
+            <div class="avatar-pill-container" (click)="fileInput.click()" title="Haz clic para cambiar tu foto de perfil">
                 <img [src]="student.avatarUrl" [alt]="student.name" class="avatar-photo"
                     (error)="onAvatarError($event)" />
-                <span class="active-dot" title="Estudiante Activo"></span>
+                <span class="active-dot" title="Estudiante Activa"></span>
+                <div class="avatar-hover-overlay">
+                    <i class="ph ph-camera"></i>
+                    <span>Cambiar</span>
+                </div>
             </div>
 
             <div class="student-headings">
@@ -40,7 +54,7 @@
         </div>
     </header>
 
-    <!-- 2. Tarjetas de Métricas Principales (Grid de 4 KPIs) -->
+    <!-- 2. Tarjetas de Métricas Principales (Grid de 4 KPIs - Escala 1.0 a 5.0) -->
     <section class="kpi-row" aria-label="Tarjetas de Métricas Principales">
         @for (kpi of metrics; track kpi.id) {
         <div class="kpi-box" [ngClass]="'theme-' + kpi.colorTheme">
@@ -62,7 +76,7 @@
 
     <!-- 3. Sección Central: Dominio por Ramas & Horas de Investigación -->
     <div class="mid-split-grid">
-        <!-- Tarjeta Principal: Dominio por Ramas de la Química -->
+        <!-- Tarjeta Principal: Dominio por Ramas de la Química (Módulos Reales de ReactivA) -->
         <section class="branches-panel">
             <div class="panel-top-bar">
                 <div class="title-cluster">
@@ -136,13 +150,13 @@
         </aside>
     </div>
 
-    <!-- 4. Historial de Prácticas, Evaluaciones y Retroalimentación Pedagógica -->
+    <!-- 4. Historial de Prácticas, Evaluaciones y Retroalimentación Pedagógica (Escala 1.0 a 5.0) -->
     <section class="practices-panel">
         <div class="panel-top-bar">
             <div class="title-cluster">
                 <h2 class="panel-heading">Historial de Prácticas y Calificaciones</h2>
                 <p class="panel-subheading">
-                    Evaluadas y validadas por el Prof. Roberto Méndez (Cátedra de Ciencias Experimentales)
+                    Evaluadas y validadas por la Cátedra de Ciencias Experimentales (Prof. Roberto Méndez)
                 </p>
             </div>
             <button type="button" class="rubrics-link-pill" (click)="openRubricsModal()"
@@ -181,15 +195,16 @@
                     </div>
                 </div>
 
-                <!-- Nota y Acción de Rúbrica -->
+                <!-- Nota en Escala 1.0 a 5.0 y Acción de Rúbrica -->
                 <div class="practice-evaluation-cell">
                     <div class="grade-score-wrap">
                         <span class="grade-caption">Nota</span>
                         <div class="grade-numbers-block">
-                            <span class="grade-main" [class.grade-perfect]="practice.score === 10">{{ practice.score
-                                }}</span>
+                            <span class="grade-main" [class.grade-perfect]="practice.score === practice.maxScore">
+                                {{ practice.score.toFixed(1) }}
+                            </span>
                             <span class="grade-slash">/</span>
-                            <span class="grade-out-of">{{ practice.maxScore }}</span>
+                            <span class="grade-out-of">{{ practice.maxScore.toFixed(1) }}</span>
                         </div>
                     </div>
                     <button type="button" class="eye-inspect-btn" (click)="openRubricsModal(practice)"
@@ -201,15 +216,6 @@
             }
         </div>
     </section>
-
-    <!-- 5. Botón Flotante: Preguntar al Asistente Átomo -->
-    <button type="button" class="floating-atom-launcher" (click)="openAskAssistantModal()"
-        aria-label="Preguntar al Asistente Átomo">
-        <div class="atom-launcher-inner">
-            <i class="ph ph-robot"></i>
-            <span>Preguntar al Asistente Átomo</span>
-        </div>
-    </button>
 
     <!-- MODAL: Editar Perfil / Avatar -->
     @if (isEditModalOpen) {
@@ -226,6 +232,34 @@
             </div>
 
             <form [formGroup]="editProfileForm" (ngSubmit)="saveProfile()" class="dialog-form">
+                <!-- Selector de Avatar Dinámico -->
+                <div class="avatar-edit-section">
+                    <div class="current-avatar-preview">
+                        <img [src]="student.avatarUrl" [alt]="student.name" class="modal-avatar-img" />
+                        <button type="button" class="btn-upload-file" (click)="fileInput.click()">
+                            <i class="ph ph-upload-simple"></i>
+                            <span>Subir Foto</span>
+                        </button>
+                    </div>
+
+                    <div class="preset-avatars-cluster">
+                        <span class="presets-caption">Avatares Prediseñados:</span>
+                        <div class="preset-options-row">
+                            @for (av of presetAvatars; track av.id) {
+                            <button
+                                type="button"
+                                class="btn-preset-avatar"
+                                [class.active]="student.avatarUrl === av.url"
+                                (click)="selectPresetAvatar(av.url)"
+                                [title]="av.label"
+                            >
+                                <img [src]="av.url" [alt]="av.label" />
+                            </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
                 <div class="input-block">
                     <label for="nameInput">Nombre y Apellidos</label>
                     <input id="nameInput" type="text" formControlName="name" class="text-input" />
@@ -252,8 +286,7 @@
 
                 <div class="dialog-footer">
                     <button type="button" class="btn-ghost" (click)="closeEditProfileModal()">Cancelar</button>
-                    <button type="submit" class="btn-solid" [disabled]="editProfileForm.invalid">Guardar
-                        Cambios</button>
+                    <button type="submit" class="btn-solid" [disabled]="editProfileForm.invalid">Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -268,7 +301,7 @@
                 <div class="dialog-title-group">
                     <i class="ph ph-certificate dialog-icon green-icon"></i>
                     <div>
-                        <h2>Rúbrica Oficial de Calificación</h2>
+                        <h2>Rúbrica Oficial de Calificación (Escala 1.0 a 5.0)</h2>
                         <p class="dialog-subtitle">{{ selectedPracticeForRubric.title }}</p>
                     </div>
                 </div>
@@ -280,8 +313,8 @@
             <div class="dialog-scroll-body">
                 <div class="official-score-banner">
                     <span class="score-caption-text">Nota Registrada:</span>
-                    <strong class="score-highlight">{{ selectedPracticeForRubric.score }} / {{
-                        selectedPracticeForRubric.maxScore }}</strong>
+                    <strong class="score-highlight">{{ selectedPracticeForRubric.score.toFixed(1) }} / {{
+                        selectedPracticeForRubric.maxScore.toFixed(1) }}</strong>
                     <span class="status-pill">{{ selectedPracticeForRubric.statusTag }}</span>
                 </div>
 
@@ -309,59 +342,6 @@
 
             <div class="dialog-footer">
                 <button type="button" class="btn-solid" (click)="closeRubricsModal()">Aceptar</button>
-            </div>
-        </div>
-    </div>
-    }
-
-    <!-- MODAL: Asistente Átomo -->
-    @if (isAssistantModalOpen) {
-    <div class="modal-overlay" (click)="closeAskAssistantModal()">
-        <div class="modal-dialog-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-            <div class="dialog-header">
-                <div class="dialog-title-group">
-                    <div class="atom-badge-icon">
-                        <i class="ph ph-robot"></i>
-                    </div>
-                    <div>
-                        <h2>Asistente Átomo</h2>
-                        <p class="dialog-subtitle">Tutor inteligente de laboratorio y ciencias químicas</p>
-                    </div>
-                </div>
-                <button type="button" class="btn-dismiss" (click)="closeAskAssistantModal()" aria-label="Cerrar">
-                    <i class="ph ph-x"></i>
-                </button>
-            </div>
-
-            <div class="dialog-scroll-body">
-                <p class="atom-greeting">
-                    ¡Hola Alex! Puedo ayudarte con tus dudas teóricas o repasar los conceptos de titulación volumétrica
-                    y enlaces químicos.
-                </p>
-
-                <div class="suggestions-list">
-                    <button type="button" class="suggestion-btn"
-                        (click)="assistantQuestionText = '¿Por qué la fenolftaleína vira a rosa en pH alcalino?'">
-                        🧪 ¿Por qué la fenolftaleína vira a rosa en medio básico?
-                    </button>
-                    <button type="button" class="suggestion-btn"
-                        (click)="assistantQuestionText = 'Explica la diferencia entre enlaces covalentes polares y no polares.'">
-                        ⚡ Diferencia entre covalente polar y no polar
-                    </button>
-                </div>
-
-                <div class="input-block">
-                    <textarea [(ngModel)]="assistantQuestionText" rows="3" class="textarea-input"
-                        placeholder="Escribe tu consulta química aquí..."></textarea>
-                </div>
-            </div>
-
-            <div class="dialog-footer">
-                <button type="button" class="btn-ghost" (click)="closeAskAssistantModal()">Cancelar</button>
-                <button type="button" class="btn-solid" [disabled]="!assistantQuestionText.trim()"
-                    (click)="sendAssistantQuestion()">
-                    Enviar Consulta
-                </button>
             </div>
         </div>
     </div>

@@ -62,6 +62,12 @@ export interface PracticeEvaluation {
   }[];
 }
 
+export interface PresetAvatar {
+  id: string;
+  label: string;
+  url: string;
+}
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -73,25 +79,49 @@ export class ProfileComponent {
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
 
-  // 1. Banner de Perfil y Acciones
+  // 1. Datos del Estudiante y Foto de Perfil (Valeria Góngora con corte micro bob estructurado)
   student: StudentProfile = {
-    name: 'Alex Morales',
+    name: 'Valeria Góngora',
     rank: 'Alquimista Teórico',
-    // Foto estilizada con chaqueta azul idéntica a la imagen de referencia
-    avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80',
+    // Estudiante de ciencias con cabello oscuro estilo micro bob estructurado
+    avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
     academicYear: '2024',
     institution: 'Cátedra de Ciencias Experimentales - ReactivA',
     gradeLevel: '10° Grado de Bachillerato Científico',
-    email: 'alex.morales@reactiva-lab.edu'
+    email: 'valeria.gongora@reactiva-lab.edu'
   };
 
-  // 2. Tarjetas de Métricas Principales (Grid de 4 KPIs)
+  // Avatares prediseñados con temática STEM / Ciencias
+  readonly presetAvatars: PresetAvatar[] = [
+    {
+      id: 'valeria-microbob',
+      label: 'Valeria (Micro Bob)',
+      url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'stem-lab-1',
+      label: 'Ingeniera Química',
+      url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'stem-lab-2',
+      label: 'Alquimista Teórica',
+      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'
+    },
+    {
+      id: 'stem-lab-3',
+      label: 'Investigadora Cuántica',
+      url: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=300&q=80'
+    }
+  ];
+
+  // 2. Tarjetas de Métricas Principales (Grid de 4 KPIs con escala Colombia 1.0 a 5.0)
   metrics: MetricCard[] = [
     {
       id: 'promedio-lab',
       label: 'PROMEDIO LAB',
-      value: '9.4',
-      suffix: '/ 10',
+      value: '4.7',
+      suffix: '/ 5.0',
       icon: 'ph ph-star-fill',
       colorTheme: 'green'
     },
@@ -119,17 +149,8 @@ export class ProfileComponent {
     }
   ];
 
-  // 3. Dominio por Ramas de la Química (Progreso Curricular)
+  // 3. Dominio por Ramas de la Química (Alineado con módulos reales de ReactivA)
   branches: ChemistryBranch[] = [
-    {
-      id: 'quimica-inorganica',
-      name: 'Química General e Inorgánica',
-      level: 'Avanzado',
-      percentage: 92,
-      colorTheme: 'green',
-      bulletColor: '#10b981',
-      tagClass: 'tag-green'
-    },
     {
       id: 'tabla-periodica',
       name: 'Tabla Periódica & Modelos Atómicos',
@@ -140,8 +161,17 @@ export class ProfileComponent {
       tagClass: 'tag-dark-blue'
     },
     {
-      id: 'estequiometria',
-      name: 'Estequiometría y Balanceo',
+      id: 'virtual-lab',
+      name: 'Virtual Lab / Simulador 3D de Enlaces Moleculares',
+      level: 'Avanzado',
+      percentage: 92,
+      colorTheme: 'green',
+      bulletColor: '#10b981',
+      tagClass: 'tag-green'
+    },
+    {
+      id: 'balanceo-estequiometria',
+      name: 'Balanceo de Ecuaciones Químicas (Estequiometría)',
       level: 'En progreso',
       percentage: 78,
       colorTheme: 'orange',
@@ -149,8 +179,8 @@ export class ProfileComponent {
       tagClass: 'tag-orange'
     },
     {
-      id: 'quimica-organica',
-      name: 'Química Orgánica & Grupos Funcionales',
+      id: 'mision-organica',
+      name: 'Química Orgánica & Misión Orgánica',
       level: 'En aprendizaje',
       percentage: 65,
       colorTheme: 'purple',
@@ -159,7 +189,7 @@ export class ProfileComponent {
     }
   ];
 
-  // 4. Panel Lateral de Horas e Interacción (Horas de Investigación)
+  // 4. Panel Lateral de Horas e Interacción (Telemetría de ReactivA)
   researchMetrics: ResearchMetric[] = [
     {
       id: 'simulador-3d',
@@ -191,69 +221,101 @@ export class ProfileComponent {
     }
   ];
 
-  // 5. Historial de Prácticas, Evaluaciones y Retroalimentación Pedagógica
+  // 5. Historial de Prácticas y Calificaciones (Escala Colombia 1.0 a 5.0)
   practices: PracticeEvaluation[] = [
     {
       id: 'practica-04',
       code: 'Práctica 04',
-      title: 'Práctica 04: Enlaces Iónicos vs Covalentes',
+      title: 'Práctica 04: Enlaces Iónicos vs Covalentes (Simulador 3D)',
       statusTag: 'Aprobado con Mención',
       statusType: 'success',
       professorFeedback:
-        'Excelente análisis de conductividad y polaridad de disolventes. Demostración impecable.',
+        'Excelente análisis de conductividad, geometría molecular y polaridad de disolventes en el workbench 3D. Demostración impecable.',
       deliveryTime: 'Entregado hace 2 días',
-      modality: 'Modalidad Laboratorio Virtual',
-      score: 10,
-      maxScore: 10,
+      modality: 'Modalidad Laboratorio Virtual 3D',
+      score: 5.0,
+      maxScore: 5.0,
       icon: 'ph ph-certificate',
       iconTheme: 'green',
       criteria: [
         {
           name: 'Identificación de enlaces iónicos y covalentes',
-          score: '10/10',
-          comment: 'Clasificación precisa basada en diferencias de electronegatividad.'
+          score: '5.0 / 5.0',
+          comment: 'Clasificación precisa basada en electronegatividad y modelos orbitales.'
         },
         {
           name: 'Comportamiento en solución acuosa',
-          score: '10/10',
-          comment: 'Conductimetría verificada y registro minucioso de datos.'
+          score: '5.0 / 5.0',
+          comment: 'Conductimetría verificada y registro minucioso en probeta y vaso.'
         },
         {
           name: 'Conclusiones y fundamento teórico',
-          score: '10/10',
-          comment: 'Argumentación científica de alto nivel.'
+          score: '5.0 / 5.0',
+          comment: 'Argumentación científica impecable acorde a la cátedra.'
         }
       ]
     },
     {
       id: 'simulacion-03',
       code: 'Simulación 03',
-      title: 'Simulación 03: Titulación Ácido-Base con Bureta',
+      title: 'Simulación 03: Titulación Ácido-Base & Balanceo con Bureta',
       statusTag: '1 intento completado',
       statusType: 'info',
       professorFeedback:
-        'Buen cálculo del punto de equivalencia con fenolftaleína. Ajustar margen de error en última gota.',
+        'Buen cálculo del punto de equivalencia con fenolftaleína y balance estequiométrico. Ajustar margen de error en última gota.',
       deliveryTime: 'Entregado hace 5 días',
       modality: 'Modalidad Laboratorio Virtual',
-      score: 9.2,
-      maxScore: 10,
+      score: 4.6,
+      maxScore: 5.0,
       icon: 'ph ph-flask',
       iconTheme: 'blue',
       criteria: [
         {
-          name: 'Lectura de menisco en bureta',
-          score: '9.0/10',
-          comment: 'Alineación visual adecuada con margen menor de dispersión.'
+          name: 'Lectura de menisco en bureta graduada',
+          score: '4.5 / 5.0',
+          comment: 'Alineación visual adecuada con margen menor de dispersión volumétrica.'
         },
         {
           name: 'Detección del viraje de fenolftaleína',
-          score: '9.2/10',
-          comment: 'Color rosa tenue alcanzado en el punto de equivalencia estequiométrico.'
+          score: '4.6 / 5.0',
+          comment: 'Color rosa tenue alcanzado en el punto estequiométrico de neutralización.'
         },
         {
           name: 'Cálculo de concentración molar',
-          score: '9.4/10',
-          comment: 'Despeje algebraico y unidades químicas correctas.'
+          score: '4.7 / 5.0',
+          comment: 'Despeje algebraico y factores de conversión estequiométricos correctos.'
+        }
+      ]
+    },
+    {
+      id: 'mision-02',
+      code: 'Misión 02',
+      title: 'Misión 02: Nomenclatura e Hibridación en Misión Orgánica',
+      statusTag: 'Completado con Éxito',
+      statusType: 'success',
+      professorFeedback:
+        'Excelente formulación y reconocimiento de alcanos, alquenos e isomería funcional. Estructuras ensambladas sin fallos.',
+      deliveryTime: 'Entregado hace 1 semana',
+      modality: 'Modalidad Misión Orgánica',
+      score: 4.8,
+      maxScore: 5.0,
+      icon: 'ph ph-tree-structure',
+      iconTheme: 'blue',
+      criteria: [
+        {
+          name: 'Identificación de cadenas carbonadas y radicales',
+          score: '4.9 / 5.0',
+          comment: 'Asignación correcta de localizadores IUPAC y saturación de enlaces.'
+        },
+        {
+          name: 'Hibridación sp³, sp² y sp',
+          score: '4.8 / 5.0',
+          comment: 'Diferenciación geométrica tetraédrica, trigonal y lineal clara.'
+        },
+        {
+          name: 'Resolución de desafíos moleculares',
+          score: '4.7 / 5.0',
+          comment: 'Modelado ágil y precisión en síntesis de grupos funcionales.'
         }
       ]
     }
@@ -288,7 +350,34 @@ export class ProfileComponent {
   // Manejo de Error en Carga de Imagen Avatar
   onAvatarError(event: Event): void {
     const imgElement = event.target as HTMLImageElement;
-    imgElement.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80';
+    imgElement.src = 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80';
+  }
+
+  // Carga dinámica de archivo para foto de perfil
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        if (result) {
+          this.student.avatarUrl = result;
+          this.editProfileForm.patchValue({ avatarUrl: result });
+          this.showToast('¡Foto de perfil actualizada con éxito!');
+          this.cdr.markForCheck();
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Selección de avatar prediseñado
+  selectPresetAvatar(url: string): void {
+    this.student.avatarUrl = url;
+    this.editProfileForm.patchValue({ avatarUrl: url });
+    this.showToast('Avatar seleccionado.');
+    this.cdr.markForCheck();
   }
 
   // Descarga e Impresión de Reporte Académico PDF
@@ -329,7 +418,7 @@ export class ProfileComponent {
         this.student.avatarUrl = val.avatarUrl;
       }
       this.closeEditProfileModal();
-      this.showToast('¡Perfil y rango del estudiante actualizados con éxito!');
+      this.showToast('¡Perfil y datos académicos actualizados con éxito!');
       this.cdr.markForCheck();
     }
   }
@@ -372,3 +461,6 @@ export class ProfileComponent {
     }, 3500);
   }
 }
+
+// Exportación como alias para compatibilidad con profile.spec.ts
+export { ProfileComponent as Profile };
