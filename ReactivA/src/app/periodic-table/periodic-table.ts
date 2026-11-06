@@ -26,13 +26,13 @@ export interface ChemicalElement {
 }
 
 @Component({
-  selector: 'app-tabla-periodica',
+  selector: 'app-periodic-table',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, DecimalPipe],
-  templateUrl: './tabla-periodica.html',
-  styleUrl: './tabla-periodica.scss'
+  templateUrl: './periodic-table.html',
+  styleUrl: './periodic-table.scss'
 })
-export class TablaPeriodicaComponent implements OnInit, OnDestroy {
+export class PeriodicTableComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   // 1. Buscador reactivo dinámico con FormControl individual
@@ -1125,3 +1125,4 @@ export class TablaPeriodicaComponent implements OnInit, OnDestroy {
   }
 }
 
+export { PeriodicTableComponent as TablaPeriodicaComponent };
