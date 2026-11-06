@@ -1,10 +1,10 @@
 <div class="virtual-lab-layout">
   <!-- Notificación Flotante (Toast) -->
   @if (toastMessage) {
-    <div class="toast-popup" role="status">
-      <i class="ph ph-check-circle"></i>
-      <span>{{ toastMessage }}</span>
-    </div>
+  <div class="toast-popup" role="status">
+    <i class="ph ph-check-circle"></i>
+    <span>{{ toastMessage }}</span>
+  </div>
   }
 
   <!-- COLUMNA CENTRAL: ÁREA DE SIMULACIÓN Y BALANCEADOR DE ECUACIONES -->
@@ -22,30 +22,18 @@
 
       <!-- Pestañas de Navegación Interna del Laboratorio -->
       <nav class="lab-nav-tabs" aria-label="Modos de Laboratorio">
-        <button
-          type="button"
-          class="nav-tab-btn"
-          [class.active]="activeViewTab === 'simulation'"
-          (click)="setActiveTab('simulation')"
-        >
+        <button type="button" class="nav-tab-btn" [class.active]="activeViewTab === 'simulation'"
+          (click)="setActiveTab('simulation')">
           <i class="ph ph-flask"></i>
           <span>Mesa de Trabajo & Simulación</span>
         </button>
-        <button
-          type="button"
-          class="nav-tab-btn"
-          [class.active]="activeViewTab === 'balancer'"
-          (click)="setActiveTab('balancer')"
-        >
+        <button type="button" class="nav-tab-btn" [class.active]="activeViewTab === 'balancer'"
+          (click)="setActiveTab('balancer')">
           <i class="ph ph-scales"></i>
           <span>Módulo de Balanceo ({{ solvedCount }}/{{ balancingExercises.length }})</span>
         </button>
-        <button
-          type="button"
-          class="nav-tab-btn"
-          [class.active]="activeViewTab === 'guide'"
-          (click)="setActiveTab('guide')"
-        >
+        <button type="button" class="nav-tab-btn" [class.active]="activeViewTab === 'guide'"
+          (click)="setActiveTab('guide')">
           <i class="ph ph-book-open"></i>
           <span>Guía & Protocolo</span>
         </button>
@@ -77,12 +65,8 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="btn-control-play"
-          (click)="toggleSimulation()"
-          [title]="simulationRunning ? 'Pausar simulación física' : 'Reanudar simulación física'"
-        >
+        <button type="button" class="btn-control-play" (click)="toggleSimulation()"
+          [title]="simulationRunning ? 'Pausar simulación física' : 'Reanudar simulación física'">
           <i class="ph" [class.ph-pause]="simulationRunning" [class.ph-play]="!simulationRunning"></i>
           <span>{{ simulationRunning ? 'Pausar' : 'Reanudar' }}</span>
         </button>
@@ -91,292 +75,250 @@
 
     <!-- VISTA 1: CANVAS DE SIMULACIÓN Y MESA DE EXPERIMENTACIÓN -->
     @if (activeViewTab === 'simulation' || activeViewTab === 'balancer') {
-      <div class="simulation-canvas-wrapper">
-        <div class="simulation-canvas" [class.simulation-paused]="!simulationRunning">
-          <!-- Marca de agua de la reacción activa -->
-          <div class="canvas-watermark">
-            <span class="watermark-title">{{ currentExercise.title }}</span>
-            <span class="watermark-formula">
-              @for (r of currentExercise.reactants; track r.formula; let isLast = $last) {
-                <span>{{ r.correctCoeff > 1 ? r.correctCoeff : '' }} {{ r.formula }}({{ r.state }})</span>
-                @if (!isLast) { <span> + </span> }
-              }
-              <span> &rarr; </span>
-              @for (p of currentExercise.products; track p.formula; let isLast = $last) {
-                <span>{{ p.correctCoeff > 1 ? p.correctCoeff : '' }} {{ p.formula }}({{ p.state }})</span>
-                @if (!isLast) { <span> + </span> }
-              }
-            </span>
-          </div>
-
-          <!-- Órbitas Concéntricas de Cinética y Enlaces -->
-          <div class="orbit-system">
-            <div class="orbit-ring ring-outer"></div>
-            <div class="orbit-ring ring-mid"></div>
-            <div class="orbit-ring ring-inner"></div>
-
-            <!-- Rayos de energía moleculares al balancear -->
-            <div class="bond-rays" [class.bonding-active]="currentExercise.isBalanced">
-              <div class="ray ray-1"></div>
-              <div class="ray ray-2"></div>
-              <div class="ray ray-3"></div>
-            </div>
-
-            <!-- Nodos Atómicos en Órbita -->
-            @for (reactant of activeReactants; track reactant.id) {
-              <div
-                class="reactant-node"
-                [ngClass]="[reactant.position, reactant.orbitType]"
-                [style.--node-color]="reactant.color"
-              >
-                <div class="atom-halo"></div>
-                <div class="atom-core">
-                  <span class="atom-symbol">{{ reactant.symbol }}</span>
-                  <span class="atom-charge">{{ reactant.charge }}</span>
-                </div>
-                <div class="atom-electrons">
-                  <span class="electron electron-1"></span>
-                  <span class="electron electron-2"></span>
-                </div>
-                <div class="atom-label">
-                  <strong>{{ reactant.formula }}</strong>
-                  <small>{{ reactant.name }}</small>
-                </div>
-              </div>
+    <div class="simulation-canvas-wrapper">
+      <div class="simulation-canvas" [class.simulation-paused]="!simulationRunning">
+        <!-- Marca de agua de la reacción activa -->
+        <div class="canvas-watermark">
+          <span class="watermark-title">{{ currentExercise.title }}</span>
+          <span class="watermark-formula">
+            @for (r of currentExercise.reactants; track r.formula; let isLast = $last) {
+            <span>{{ r.correctCoeff > 1 ? r.correctCoeff : '' }} {{ r.formula }}({{ r.state }})</span>
+            @if (!isLast) { <span> + </span> }
             }
+            <span> &rarr; </span>
+            @for (p of currentExercise.products; track p.formula; let isLast = $last) {
+            <span>{{ p.correctCoeff > 1 ? p.correctCoeff : '' }} {{ p.formula }}({{ p.state }})</span>
+            @if (!isLast) { <span> + </span> }
+            }
+          </span>
+        </div>
 
-            <!-- Núcleo de Reacción Central -->
-            <div class="synthesis-core" [class.synthesized]="currentExercise.isBalanced">
-              @if (currentExercise.isBalanced) {
-                <div class="molecule-synthesized">
-                  <div class="synth-sparkle-halo">
-                    <i class="ph ph-sparkle"></i>
-                  </div>
-                  <div class="molecule-badge">
-                    <span class="synth-name">¡Reacción Completada!</span>
-                    <strong class="synth-formula">
-                      @for (p of currentExercise.products; track p.formula; let isLast = $last) {
-                        <span>{{ p.correctCoeff }} {{ p.formula }}</span>
-                        @if (!isLast) { <span> + </span> }
-                      }
-                    </strong>
-                    <small class="synth-law">Ley de Conservación Cumplida</small>
-                  </div>
-                </div>
-              } @else {
-                <div class="awaiting-state">
-                  <div class="pulse-indicator">
-                    <i class="ph ph-atom"></i>
-                  </div>
-                  <span class="awaiting-title">Zona de Reacción</span>
-                  <p>Ajusta los coeficientes para activar la formación molecular</p>
-                </div>
-              }
-            </div>
+        <!-- Órbitas Concéntricas de Cinética y Enlaces -->
+        <div class="orbit-system">
+          <div class="orbit-ring ring-outer"></div>
+          <div class="orbit-ring ring-mid"></div>
+          <div class="orbit-ring ring-inner"></div>
+
+          <!-- Rayos de energía moleculares al balancear -->
+          <div class="bond-rays" [class.bonding-active]="currentExercise.isBalanced">
+            <div class="ray ray-1"></div>
+            <div class="ray ray-2"></div>
+            <div class="ray ray-3"></div>
           </div>
 
-          <!-- MESA DE TRABAJO FÍSICA E INTERACTIVA (Workbench Equipos y Reactivos) -->
-          <div class="workbench-bar">
-            <div class="workbench-header">
-              <div class="wb-title-group">
-                <i class="ph ph-toolbox"></i>
-                <span class="wb-title">
-                  Mesa de Experimentación ({{ activeEquipment.length }} elementos en uso):
-                </span>
+          <!-- Nodos Atómicos en Órbita -->
+          @for (reactant of activeReactants; track reactant.id) {
+          <div class="reactant-node" [ngClass]="[reactant.position, reactant.orbitType]"
+            [style.--node-color]="reactant.color">
+            <div class="atom-halo"></div>
+            <div class="atom-core">
+              <span class="atom-symbol">{{ reactant.symbol }}</span>
+              <span class="atom-charge">{{ reactant.charge }}</span>
+            </div>
+            <div class="atom-electrons">
+              <span class="electron electron-1"></span>
+              <span class="electron electron-2"></span>
+            </div>
+            <div class="atom-label">
+              <strong>{{ reactant.formula }}</strong>
+              <small>{{ reactant.name }}</small>
+            </div>
+          </div>
+          }
+
+          <!-- Núcleo de Reacción Central -->
+          <div class="synthesis-core" [class.synthesized]="currentExercise.isBalanced">
+            @if (currentExercise.isBalanced) {
+            <div class="molecule-synthesized">
+              <div class="synth-sparkle-halo">
+                <i class="ph ph-sparkle"></i>
               </div>
-              <div class="wb-actions">
-                <button
-                  type="button"
-                  class="btn-wb-action"
-                  (click)="resetWorkbenchDefaults()"
-                  title="Restablecer equipos recomendados"
-                >
-                  <i class="ph ph-arrows-counter-clockwise"></i>
-                  <span>Equipos Base</span>
-                </button>
-                <button
-                  type="button"
-                  class="btn-wb-action btn-danger-action"
-                  (click)="clearWorkbench()"
-                  title="Despejar mesa de trabajo"
-                >
-                  <i class="ph ph-trash"></i>
-                  <span>Despejar</span>
-                </button>
+              <div class="molecule-badge">
+                <span class="synth-name">¡Reacción Completada!</span>
+                <strong class="synth-formula">
+                  @for (p of currentExercise.products; track p.formula; let isLast = $last) {
+                  <span>{{ p.correctCoeff }} {{ p.formula }}</span>
+                  @if (!isLast) { <span> + </span> }
+                  }
+                </strong>
+                <small class="synth-law">Ley de Conservación Cumplida</small>
               </div>
             </div>
-
-            <!-- Estantes y Recipientes Interactivos en la Mesa -->
-            <div class="workbench-benchtop">
-              @for (eq of activeEquipment; track eq.id) {
-                <div
-                  class="bench-tool-item"
-                  [class.selected]="selectedEquipment?.id === eq.id"
-                  (click)="selectEquipment(eq)"
-                  [title]="'Herramienta activa: ' + eq.name + ' - Clic para ajustar'"
-                >
-                  <!-- Visualización de Matraces / Vasos con Líquido Graduado -->
-                  @if (eq.category === 'glassware') {
-                    <div class="glassware-flask-visual">
-                      <div class="flask-neck"></div>
-                      <div class="flask-body">
-                        <div
-                          class="flask-liquid"
-                          [style.height.%]="eq.maxVolume ? ((eq.volume || 0) / eq.maxVolume) * 100 : 50"
-                          [style.background-color]="eq.liquidColor || '#38bdf8'"
-                        >
-                          <div class="liquid-meniscus"></div>
-                          @if (isItemActive('bunsen') || (eq.rpm && eq.rpm > 0)) {
-                            <div class="boiling-bubble b1"></div>
-                            <div class="boiling-bubble b2"></div>
-                            <div class="boiling-bubble b3"></div>
-                          }
-                        </div>
-                      </div>
-                      <span class="flask-reading">{{ eq.volume || 0 }} mL</span>
-                    </div>
-                  }
-
-                  <!-- Visualización del Mechero Bunsen con Llama Dinámica -->
-                  @if (eq.id === 'bunsen') {
-                    <div class="bunsen-burner-visual" (click)="cycleBunsenFlame(); $event.stopPropagation()">
-                      <div
-                        class="flame-cone"
-                        [class.flame-low]="eq.flameState === 'low'"
-                        [class.flame-medium]="eq.flameState === 'medium'"
-                        [class.flame-high]="eq.flameState === 'high'"
-                        [class.flame-off]="eq.flameState === 'off'"
-                      >
-                        <div class="flame-core"></div>
-                      </div>
-                      <div class="bunsen-barrel"></div>
-                      <div class="bunsen-base"></div>
-                      <span class="flame-label">
-                        {{ eq.flameState === 'off' ? 'Apagado' : 'Llama ' + eq.flameState }}
-                      </span>
-                    </div>
-                  }
-
-                  <!-- Visualización de Otros Sensores y Reactivos -->
-                  @if (eq.category === 'instrument' || eq.category === 'reagent') {
-                    <div class="generic-tool-visual" [style.color]="eq.color">
-                      <div class="tool-icon-circle" [style.background-color]="eq.color + '20'">
-                        <i class="ph" [ngClass]="eq.icon"></i>
-                      </div>
-                      @if (eq.id === 'thermometer') {
-                        <span class="tool-value-tag">{{ baseTemperature }} K</span>
-                      } @else if (eq.id === 'stirrer') {
-                        <span class="tool-value-tag">{{ eq.rpm || 0 }} RPM</span>
-                      } @else if (eq.id === 'ph_meter') {
-                        <span class="tool-value-tag">pH {{ currentPH.toFixed(1) }}</span>
-                      } @else {
-                        <span class="tool-value-tag">{{ eq.formula || eq.name }}</span>
-                      }
-                    </div>
-                  }
-
-                  <!-- Etiqueta del Elemento -->
-                  <div class="bench-tool-meta">
-                    <span class="tool-name">{{ eq.name }}</span>
-                    <button
-                      type="button"
-                      class="btn-tool-remove"
-                      (click)="toggleEquipment(eq); $event.stopPropagation()"
-                      title="Retirar de la mesa"
-                    >
-                      <i class="ph ph-x"></i>
-                    </button>
-                  </div>
-                </div>
-              } @empty {
-                <div class="bench-empty-guide">
-                  <i class="ph ph-hand-pointing"></i>
-                  <p>
-                    La mesa está vacía. Haz clic en cualquier material de vidrio, mechero o reactivo en el panel
-                    derecho <strong>"Equipment"</strong> para colocarlo en tu banco de trabajo interactivo.
-                  </p>
-                </div>
-              }
-            </div>
-
-            <!-- Inspector de Controles Rápidos para la Herramienta Seleccionada -->
-            @if (selectedEquipment && selectedEquipment.active) {
-              <div class="tool-control-strip">
-                <div class="control-lead">
-                  <i class="ph" [ngClass]="selectedEquipment.icon" [style.color]="selectedEquipment.color"></i>
-                  <div>
-                    <strong>{{ selectedEquipment.name }}</strong>
-                    <small>{{ selectedEquipment.categoryLabel }}</small>
-                  </div>
-                </div>
-
-                <!-- Controles para Recipientes de Vidrio: Ajuste de Volumen -->
-                @if (selectedEquipment.category === 'glassware' && selectedEquipment.maxVolume) {
-                  <div class="control-actions volume-control">
-                    <span class="control-label">Nivel de Solución:</span>
-                    <button
-                      type="button"
-                      class="btn-volume-step"
-                      (click)="setVolume(selectedEquipment, (selectedEquipment.volume || 0) - 25)"
-                      title="Reducir 25 mL"
-                    >
-                      -25 mL
-                    </button>
-                    <input
-                      type="range"
-                      min="0"
-                      [max]="selectedEquipment.maxVolume"
-                      step="10"
-                      [value]="selectedEquipment.volume || 0"
-                      (input)="setVolume(selectedEquipment, +$any($event.target).value)"
-                      class="volume-slider"
-                    />
-                    <button
-                      type="button"
-                      class="btn-volume-step"
-                      (click)="setVolume(selectedEquipment, (selectedEquipment.volume || 0) + 25)"
-                      title="Añadir 25 mL"
-                    >
-                      +25 mL
-                    </button>
-                    <span class="volume-badge">{{ selectedEquipment.volume || 0 }} / {{ selectedEquipment.maxVolume }} mL</span>
-                    <button
-                      type="button"
-                      class="btn-vessel-empty"
-                      (click)="emptyVessel(selectedEquipment)"
-                      title="Vaciar recipiente"
-                    >
-                      <i class="ph ph-arrow-counter-clockwise"></i> Vaciar
-                    </button>
-                  </div>
-                }
-
-                <!-- Controles para Mechero Bunsen -->
-                @if (selectedEquipment.id === 'bunsen') {
-                  <div class="control-actions">
-                    <span class="control-label">Intensidad de Llama:</span>
-                    <button type="button" class="btn-tool-mode" (click)="cycleBunsenFlame()">
-                      <i class="ph ph-fire"></i>
-                      <span>Cambiar Llama (Actual: {{ selectedEquipment.flameState }})</span>
-                    </button>
-                  </div>
-                }
-
-                <!-- Controles para Agitador Magnético -->
-                @if (selectedEquipment.id === 'stirrer') {
-                  <div class="control-actions">
-                    <span class="control-label">Velocidad del Agitador:</span>
-                    <button type="button" class="btn-tool-mode" (click)="cycleStirrerRPM()">
-                      <i class="ph ph-arrows-clockwise"></i>
-                      <span>Cambiar Velocidad (Actual: {{ selectedEquipment.rpm || 0 }} RPM)</span>
-                    </button>
-                  </div>
-                }
+            } @else {
+            <div class="awaiting-state">
+              <div class="pulse-indicator">
+                <i class="ph ph-atom"></i>
               </div>
+              <span class="awaiting-title">Zona de Reacción</span>
+              <p>Ajusta los coeficientes para activar la formación molecular</p>
+            </div>
             }
           </div>
         </div>
+
+        <!-- MESA DE TRABAJO FÍSICA E INTERACTIVA (Workbench Equipos y Reactivos) -->
+        <div class="workbench-bar">
+          <div class="workbench-header">
+            <div class="wb-title-group">
+              <i class="ph ph-toolbox"></i>
+              <span class="wb-title">
+                Mesa de Experimentación ({{ activeEquipment.length }} elementos en uso):
+              </span>
+            </div>
+            <div class="wb-actions">
+              <button type="button" class="btn-wb-action" (click)="resetWorkbenchDefaults()"
+                title="Restablecer equipos recomendados">
+                <i class="ph ph-arrows-counter-clockwise"></i>
+                <span>Equipos Base</span>
+              </button>
+              <button type="button" class="btn-wb-action btn-danger-action" (click)="clearWorkbench()"
+                title="Despejar mesa de trabajo">
+                <i class="ph ph-trash"></i>
+                <span>Despejar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Estantes y Recipientes Interactivos en la Mesa -->
+          <div class="workbench-benchtop">
+            @for (eq of activeEquipment; track eq.id) {
+            <div class="bench-tool-item" [class.selected]="selectedEquipment?.id === eq.id"
+              (click)="selectEquipment(eq)" [title]="'Herramienta activa: ' + eq.name + ' - Clic para ajustar'">
+              <!-- Visualización de Matraces / Vasos con Líquido Graduado -->
+              @if (eq.category === 'glassware') {
+              <div class="glassware-flask-visual">
+                <div class="flask-neck"></div>
+                <div class="flask-body">
+                  <div class="flask-liquid"
+                    [style.height.%]="eq.maxVolume ? ((eq.volume || 0) / eq.maxVolume) * 100 : 50"
+                    [style.background-color]="eq.liquidColor || '#38bdf8'">
+                    <div class="liquid-meniscus"></div>
+                    @if (isItemActive('bunsen') || (eq.rpm && eq.rpm > 0)) {
+                    <div class="boiling-bubble b1"></div>
+                    <div class="boiling-bubble b2"></div>
+                    <div class="boiling-bubble b3"></div>
+                    }
+                  </div>
+                </div>
+                <span class="flask-reading">{{ eq.volume || 0 }} mL</span>
+              </div>
+              }
+
+              <!-- Visualización del Mechero Bunsen con Llama Dinámica -->
+              @if (eq.id === 'bunsen') {
+              <div class="bunsen-burner-visual" (click)="cycleBunsenFlame(); $event.stopPropagation()">
+                <div class="flame-cone" [class.flame-low]="eq.flameState === 'low'"
+                  [class.flame-medium]="eq.flameState === 'medium'" [class.flame-high]="eq.flameState === 'high'"
+                  [class.flame-off]="eq.flameState === 'off'">
+                  <div class="flame-core"></div>
+                </div>
+                <div class="bunsen-barrel"></div>
+                <div class="bunsen-base"></div>
+                <span class="flame-label">
+                  {{ eq.flameState === 'off' ? 'Apagado' : 'Llama ' + eq.flameState }}
+                </span>
+              </div>
+              }
+
+              <!-- Visualización de Otros Sensores y Reactivos -->
+              @if (eq.category === 'instrument' || eq.category === 'reagent') {
+              <div class="generic-tool-visual" [style.color]="eq.color">
+                <div class="tool-icon-circle" [style.background-color]="eq.color + '20'">
+                  <i class="ph" [ngClass]="eq.icon"></i>
+                </div>
+                @if (eq.id === 'thermometer') {
+                <span class="tool-value-tag">{{ baseTemperature }} K</span>
+                } @else if (eq.id === 'stirrer') {
+                <span class="tool-value-tag">{{ eq.rpm || 0 }} RPM</span>
+                } @else if (eq.id === 'ph_meter') {
+                <span class="tool-value-tag">pH {{ currentPH.toFixed(1) }}</span>
+                } @else {
+                <span class="tool-value-tag">{{ eq.formula || eq.name }}</span>
+                }
+              </div>
+              }
+
+              <!-- Etiqueta del Elemento -->
+              <div class="bench-tool-meta">
+                <span class="tool-name">{{ eq.name }}</span>
+                <button type="button" class="btn-tool-remove" (click)="toggleEquipment(eq); $event.stopPropagation()"
+                  title="Retirar de la mesa">
+                  <i class="ph ph-x"></i>
+                </button>
+              </div>
+            </div>
+            } @empty {
+            <div class="bench-empty-guide">
+              <i class="ph ph-hand-pointing"></i>
+              <p>
+                La mesa está vacía. Haz clic en cualquier material de vidrio, mechero o reactivo en el panel
+                derecho <strong>"Equipment"</strong> para colocarlo en tu banco de trabajo interactivo.
+              </p>
+            </div>
+            }
+          </div>
+
+          <!-- Inspector de Controles Rápidos para la Herramienta Seleccionada -->
+          @if (selectedEquipment && selectedEquipment.active) {
+          <div class="tool-control-strip">
+            <div class="control-lead">
+              <i class="ph" [ngClass]="selectedEquipment.icon" [style.color]="selectedEquipment.color"></i>
+              <div>
+                <strong>{{ selectedEquipment.name }}</strong>
+                <small>{{ selectedEquipment.categoryLabel }}</small>
+              </div>
+            </div>
+
+            <!-- Controles para Recipientes de Vidrio: Ajuste de Volumen -->
+            @if (selectedEquipment.category === 'glassware' && selectedEquipment.maxVolume) {
+            <div class="control-actions volume-control">
+              <span class="control-label">Nivel de Solución:</span>
+              <button type="button" class="btn-volume-step"
+                (click)="setVolume(selectedEquipment, (selectedEquipment.volume || 0) - 25)" title="Reducir 25 mL">
+                -25 mL
+              </button>
+              <input type="range" min="0" [max]="selectedEquipment.maxVolume" step="10"
+                [value]="selectedEquipment.volume || 0"
+                (input)="setVolume(selectedEquipment, +$any($event.target).value)" class="volume-slider" />
+              <button type="button" class="btn-volume-step"
+                (click)="setVolume(selectedEquipment, (selectedEquipment.volume || 0) + 25)" title="Añadir 25 mL">
+                +25 mL
+              </button>
+              <span class="volume-badge">{{ selectedEquipment.volume || 0 }} / {{ selectedEquipment.maxVolume }}
+                mL</span>
+              <button type="button" class="btn-vessel-empty" (click)="emptyVessel(selectedEquipment)"
+                title="Vaciar recipiente">
+                <i class="ph ph-arrow-counter-clockwise"></i> Vaciar
+              </button>
+            </div>
+            }
+
+            <!-- Controles para Mechero Bunsen -->
+            @if (selectedEquipment.id === 'bunsen') {
+            <div class="control-actions">
+              <span class="control-label">Intensidad de Llama:</span>
+              <button type="button" class="btn-tool-mode" (click)="cycleBunsenFlame()">
+                <i class="ph ph-fire"></i>
+                <span>Cambiar Llama (Actual: {{ selectedEquipment.flameState }})</span>
+              </button>
+            </div>
+            }
+
+            <!-- Controles para Agitador Magnético -->
+            @if (selectedEquipment.id === 'stirrer') {
+            <div class="control-actions">
+              <span class="control-label">Velocidad del Agitador:</span>
+              <button type="button" class="btn-tool-mode" (click)="cycleStirrerRPM()">
+                <i class="ph ph-arrows-clockwise"></i>
+                <span>Cambiar Velocidad (Actual: {{ selectedEquipment.rpm || 0 }} RPM)</span>
+              </button>
+            </div>
+            }
+          </div>
+          }
+        </div>
       </div>
+    </div>
     }
 
     <!-- SECCIÓN: BALANCEADOR DE ECUACIONES QUÍMICAS (AMPLIADO CON 15 EJERCICIOS) -->
@@ -402,12 +344,8 @@
           <!-- Selector de Ejercicio y Acciones -->
           <div class="balancer-actions">
             <!-- Filtro por tipo de reacción -->
-            <select
-              class="exercise-filter-select"
-              [ngModel]="selectedExerciseFilter"
-              (ngModelChange)="setExerciseFilter($event)"
-              title="Filtrar tipo de reacción"
-            >
+            <select class="exercise-filter-select" [ngModel]="selectedExerciseFilter"
+              (ngModelChange)="setExerciseFilter($event)" title="Filtrar tipo de reacción">
               <option value="all">Todas las Reacciones (15)</option>
               <option value="synthesis">Síntesis (3)</option>
               <option value="decomposition">Descomposición (3)</option>
@@ -418,59 +356,38 @@
 
             <!-- Botones de Navegación Previo / Siguiente -->
             <div class="stepper-buttons">
-              <button
-                type="button"
-                class="btn-step-arrow"
-                (click)="prevExercise()"
-                title="Reacción anterior"
-                aria-label="Reacción anterior"
-              >
+              <button type="button" class="btn-step-arrow" (click)="prevExercise()" title="Reacción anterior"
+                aria-label="Reacción anterior">
                 <i class="ph ph-caret-left"></i>
               </button>
-              <button
-                type="button"
-                class="btn-step-arrow"
-                (click)="nextExercise()"
-                title="Siguiente reacción"
-                aria-label="Siguiente reacción"
-              >
+              <button type="button" class="btn-step-arrow" (click)="nextExercise()" title="Siguiente reacción"
+                aria-label="Siguiente reacción">
                 <i class="ph ph-caret-right"></i>
               </button>
             </div>
 
             <!-- Badge de Estado Balanceado / Sin Balancear -->
-            <div
-              class="balance-badge"
-              [class.balanced]="currentExercise.isBalanced"
-              [attr.aria-label]="currentExercise.isBalanced ? 'Ecuación balanceada' : 'Ecuación sin balancear'"
-            >
+            <div class="balance-badge" [class.balanced]="currentExercise.isBalanced"
+              [attr.aria-label]="currentExercise.isBalanced ? 'Ecuación balanceada' : 'Ecuación sin balancear'">
               @if (currentExercise.isBalanced) {
-                <i class="ph ph-check-circle"></i>
-                <span>¡Ecuación Balanceada!</span>
+              <i class="ph ph-check-circle"></i>
+              <span>¡Ecuación Balanceada!</span>
               } @else {
-                <i class="ph ph-warning-circle"></i>
-                <span>Sin Balancear</span>
+              <i class="ph ph-warning-circle"></i>
+              <span>Sin Balancear</span>
               }
             </div>
 
             <!-- Botón Reiniciar -->
-            <button
-              type="button"
-              class="btn-reset-equation"
-              (click)="resetEquation()"
-              title="Restablecer coeficientes a blanco"
-            >
+            <button type="button" class="btn-reset-equation" (click)="resetEquation()"
+              title="Restablecer coeficientes a blanco">
               <i class="ph ph-arrow-counter-clockwise"></i>
               <span>Reiniciar</span>
             </button>
 
             <!-- Botón Auto-Balance -->
-            <button
-              type="button"
-              class="btn-help-equation"
-              (click)="autoBalanceHelp()"
-              title="Cargar solución estequiométrica mínima"
-            >
+            <button type="button" class="btn-help-equation" (click)="autoBalanceHelp()"
+              title="Cargar solución estequiométrica mínima">
               <i class="ph ph-lightbulb"></i>
               <span>Auto-Balance</span>
             </button>
@@ -480,20 +397,14 @@
         <!-- Carrusel Rápido de Ejercicios -->
         <div class="exercise-carousel-tabs">
           @for (ex of balancingExercises; track ex.id; let idx = $index) {
-            <button
-              type="button"
-              class="carousel-pill"
-              [class.active]="idx === currentExerciseIndex"
-              [class.solved]="ex.isBalanced"
-              (click)="selectExercise(idx)"
-              [title]="ex.title"
-            >
-              <span class="pill-index">{{ idx + 1 }}</span>
-              <span class="pill-name">{{ ex.title }}</span>
-              @if (ex.isBalanced) {
-                <i class="ph ph-check-circle-fill pill-check"></i>
-              }
-            </button>
+          <button type="button" class="carousel-pill" [class.active]="idx === currentExerciseIndex"
+            [class.solved]="ex.isBalanced" (click)="selectExercise(idx)" [title]="ex.title">
+            <span class="pill-index">{{ idx + 1 }}</span>
+            <span class="pill-name">{{ ex.title }}</span>
+            @if (ex.isBalanced) {
+            <i class="ph ph-check-circle-fill pill-check"></i>
+            }
+          </button>
           }
         </div>
 
@@ -502,28 +413,21 @@
           <!-- REACTIVOS -->
           <div class="formula-side reactants-side">
             @for (reactant of currentExercise.reactants; track reactant.formula; let isLast = $last) {
-              <div class="chemical-species-block">
-                <div class="input-wrapper">
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    class="coeff-input"
-                    [class.valid-coeff]="currentExercise.isBalanced"
-                    [value]="reactant.userCoeff ?? ''"
-                    (input)="onSpeciesInput(reactant, $event)"
-                    placeholder="?"
-                    [attr.aria-label]="'Coeficiente de ' + reactant.name"
-                  />
-                </div>
-                <span class="chemical-formula">
-                  <span [innerHTML]="reactant.htmlFormula"></span>
-                  <span class="state-sub">({{ reactant.state }})</span>
-                </span>
+            <div class="chemical-species-block">
+              <div class="input-wrapper">
+                <input type="number" min="1" max="12" class="coeff-input"
+                  [class.valid-coeff]="currentExercise.isBalanced" [value]="reactant.userCoeff ?? ''"
+                  (input)="onSpeciesInput(reactant, $event)" placeholder="?"
+                  [attr.aria-label]="'Coeficiente de ' + reactant.name" />
               </div>
-              @if (!isLast) {
-                <span class="math-operator">+</span>
-              }
+              <span class="chemical-formula">
+                <span [innerHTML]="reactant.htmlFormula"></span>
+                <span class="state-sub">({{ reactant.state }})</span>
+              </span>
+            </div>
+            @if (!isLast) {
+            <span class="math-operator">+</span>
+            }
             }
           </div>
 
@@ -536,28 +440,21 @@
           <!-- PRODUCTOS -->
           <div class="formula-side products-side">
             @for (product of currentExercise.products; track product.formula; let isLast = $last) {
-              <div class="chemical-species-block">
-                <div class="input-wrapper">
-                  <input
-                    type="number"
-                    min="1"
-                    max="12"
-                    class="coeff-input"
-                    [class.valid-coeff]="currentExercise.isBalanced"
-                    [value]="product.userCoeff ?? ''"
-                    (input)="onSpeciesInput(product, $event)"
-                    placeholder="?"
-                    [attr.aria-label]="'Coeficiente de ' + product.name"
-                  />
-                </div>
-                <span class="chemical-formula">
-                  <span [innerHTML]="product.htmlFormula"></span>
-                  <span class="state-sub">({{ product.state }})</span>
-                </span>
+            <div class="chemical-species-block">
+              <div class="input-wrapper">
+                <input type="number" min="1" max="12" class="coeff-input"
+                  [class.valid-coeff]="currentExercise.isBalanced" [value]="product.userCoeff ?? ''"
+                  (input)="onSpeciesInput(product, $event)" placeholder="?"
+                  [attr.aria-label]="'Coeficiente de ' + product.name" />
               </div>
-              @if (!isLast) {
-                <span class="math-operator">+</span>
-              }
+              <span class="chemical-formula">
+                <span [innerHTML]="product.htmlFormula"></span>
+                <span class="state-sub">({{ product.state }})</span>
+              </span>
+            </div>
+            @if (!isLast) {
+            <span class="math-operator">+</span>
+            }
             }
           </div>
         </div>
@@ -567,27 +464,28 @@
           <div class="atomic-pills-row">
             <span class="conservation-label">Conservación Atómica:</span>
             @for (item of currentAtomsSummary; track item.element) {
-              <div class="element-atom-chip" [class.balanced]="item.balanced">
-                <span class="element-symbol">{{ item.element }}:</span>
-                <span class="atom-count-display">
-                  <strong>{{ item.left }}</strong> (React.)
-                  <i class="ph" [class.ph-arrows-left-right]="!item.balanced" [class.ph-check]="item.balanced"></i>
-                  <strong>{{ item.right }}</strong> (Prod.)
-                </span>
-              </div>
+            <div class="element-atom-chip" [class.balanced]="item.balanced">
+              <span class="element-symbol">{{ item.element }}:</span>
+              <span class="atom-count-display">
+                <strong>{{ item.left }}</strong> (React.)
+                <i class="ph" [class.ph-arrows-left-right]="!item.balanced" [class.ph-check]="item.balanced"></i>
+                <strong>{{ item.right }}</strong> (Prod.)
+              </span>
+            </div>
             }
           </div>
 
           <div class="conservation-status-message">
             @if (currentExercise.isBalanced) {
-              <span class="conservation-match">
-                <i class="ph ph-check-fat"></i> ¡Ley de Conservación Cumplida! Todos los átomos están balanceados estequiométricamente.
-              </span>
+            <span class="conservation-match">
+              <i class="ph ph-check-fat"></i> ¡Ley de Conservación Cumplida! Todos los átomos están balanceados
+              estequiométricamente.
+            </span>
             } @else {
-              <span class="conservation-mismatch">
-                <i class="ph ph-scales"></i>
-                Ingresa coeficientes enteros para que el número de átomos coincida a ambos lados.
-              </span>
+            <span class="conservation-mismatch">
+              <i class="ph ph-scales"></i>
+              Ingresa coeficientes enteros para que el número de átomos coincida a ambos lados.
+            </span>
             }
           </div>
         </div>
@@ -596,46 +494,49 @@
 
     <!-- VISTA 3: GUÍA PEDAGÓGICA Y PROTOCOLO EXPERIMENTAL -->
     @if (activeViewTab === 'guide') {
-      <div class="lab-guide-panel">
-        <div class="guide-card">
-          <h2><i class="ph ph-shield-check"></i> Normas de Seguridad y Buenas Prácticas</h2>
-          <p>
-            En un laboratorio de química real y en este simulador interactivo, rigen las siguientes normas
-            curriculares de bioseguridad:
-          </p>
-          <ul>
-            <li><strong>Uso de EPP:</strong> Bata de algodón abotonada, gafas de protección ocular y guantes de nitrilo.</li>
-            <li><strong>Manejo del Mechero Bunsen:</strong> Encender con válvula de aire cerrada para obtener llama amarilla luminosa de seguridad, luego abrir el collarín para llama azul oxidante.</li>
-            <li><strong>Dilución de Ácidos:</strong> Regla de oro: <em>"Siempre añade el ácido sobre el agua, nunca agua sobre el ácido"</em> para evitar proyecciones por calor de hidratación.</li>
-          </ul>
-        </div>
+    <div class="lab-guide-panel">
+      <div class="guide-card">
+        <h2><i class="ph ph-shield-check"></i> Normas de Seguridad y Buenas Prácticas</h2>
+        <p>
+          En un laboratorio de química real y en este simulador interactivo, rigen las siguientes normas
+          curriculares de bioseguridad:
+        </p>
+        <ul>
+          <li><strong>Uso de EPP:</strong> Bata de algodón abotonada, gafas de protección ocular y guantes de nitrilo.
+          </li>
+          <li><strong>Manejo del Mechero Bunsen:</strong> Encender con válvula de aire cerrada para obtener llama
+            amarilla luminosa de seguridad, luego abrir el collarín para llama azul oxidante.</li>
+          <li><strong>Dilución de Ácidos:</strong> Regla de oro: <em>"Siempre añade el ácido sobre el agua, nunca agua
+              sobre el ácido"</em> para evitar proyecciones por calor de hidratación.</li>
+        </ul>
+      </div>
 
-        <div class="guide-card">
-          <h2><i class="ph ph-flask"></i> Clasificación de Reacciones Químicas</h2>
-          <div class="guide-types-grid">
-            <div class="type-box">
-              <strong>1. Síntesis (A + B &rarr; AB):</strong>
-              Dos o más sustancias se combinan para formar un único compuesto más complejo.
-            </div>
-            <div class="type-box">
-              <strong>2. Descomposición (AB &rarr; A + B):</strong>
-              Un compuesto se fragmenta en sustancias más sencillas por calor o electrólisis.
-            </div>
-            <div class="type-box">
-              <strong>3. Combustión (CxHy + O₂ &rarr; CO₂ + H₂O):</strong>
-              Reacción de un hidrocarburo con oxígeno que libera dióxido de carbono, agua y energía.
-            </div>
-            <div class="type-box">
-              <strong>4. Sustitución Simple (A + BC &rarr; AC + B):</strong>
-              Un elemento más reactivo desplaza a otro menos activo en un compuesto disuelto.
-            </div>
-            <div class="type-box">
-              <strong>5. Doble Desplazamiento (AB + CD &rarr; AD + CB):</strong>
-              Intercambio de iones entre dos sales o un ácido y una base (neutralización).
-            </div>
+      <div class="guide-card">
+        <h2><i class="ph ph-flask"></i> Clasificación de Reacciones Químicas</h2>
+        <div class="guide-types-grid">
+          <div class="type-box">
+            <strong>1. Síntesis (A + B &rarr; AB):</strong>
+            Dos o más sustancias se combinan para formar un único compuesto más complejo.
+          </div>
+          <div class="type-box">
+            <strong>2. Descomposición (AB &rarr; A + B):</strong>
+            Un compuesto se fragmenta en sustancias más sencillas por calor o electrólisis.
+          </div>
+          <div class="type-box">
+            <strong>3. Combustión (CxHy + O₂ &rarr; CO₂ + H₂O):</strong>
+            Reacción de un hidrocarburo con oxígeno que libera dióxido de carbono, agua y energía.
+          </div>
+          <div class="type-box">
+            <strong>4. Sustitución Simple (A + BC &rarr; AC + B):</strong>
+            Un elemento más reactivo desplaza a otro menos activo en un compuesto disuelto.
+          </div>
+          <div class="type-box">
+            <strong>5. Doble Desplazamiento (AB + CD &rarr; AD + CB):</strong>
+            Intercambio de iones entre dos sales o un ácido y una base (neutralización).
           </div>
         </div>
       </div>
+    </div>
     }
   </section>
 
@@ -660,66 +561,35 @@
     <!-- 1. Buscador Reactivo de Herramientas -->
     <div class="search-equipment-box">
       <i class="ph ph-magnifying-glass search-icon"></i>
-      <input
-        type="text"
-        [formControl]="searchControl"
-        placeholder="Buscar equipos, reactivos..."
-        class="search-input"
-        aria-label="Buscar equipos o reactivos de laboratorio"
-      />
+      <input type="text" [formControl]="searchControl" placeholder="Buscar equipos, reactivos..." class="search-input"
+        aria-label="Buscar equipos o reactivos de laboratorio" />
       @if (searchTerm) {
-        <button
-          type="button"
-          class="btn-clear-search"
-          (click)="clearSearch()"
-          title="Limpiar búsqueda"
-          aria-label="Limpiar búsqueda"
-        >
-          <i class="ph ph-x"></i>
-        </button>
+      <button type="button" class="btn-clear-search" (click)="clearSearch()" title="Limpiar búsqueda"
+        aria-label="Limpiar búsqueda">
+        <i class="ph ph-x"></i>
+      </button>
       }
     </div>
 
     <!-- Píldoras de Categorías para Filtrado Rápido -->
     <div class="category-tabs">
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="selectedCategory === 'all'"
-        (click)="setCategory('all')"
-      >
+      <button type="button" class="tab-btn" [class.active]="selectedCategory === 'all'" (click)="setCategory('all')">
         Todos
       </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="selectedCategory === 'glassware'"
-        (click)="setCategory('glassware')"
-      >
+      <button type="button" class="tab-btn" [class.active]="selectedCategory === 'glassware'"
+        (click)="setCategory('glassware')">
         Vidriería
       </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="selectedCategory === 'burner'"
-        (click)="setCategory('burner')"
-      >
+      <button type="button" class="tab-btn" [class.active]="selectedCategory === 'burner'"
+        (click)="setCategory('burner')">
         Calor
       </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="selectedCategory === 'reagent'"
-        (click)="setCategory('reagent')"
-      >
+      <button type="button" class="tab-btn" [class.active]="selectedCategory === 'reagent'"
+        (click)="setCategory('reagent')">
         Reactivos
       </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="selectedCategory === 'instrument'"
-        (click)="setCategory('instrument')"
-      >
+      <button type="button" class="tab-btn" [class.active]="selectedCategory === 'instrument'"
+        (click)="setCategory('instrument')">
         Sensores
       </button>
     </div>
@@ -728,52 +598,42 @@
     <div class="equipment-list-container">
       <div class="equipment-list">
         @for (item of filteredEquipment; track item.id) {
-          <div
-            class="equipment-card"
-            [class.active]="item.active"
-            (click)="toggleEquipment(item)"
-            role="button"
-            tabindex="0"
-            [attr.aria-pressed]="item.active"
-          >
-            <div class="card-icon-box" [style.background-color]="item.color + '18'" [style.color]="item.color">
-              <i class="ph" [ngClass]="item.icon"></i>
-            </div>
+        <div class="equipment-card" [class.active]="item.active" (click)="toggleEquipment(item)" role="button"
+          tabindex="0" [attr.aria-pressed]="item.active">
+          <div class="card-icon-box" [style.background-color]="item.color + '18'" [style.color]="item.color">
+            <i class="ph" [ngClass]="item.icon"></i>
+          </div>
 
-            <div class="card-info">
-              <div class="card-title-row">
-                <h3 class="card-name">{{ item.name }}</h3>
-                @if (item.formula) {
-                  <span class="card-formula-tag">{{ item.formula }}</span>
-                }
-              </div>
-              <p class="card-desc">{{ item.description }}</p>
-              <div class="card-footer-meta">
-                <span class="category-tag">{{ item.categoryLabel }}</span>
-                <span class="status-indicator" [class.status-active]="item.active">
-                  <i class="ph" [class.ph-check-circle]="item.active" [class.ph-plus-circle]="!item.active"></i>
-                  {{ item.active ? 'En Mesa' : 'Agregar' }}
-                </span>
-                <button
-                  type="button"
-                  class="btn-inspect-modal"
-                  (click)="openEquipmentModal(item); $event.stopPropagation()"
-                  title="Ficha técnica del equipo"
-                >
-                  <i class="ph ph-info"></i>
-                </button>
-              </div>
+          <div class="card-info">
+            <div class="card-title-row">
+              <h3 class="card-name">{{ item.name }}</h3>
+              @if (item.formula) {
+              <span class="card-formula-tag">{{ item.formula }}</span>
+              }
+            </div>
+            <p class="card-desc">{{ item.description }}</p>
+            <div class="card-footer-meta">
+              <span class="category-tag">{{ item.categoryLabel }}</span>
+              <span class="status-indicator" [class.status-active]="item.active">
+                <i class="ph" [class.ph-check-circle]="item.active" [class.ph-plus-circle]="!item.active"></i>
+                {{ item.active ? 'En Mesa' : 'Agregar' }}
+              </span>
+              <button type="button" class="btn-inspect-modal"
+                (click)="openEquipmentModal(item); $event.stopPropagation()" title="Ficha técnica del equipo">
+                <i class="ph ph-info"></i>
+              </button>
             </div>
           </div>
+        </div>
         } @empty {
-          <div class="empty-equipment-state">
-            <i class="ph ph-flask-slash"></i>
-            <h4>No se encontraron elementos</h4>
-            <p>No hay herramientas que coincidan con "{{ searchTerm }}".</p>
-            <button type="button" class="btn-reset-filter" (click)="clearSearch()">
-              Ver todo el catálogo
-            </button>
-          </div>
+        <div class="empty-equipment-state">
+          <i class="ph ph-flask-slash"></i>
+          <h4>No se encontraron elementos</h4>
+          <p>No hay herramientas que coincidan con "{{ searchTerm }}".</p>
+          <button type="button" class="btn-reset-filter" (click)="clearSearch()">
+            Ver todo el catálogo
+          </button>
+        </div>
         }
       </div>
     </div>
@@ -781,103 +641,101 @@
 
   <!-- MODAL: FICHA TÉCNICA Y SEGURIDAD DEL EQUIPO -->
   @if (isEquipmentModalOpen && selectedEquipmentForModal) {
-    <div class="modal-backdrop" (click)="closeEquipmentModal()">
-      <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-        <div class="modal-head">
-          <div class="tool-head-badge" [style.background-color]="selectedEquipmentForModal.color + '20'" [style.color]="selectedEquipmentForModal.color">
-            <i class="ph" [ngClass]="selectedEquipmentForModal.icon"></i>
-          </div>
-          <div>
-            <h3>{{ selectedEquipmentForModal.name }}</h3>
-            <span>{{ selectedEquipmentForModal.categoryLabel }}</span>
-          </div>
-          <button type="button" class="btn-close-modal" (click)="closeEquipmentModal()">
-            <i class="ph ph-x"></i>
-          </button>
+  <div class="modal-backdrop" (click)="closeEquipmentModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <div class="tool-head-badge" [style.background-color]="selectedEquipmentForModal.color + '20'"
+          [style.color]="selectedEquipmentForModal.color">
+          <i class="ph" [ngClass]="selectedEquipmentForModal.icon"></i>
         </div>
-
-        <div class="modal-body">
-          <p class="modal-desc">{{ selectedEquipmentForModal.description }}</p>
-          <div class="tech-spec-grid">
-            <div class="spec-cell">
-              <strong>Fórmula / Capacidad:</strong>
-              <span>{{ selectedEquipmentForModal.formula || 'N/A' }}</span>
-            </div>
-            <div class="spec-cell">
-              <strong>Estado en Simulación:</strong>
-              <span [class.text-green]="selectedEquipmentForModal.active">
-                {{ selectedEquipmentForModal.active ? 'Activo en mesa de trabajo' : 'Disponible en almacén' }}
-              </span>
-            </div>
-          </div>
+        <div>
+          <h3>{{ selectedEquipmentForModal.name }}</h3>
+          <span>{{ selectedEquipmentForModal.categoryLabel }}</span>
         </div>
+        <button type="button" class="btn-close-modal" (click)="closeEquipmentModal()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
 
-        <div class="modal-foot">
-          <button
-            type="button"
-            class="btn-modal-action"
-            (click)="toggleEquipment(selectedEquipmentForModal); closeEquipmentModal()"
-          >
-            {{ selectedEquipmentForModal.active ? 'Retirar de la Mesa' : 'Añadir a la Mesa de Trabajo' }}
-          </button>
+      <div class="modal-body">
+        <p class="modal-desc">{{ selectedEquipmentForModal.description }}</p>
+        <div class="tech-spec-grid">
+          <div class="spec-cell">
+            <strong>Fórmula / Capacidad:</strong>
+            <span>{{ selectedEquipmentForModal.formula || 'N/A' }}</span>
+          </div>
+          <div class="spec-cell">
+            <strong>Estado en Simulación:</strong>
+            <span [class.text-green]="selectedEquipmentForModal.active">
+              {{ selectedEquipmentForModal.active ? 'Activo en mesa de trabajo' : 'Disponible en almacén' }}
+            </span>
+          </div>
         </div>
       </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn-modal-action"
+          (click)="toggleEquipment(selectedEquipmentForModal); closeEquipmentModal()">
+          {{ selectedEquipmentForModal.active ? 'Retirar de la Mesa' : 'Añadir a la Mesa de Trabajo' }}
+        </button>
+      </div>
     </div>
+  </div>
   }
 
   <!-- MODAL: RÚBRICA Y PUNTUACIÓN DE LABORATORIO -->
   @if (isRubricModalOpen) {
-    <div class="modal-backdrop" (click)="closeRubricModal()">
-      <div class="modal-card rubric-modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-        <div class="modal-head">
-          <i class="ph ph-trophy trophy-icon"></i>
-          <div>
-            <h3>Progreso en Laboratorio Virtual</h3>
-            <span>Récord de simulaciones y balanceos</span>
-          </div>
-          <button type="button" class="btn-close-modal" (click)="closeRubricModal()">
-            <i class="ph ph-x"></i>
-          </button>
+  <div class="modal-backdrop" (click)="closeRubricModal()">
+    <div class="modal-card rubric-modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <i class="ph ph-trophy trophy-icon"></i>
+        <div>
+          <h3>Progreso en Laboratorio Virtual</h3>
+          <span>Récord de simulaciones y balanceos</span>
         </div>
+        <button type="button" class="btn-close-modal" (click)="closeRubricModal()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
 
-        <div class="modal-body">
-          <div class="score-overview-box">
-            <div class="score-unit">
-              <strong>{{ totalLabScore }}</strong>
-              <small>Puntos XP</small>
-            </div>
-            <div class="score-unit">
-              <strong>{{ solvedCount }} / {{ balancingExercises.length }}</strong>
-              <small>Ecuaciones Balanceadas</small>
-            </div>
-            <div class="score-unit">
-              <strong>{{ streakDays }} Días</strong>
-              <small>Racha Activa</small>
-            </div>
+      <div class="modal-body">
+        <div class="score-overview-box">
+          <div class="score-unit">
+            <strong>{{ totalLabScore }}</strong>
+            <small>Puntos XP</small>
           </div>
-
-          <h4>Ecuaciones Estequiométricas Resueltas:</h4>
-          <div class="solved-list">
-            @for (ex of balancingExercises; track ex.id; let i = $index) {
-              <div class="solved-row" [class.is-done]="ex.isBalanced">
-                <span class="row-num">{{ i + 1 }}.</span>
-                <span class="row-name">{{ ex.title }}</span>
-                <span class="row-tag">{{ ex.typeLabel }}</span>
-                <span class="row-status">
-                  <i class="ph" [class.ph-check-circle-fill]="ex.isBalanced" [class.ph-circle]="!ex.isBalanced"></i>
-                  {{ ex.isBalanced ? '+50 XP' : 'Pendiente' }}
-                </span>
-              </div>
-            }
+          <div class="score-unit">
+            <strong>{{ solvedCount }} / {{ balancingExercises.length }}</strong>
+            <small>Ecuaciones Balanceadas</small>
+          </div>
+          <div class="score-unit">
+            <strong>{{ streakDays }} Días</strong>
+            <small>Racha Activa</small>
           </div>
         </div>
 
-        <div class="modal-foot">
-          <button type="button" class="btn-modal-action" (click)="closeRubricModal()">
-            Continuar Experimentando
-          </button>
+        <h4>Ecuaciones Estequiométricas Resueltas:</h4>
+        <div class="solved-list">
+          @for (ex of balancingExercises; track ex.id; let i = $index) {
+          <div class="solved-row" [class.is-done]="ex.isBalanced">
+            <span class="row-num">{{ i + 1 }}.</span>
+            <span class="row-name">{{ ex.title }}</span>
+            <span class="row-tag">{{ ex.typeLabel }}</span>
+            <span class="row-status">
+              <i class="ph" [class.ph-check-circle-fill]="ex.isBalanced" [class.ph-circle]="!ex.isBalanced"></i>
+              {{ ex.isBalanced ? '+50 XP' : 'Pendiente' }}
+            </span>
+          </div>
+          }
         </div>
       </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn-modal-action" (click)="closeRubricModal()">
+          Continuar Experimentando
+        </button>
+      </div>
     </div>
+  </div>
   }
 </div>

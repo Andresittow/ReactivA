@@ -122,14 +122,14 @@ export class ProfileComponent {
       label: 'PROMEDIO LAB',
       value: '4.7',
       suffix: '/ 5.0',
-      icon: 'ph ph-star-fill',
+      icon: 'ph ph-star',
       colorTheme: 'green'
     },
     {
       id: 'reacciones-hechas',
       label: 'REACCIONES HECHAS',
       value: '412',
-      icon: 'ph ph-flask-fill',
+      icon: 'ph ph-flask',
       colorTheme: 'blue'
     },
     {
@@ -137,7 +137,7 @@ export class ProfileComponent {
       label: 'RACHA MÁXIMA',
       value: '18',
       suffix: 'Días',
-      icon: 'ph ph-fire-fill',
+      icon: 'ph ph-fire',
       colorTheme: 'amber'
     },
     {
@@ -207,7 +207,7 @@ export class ProfileComponent {
       subtitleLine1: 'Ecuaciones',
       subtitleLine2: 'validadas',
       value: 189,
-      icon: 'ph ph-function',
+      icon: 'ph ph-scales',
       colorTheme: 'purple'
     },
     {
@@ -216,7 +216,7 @@ export class ProfileComponent {
       subtitleLine1: 'Consultas',
       subtitleLine2: 'resueltas',
       value: 42,
-      icon: 'ph ph-sparkle',
+      icon: 'ph ph-robot',
       colorTheme: 'orange'
     }
   ];
