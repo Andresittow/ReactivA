@@ -52,6 +52,12 @@ export const routes: Routes = [
     loadComponent: () => import('./settings/settings').then(m => m.SettingsComponent)
   },
 
+  // Ruta del Centro de Ayuda y Soporte
+  {
+    path: 'help',
+    loadComponent: () => import('./help/help').then(m => m.HelpComponent)
+  },
+
   // Redirecciones por defecto con las rutas existentes
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
