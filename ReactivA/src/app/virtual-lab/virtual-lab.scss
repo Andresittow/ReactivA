@@ -10,8 +10,8 @@ $warning-amber: #f59e0b;
 $danger-red: #ef4444;
 
 $bg-workspace: #f8fafc;
-$bg-canvas: #ffffff;
-$bg-card: #ffffff;
+$bg-canvas: #fff;
+$bg-card: #fff;
 $text-dark: #1e293b;
 $text-muted: #64748b;
 $text-light: #94a3b8;
@@ -67,10 +67,86 @@ $border-color: #e2e8f0;
   &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 }
 
-.lab-header {
+/* ============================================================
+   SHARED FLEXBOX & INTERACTIVE UTILITY GROUPS
+   ============================================================ */
+.pulse-indicator,
+.synth-sparkle-halo,
+.card-icon-box,
+.panel-icon,
+.balancer-icon-box,
+.tool-icon-circle,
+.btn-clear-search,
+.pill-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.awaiting-state,
+.molecule-synthesized,
+.molecule-badge,
+.glassware-flask-visual,
+.bunsen-burner-visual,
+.generic-tool-visual,
+.bench-tool-item,
+.reactant-node,
+.atom-label,
+.reaction-arrow-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lab-header,
+.workbench-header,
+.balancer-header,
+.card-title-row,
+.card-footer-meta,
+.tool-control-strip,
+.panel-header,
+.solved-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.nav-tab-btn,
+.btn-control-play,
+.btn-wb-action,
+.btn-reset-equation,
+.btn-help-equation,
+.carousel-pill,
+.balance-badge,
+.element-atom-chip {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-tab-btn,
+.btn-control-play,
+.btn-wb-action,
+.btn-reset-equation,
+.btn-help-equation,
+.btn-volume-step,
+.btn-vessel-empty,
+.btn-tool-mode,
+.btn-step-arrow,
+.btn-reset-filter,
+.btn-close-modal,
+.btn-modal-action,
+.btn-tool-remove,
+.btn-inspect-modal,
+.tab-btn,
+.carousel-pill {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ============================================================
+   HEADER & TOP CONTROLS
+   ============================================================ */
+.lab-header {
   flex-wrap: wrap;
   gap: 1rem;
   background: $bg-card;
@@ -106,39 +182,6 @@ $border-color: #e2e8f0;
   background: #f1f5f9;
   padding: 0.25rem;
   border-radius: 10px;
-}
-
-/* Shared button / interactive styles */
-.nav-tab-btn,
-.btn-control-play,
-.btn-wb-action,
-.btn-reset-equation,
-.btn-help-equation,
-.carousel-pill,
-.balance-badge,
-.element-atom-chip {
-  display: inline-flex;
-  align-items: center;
-}
-
-.nav-tab-btn,
-.btn-control-play,
-.btn-wb-action,
-.btn-reset-equation,
-.btn-help-equation,
-.btn-volume-step,
-.btn-vessel-empty,
-.btn-tool-mode,
-.btn-step-arrow,
-.btn-reset-filter,
-.btn-close-modal,
-.btn-modal-action,
-.btn-tool-remove,
-.btn-inspect-modal,
-.tab-btn,
-.carousel-pill {
-  cursor: pointer;
-  font-family: inherit;
 }
 
 .nav-tab-btn {
@@ -208,9 +251,12 @@ $border-color: #e2e8f0;
   &:hover { background: color.adjust($primary-dark, $lightness: 8%); }
 }
 
+/* ============================================================
+   CANVAS DE SIMULACIÓN Y ÓRBITAS
+   ============================================================ */
 .simulation-canvas-wrapper {
-  flex: 1;
-  min-height: 380px;
+  flex-shrink: 0;
+  min-height: 520px;
   background: $bg-canvas;
   border-radius: 18px;
   border: 1px solid $border-color;
@@ -230,6 +276,7 @@ $border-color: #e2e8f0;
   padding: 1.1rem;
   box-sizing: border-box;
   background: #fff radial-gradient(#e2e8f0 1px, transparent 1px) 0 0/24px 24px;
+  gap: 0.85rem;
 
   &.simulation-paused * {
     animation-play-state: paused !important;
@@ -251,11 +298,11 @@ $border-color: #e2e8f0;
 .orbit-system {
   position: relative;
   width: 100%;
-  height: 290px;
+  height: 230px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: auto 0;
+  margin: 0.25rem auto 0.5rem;
 }
 
 .orbit-ring {
@@ -263,9 +310,9 @@ $border-color: #e2e8f0;
   border-radius: 50%;
   pointer-events: none;
 }
-.ring-outer { width: 270px; height: 270px; border: 1.5px dashed rgba(0, 162, 237, 0.28); animation: rotateOrbit 30s linear infinite; }
-.ring-mid { width: 180px; height: 180px; border: 1.5px dashed rgba(99, 91, 252, 0.28); animation: rotateOrbitCounter 22s linear infinite; }
-.ring-inner { width: 100px; height: 100px; border: 1px solid rgba(16, 185, 129, 0.25); }
+.ring-outer { width: 220px; height: 220px; border: 1.5px dashed rgba(0, 162, 237, 0.28); animation: rotateOrbit 30s linear infinite; }
+.ring-mid { width: 155px; height: 155px; border: 1.5px dashed rgba(99, 91, 252, 0.28); animation: rotateOrbitCounter 22s linear infinite; }
+.ring-inner { width: 85px; height: 85px; border: 1px solid rgba(16, 185, 129, 0.25); }
 
 .bond-rays {
   position: absolute;
@@ -281,21 +328,18 @@ $border-color: #e2e8f0;
 }
 
 .ray { position: absolute; top: 50%; left: 50%; height: 2px; transform-origin: 0% 50%; }
-.ray-1 { width: 110px; background: linear-gradient(90deg, #0284c7, transparent); transform: rotate(215deg); }
-.ray-2 { width: 110px; background: linear-gradient(90deg, #0284c7, transparent); transform: rotate(145deg); }
-.ray-3 { width: 120px; background: linear-gradient(90deg, #e11d48, transparent); transform: rotate(0deg); }
+.ray-1 { width: 100px; background: linear-gradient(90deg, #0284c7, transparent); transform: rotate(215deg); }
+.ray-2 { width: 100px; background: linear-gradient(90deg, #0284c7, transparent); transform: rotate(145deg); }
+.ray-3 { width: 110px; background: linear-gradient(90deg, #e11d48, transparent); transform: rotate(0deg); }
 
 .reactant-node {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   z-index: 5;
 
-  &.top-left { top: 10%; left: 22%; }
-  &.bottom-left { bottom: 10%; left: 22%; }
-  &.center-right { top: 38%; right: 22%; }
-  &.top-right { top: 10%; right: 25%; }
+  &.top-left { top: 4%; left: 22%; }
+  &.bottom-left { bottom: 4%; left: 22%; }
+  &.center-right { top: 34%; right: 22%; }
+  &.top-right { top: 4%; right: 24%; }
 }
 
 .atom-halo {
@@ -354,10 +398,7 @@ $border-color: #e2e8f0;
 }
 
 .atom-label {
-  margin-top: 0.3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin-top: 0.25rem;
   background: rgba(255, 255, 255, 0.95);
   padding: 0.1rem 0.35rem;
   border-radius: 5px;
@@ -375,9 +416,6 @@ $border-color: #e2e8f0;
 }
 
 .awaiting-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   background: #fff;
   border: 1.5px dashed #cbd5e1;
   border-radius: 14px;
@@ -393,9 +431,6 @@ $border-color: #e2e8f0;
   border-radius: 50%;
   background: rgba(0, 162, 237, 0.1);
   color: $primary-blue;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 1.2rem;
   margin-bottom: 0.35rem;
   animation: pulseCore 2s infinite;
@@ -404,9 +439,6 @@ $border-color: #e2e8f0;
 .awaiting-title { font-size: 0.78rem; font-weight: 700; color: $text-dark; }
 
 .molecule-synthesized {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   animation: popIn 0.4s ease;
 }
 
@@ -416,18 +448,12 @@ $border-color: #e2e8f0;
   border-radius: 50%;
   background: #ecfdf5;
   color: #10b981;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 1.3rem;
   box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
 }
 
 .molecule-badge {
   margin-top: 0.4rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   background: #fff;
   padding: 0.4rem 0.75rem;
   border-radius: 10px;
@@ -437,21 +463,20 @@ $border-color: #e2e8f0;
   .synth-law { font-size: 0.6rem; color: #047857; }
 }
 
+/* ============================================================
+   MESA DE EXPERIMENTACIÓN (WORKBENCH) - 100% VISIBLE Y DINÁMICA
+   ============================================================ */
 .workbench-bar {
-  background: rgba(248, 250, 252, 0.95);
+  background: rgba(248, 250, 252, 0.98);
   border: 1px solid $border-color;
   border-radius: 14px;
-  padding: 0.6rem 0.8rem;
+  padding: 0.75rem 0.9rem;
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-}
-
-.workbench-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: 0.55rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  margin-top: auto;
 }
 
 .wb-title-group {
@@ -484,13 +509,18 @@ $border-color: #e2e8f0;
 .workbench-benchtop {
   display: flex;
   align-items: flex-end;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  min-height: 75px;
-  padding: 0.35rem;
+  gap: 0.75rem;
+  min-height: 110px;
+  padding: 0.6rem 0.75rem;
   background: #fff;
   border-radius: 10px;
   border: 1px solid $border-color;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-sizing: border-box;
+
+  &::-webkit-scrollbar { height: 5px; }
+  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 }
 
 .bench-empty-guide {
@@ -499,41 +529,46 @@ $border-color: #e2e8f0;
   gap: 0.45rem;
   color: $text-muted;
   font-size: 0.74rem;
+  padding: 0.5rem;
   i { font-size: 1.1rem; color: $primary-blue; }
 }
 
 .bench-tool-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-shrink: 0;
+  min-width: 72px;
   cursor: pointer;
-  padding: 0.25rem 0.45rem;
-  border-radius: 6px;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
   background: #f8fafc;
-  border: 1.5px solid transparent;
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+  }
 
   &.selected {
     background: #eff6ff;
     border-color: $primary-blue;
+    box-shadow: 0 0 0 2px rgba(0, 162, 237, 0.15);
   }
 }
 
 .glassware-flask-visual {
   position: relative;
-  width: 36px;
-  height: 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 40px;
+  height: 52px;
 
-  .flask-neck { width: 9px; height: 12px; border: 2px solid #94a3b8; border-bottom: none; }
-  .flask-reading { font-size: 0.58rem; font-weight: 700; color: $text-muted; }
+  .flask-neck { width: 10px; height: 12px; border: 2px solid #94a3b8; border-bottom: none; }
+  .flask-reading { font-size: 0.62rem; font-weight: 700; color: $text-muted; margin-top: 2px; }
 }
 
 .flask-body {
   position: relative;
-  width: 32px;
-  height: 30px;
+  width: 36px;
+  height: 32px;
   border: 2px solid #94a3b8;
   border-radius: 4px 4px 12px 12px;
   overflow: hidden;
@@ -559,50 +594,45 @@ $border-color: #e2e8f0;
 }
 
 .bunsen-burner-visual {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  height: 56px;
+  justify-content: flex-end;
   .bunsen-barrel { width: 7px; height: 22px; background: #64748b; }
-  .bunsen-base { width: 22px; height: 5px; background: #334155; border-radius: 2px; }
-  .flame-label { font-size: 0.58rem; font-weight: 700; color: #ea580c; }
+  .bunsen-base { width: 24px; height: 5px; background: #334155; border-radius: 2px; }
+  .flame-label { font-size: 0.6rem; font-weight: 700; color: #ea580c; margin-top: 2px; }
 }
 
 .flame-cone {
   width: 12px;
   height: 18px;
   border-radius: 50% 50% 20% 20%;
-  &.flame-off { opacity: 0; height: 0; }
+  &.flame-off { opacity: 0; }
   &.flame-low { background: linear-gradient(to top, #0284c7, #facc15); animation: pulseFlame 1s infinite alternate; }
   &.flame-medium { width: 14px; height: 22px; background: linear-gradient(to top, #2563eb, #38bdf8, #fbbf24); animation: pulseFlame 0.8s infinite alternate; }
   &.flame-high { width: 16px; height: 26px; background: linear-gradient(to top, #1d4ed8, #00f0ff, #fff); animation: pulseFlame 0.5s infinite alternate; }
 }
 
 .generic-tool-visual {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  .tool-icon-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
-  .tool-value-tag { font-size: 0.6rem; font-weight: 700; color: $text-dark; }
+  .tool-icon-circle { width: 34px; height: 34px; border-radius: 50%; font-size: 1.15rem; }
+  .tool-value-tag { font-size: 0.62rem; font-weight: 700; color: $text-dark; margin-top: 2px; }
 }
 
 .bench-tool-meta {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
-  margin-top: 0.2rem;
-  .tool-name { font-size: 0.65rem; font-weight: 700; color: $text-dark; }
-  .btn-tool-remove { border: none; background: transparent; color: $text-light; }
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  .tool-name { font-size: 0.68rem; font-weight: 700; color: $text-dark; white-space: nowrap; max-width: 70px; overflow: hidden; text-overflow: ellipsis; }
+  .btn-tool-remove { border: none; background: transparent; color: $text-light; padding: 0; &:hover { color: $danger-red; } }
 }
 
 .tool-control-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.45rem;
-  padding: 0.4rem 0.6rem;
+  padding: 0.45rem 0.75rem;
   background: #f1f5f9;
   border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-top: 0.25rem;
 }
 
 .control-lead {
@@ -620,7 +650,7 @@ $border-color: #e2e8f0;
 
 .volume-slider { width: 80px; accent-color: $primary-blue; }
 
-.btn-volume-step, .volume-badge, .btn-tool-mode {
+.btn-volume-step, .volume-badge, .btn-tool-mode, .btn-vessel-empty {
   font-size: 0.65rem;
   padding: 0.15rem 0.35rem;
   border-radius: 4px;
@@ -629,14 +659,13 @@ $border-color: #e2e8f0;
 }
 
 .btn-vessel-empty {
-  font-size: 0.65rem;
-  padding: 0.15rem 0.35rem;
-  border-radius: 4px;
-  border: 1px solid $border-color;
   color: #dc2626;
   background: #fee2e2;
 }
 
+/* ============================================================
+   ESTACIÓN DE BALANCEO DE ECUACIONES
+   ============================================================ */
 .equation-balancer-section { width: 100%; }
 
 .balancer-card {
@@ -648,14 +677,6 @@ $border-color: #e2e8f0;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.balancer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.55rem;
 }
 
 .balancer-title-group {
@@ -670,9 +691,6 @@ $border-color: #e2e8f0;
   border-radius: 8px;
   background: rgba(0, 162, 237, 0.1);
   color: $primary-blue;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 1.1rem;
 }
 
@@ -748,7 +766,7 @@ $border-color: #e2e8f0;
   font-weight: 600;
   color: $text-muted;
 
-  .pill-index { width: 12px; height: 12px; border-radius: 50%; background: #e2e8f0; font-size: 0.55rem; display: flex; align-items: center; justify-content: center; }
+  .pill-index { width: 12px; height: 12px; border-radius: 50%; background: #e2e8f0; font-size: 0.55rem; }
   .pill-check { color: #10b981; }
   &.active { background: $primary-dark; color: #fff; border-color: $primary-dark; .pill-index { background: #fff; color: $primary-dark; } }
 }
@@ -801,9 +819,6 @@ $border-color: #e2e8f0;
 .math-operator { font-size: 1.15rem; font-weight: 700; color: $text-muted; }
 
 .reaction-arrow-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   color: $primary-blue;
   i { font-size: 1.3rem; font-weight: 800; }
   .heat-symbol { font-size: 0.62rem; font-weight: 800; color: #f97316; }
@@ -849,6 +864,9 @@ $border-color: #e2e8f0;
   .conservation-mismatch { color: $text-muted; display: inline-flex; align-items: center; gap: 0.2rem; }
 }
 
+/* ============================================================
+   GUÍA PEDAGÓGICA Y PANEL DE EQUIPOS
+   ============================================================ */
 .lab-guide-panel {
   display: flex;
   flex-direction: column;
@@ -894,9 +912,6 @@ $border-color: #e2e8f0;
 
 .panel-header {
   padding: 0.9rem 1rem 0.55rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -904,7 +919,7 @@ $border-color: #e2e8f0;
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  .panel-icon { width: 30px; height: 30px; border-radius: 6px; background: rgba(0, 162, 237, 0.1); color: $primary-blue; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .panel-icon { width: 30px; height: 30px; border-radius: 6px; background: rgba(0, 162, 237, 0.1); color: $primary-blue; font-size: 1rem; }
   h2 { margin: 0; font-size: 0.95rem; font-weight: 800; color: $text-dark; }
   span { font-size: 0.65rem; color: $text-muted; }
 }
@@ -939,9 +954,6 @@ $border-color: #e2e8f0;
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 0.6rem;
 }
 
@@ -987,7 +999,7 @@ $border-color: #e2e8f0;
   &.active { border-color: $primary-blue; background: #f0f9ff; }
 }
 
-.card-icon-box { width: 30px; height: 30px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.card-icon-box { width: 30px; height: 30px; border-radius: 5px; font-size: 1rem; flex-shrink: 0; }
 
 .card-info {
   flex: 1;
@@ -996,17 +1008,11 @@ $border-color: #e2e8f0;
 }
 
 .card-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   .card-name { margin: 0; font-size: 0.75rem; font-weight: 700; color: $text-dark; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card-formula-tag { font-size: 0.58rem; font-weight: 700; background: #e2e8f0; color: #475569; padding: 0.05rem 0.2rem; border-radius: 3px; }
 }
 
 .card-footer-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   font-size: 0.62rem;
   .category-tag { color: $text-light; font-weight: 600; }
   .status-indicator { font-weight: 700; color: $text-muted; &.status-active { color: $primary-blue; } }
@@ -1031,6 +1037,9 @@ $border-color: #e2e8f0;
   font-size: 0.68rem;
 }
 
+/* ============================================================
+   MODALES Y POPUPS
+   ============================================================ */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -1116,9 +1125,6 @@ $border-color: #e2e8f0;
 }
 
 .solved-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 0.25rem 0.45rem;
   background: #f8fafc;
   border-radius: 5px;
@@ -1145,6 +1151,9 @@ $border-color: #e2e8f0;
   font-size: 0.74rem;
 }
 
+/* ============================================================
+   KEYFRAMES & MEDIA QUERIES
+   ============================================================ */
 @keyframes rotateOrbit { to { transform: rotate(360deg); } }
 @keyframes rotateOrbitCounter { to { transform: rotate(-360deg); } }
 @keyframes pulseHalo { 50% { transform: scale(1.2); opacity: 0.3; } }
@@ -1152,12 +1161,12 @@ $border-color: #e2e8f0;
 @keyframes pulseFlame { to { transform: scale(1.18); } }
 @keyframes pulseRays { to { opacity: 1; } }
 @keyframes popIn { 0% { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes riseBubble { 0% { bottom: 0; opacity: 0; } 50% { opacity: 0.8; } 100% { bottom: 90%; opacity: 0; } }
+@keyframes riseBubble { 0% { bottom: 0; opacity: 0; } 50% { opacity: 0.8; } to { bottom: 90%; opacity: 0; } }
 @keyframes slideInDown { from { opacity: 0; transform: translateY(-16px); } }
 
 @media (max-width: 1200px) {
   .equipment-panel { width: 300px; }
-  .orbit-system { height: 250px; }
+  .orbit-system { height: 210px; }
 }
 
 @media (max-width: 992px) {

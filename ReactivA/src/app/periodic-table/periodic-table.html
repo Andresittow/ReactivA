@@ -1,5 +1,5 @@
 <div class="periodic-page">
-  <!-- Área Principal: Barra Superior, Filtros y Matriz de 18 Columnas -->
+  <!-- Área Principal: Barra Superior, Filtros y Matriz de 18 Columnas / Modo Memory -->
   <main class="table-workspace">
     <!-- Encabezado de la Sección -->
     <header class="table-header">
@@ -9,318 +9,493 @@
           <span>Interactive Chemistry Lab</span>
         </div>
         <h1>Tabla Periódica Interactiva</h1>
-        <p>Explora propiedades atómicas, configuraciones electrónicas y modelos de Bohr en tiempo real.</p>
+        <p>Explora propiedades atómicas, configuraciones electrónicas o desafía tu conocimiento con el Memory Game.</p>
       </div>
 
-      <div class="stats-pills">
-        <div class="stat-item">
-          <span class="stat-number">{{ filteredElements.length }}</span>
-          <span class="stat-label">Elementos Visibles</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">18</span>
-          <span class="stat-label">Grupos</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-number">7</span>
-          <span class="stat-label">Periodos</span>
-        </div>
+      <!-- Selector de Modo: Tabla Periódica vs Memory Game -->
+      <div class="view-mode-tabs">
+        <button
+          type="button"
+          class="mode-pill-btn"
+          [class.active]="activeTab === 'table'"
+          (click)="switchTab('table')"
+        >
+          <i class="ph ph-table"></i>
+          <span>Tabla Periódica</span>
+        </button>
+        <button
+          type="button"
+          class="mode-pill-btn game-tab-btn"
+          [class.active]="activeTab === 'memory'"
+          (click)="switchTab('memory')"
+        >
+          <i class="ph ph-cards"></i>
+          <span>Memory: Parejas Periódicas</span>
+          <span class="game-badge">🎮 Mini-Juego</span>
+        </button>
       </div>
     </header>
 
-    <!-- Controles de Navegación: Buscador Reactivo y Filtro de Categorías -->
-    <section class="controls-bar">
-      <!-- Buscador Reactivo con FormControl (Clase 5a) -->
-      <div class="search-box">
-        <i class="ph ph-magnifying-glass search-icon"></i>
-        <input
-          type="text"
-          class="search-input"
-          [formControl]="searchElementControl"
-          placeholder="Buscar elemento por nombre, símbolo (ej. Fe) o número..."
-          aria-label="Buscar elemento químico"
-        />
-        @if (searchElementControl.value) {
-          <button
-            type="button"
-            class="btn-clear"
-            (click)="clearSearch()"
-            title="Limpiar búsqueda"
-            aria-label="Limpiar búsqueda"
-          >
-            <i class="ph ph-x"></i>
-          </button>
-        }
+    <!-- ======================================================== -->
+    <!-- VISTA 1: TABLA PERIÓDICA COMPLETA DE 18 COLUMNAS         -->
+    <!-- ======================================================== -->
+    @if (activeTab === 'table') {
+      <!-- Controles de Navegación: Buscador Reactivo y Filtro de Categorías -->
+      <section class="controls-bar">
+        <!-- Buscador Reactivo con FormControl (Clase 5a) -->
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass search-icon"></i>
+          <input
+            type="text"
+            class="search-input"
+            [formControl]="searchElementControl"
+            placeholder="Buscar elemento por nombre, símbolo (ej. Fe) o número..."
+            aria-label="Buscar elemento químico"
+          />
+          @if (searchElementControl.value) {
+            <button
+              type="button"
+              class="btn-clear"
+              (click)="clearSearch()"
+              title="Limpiar búsqueda"
+              aria-label="Limpiar búsqueda"
+            >
+              <i class="ph ph-x"></i>
+            </button>
+          }
+        </div>
+
+        <!-- Pills de Filtro de Categorías (Class Binding / ngClass) -->
+        <nav class="categories-nav" aria-label="Filtro de categorías químicas">
+          @for (category of categories; track category) {
+            <button
+              type="button"
+              class="category-pill"
+              [class.active]="selectedCategory === category"
+              (click)="setCategory(category)"
+            >
+              <span class="dot-indicator"></span>
+              {{ category }}
+            </button>
+          }
+        </nav>
+      </section>
+
+      <!-- Leyenda de Categorías Rápidas -->
+      <div class="category-legend">
+        <span class="legend-item metal"><span class="legend-box"></span> Metals</span>
+        <span class="legend-item metalloid"><span class="legend-box"></span> Metalloids</span>
+        <span class="legend-item nonmetal"><span class="legend-box"></span> Non-metals</span>
+        <span class="legend-item noble-gas"><span class="legend-box"></span> Noble Gases</span>
       </div>
 
-      <!-- Pills de Filtro de Categorías (Class Binding / ngClass) -->
-      <nav class="categories-nav" aria-label="Filtro de categorías químicas">
-        @for (category of categories; track category) {
-          <button
-            type="button"
-            class="category-pill"
-            [class.active]="selectedCategory === category"
-            (click)="setCategory(category)"
-          >
-            <span class="dot-indicator"></span>
-            {{ category }}
-          </button>
-        }
-      </nav>
-    </section>
+      <!-- Matriz CSS Grid de 18 Columnas -->
+      <div class="periodic-grid-viewport">
+        <div class="periodic-grid">
+          <!-- Iteración moderna con @for y track por número atómico -->
+          @for (element of filteredElements; track element.number) {
+            <button
+              type="button"
+              class="element-cell"
+              [ngClass]="element.category"
+              [class.selected]="selectedElement?.number === element.number"
+              [style.grid-column]="element.group"
+              [style.grid-row]="element.period"
+              (click)="onSelectElement(element)"
+              [attr.aria-label]="element.name + ' (' + element.symbol + '), número ' + element.number"
+            >
+              <span class="cell-number">{{ element.number }}</span>
+              <strong class="cell-symbol">{{ element.symbol }}</strong>
+              <span class="cell-name">{{ element.name }}</span>
+              <span class="cell-weight">{{ element.weight | number:'1.2-3' }}</span>
+            </button>
+          } @empty {
+            <div class="no-elements-state">
+              <i class="ph ph-atom"></i>
+              <h3>No se encontraron elementos químicos</h3>
+              <p>Intenta con otro término de búsqueda o selecciona la categoría "All Elements".</p>
+              <button type="button" class="btn-reset-filter" (click)="setCategory('All Elements'); clearSearch();">
+                Restablecer filtros
+              </button>
+            </div>
+          }
 
-    <!-- Leyenda de Categorías Rápidas -->
-    <div class="category-legend">
-      <span class="legend-item metal"><span class="legend-box"></span> Metals</span>
-      <span class="legend-item metalloid"><span class="legend-box"></span> Metalloids</span>
-      <span class="legend-item nonmetal"><span class="legend-box"></span> Non-metals</span>
-      <span class="legend-item noble-gas"><span class="legend-box"></span> Noble Gases</span>
-    </div>
-
-    <!-- Matriz CSS Grid de 18 Columnas -->
-    <div class="periodic-grid-viewport">
-      <div class="periodic-grid">
-        <!-- Iteración moderna con @for y track por número atómico -->
-        @for (element of filteredElements; track element.number) {
-          <button
-            type="button"
-            class="element-cell"
-            [ngClass]="element.category"
-            [class.selected]="selectedElement?.number === element.number"
-            [style.grid-column]="element.group"
-            [style.grid-row]="element.period"
-            (click)="onSelectElement(element)"
-            [attr.aria-label]="element.name + ' (' + element.symbol + '), número ' + element.number"
-          >
-            <span class="cell-number">{{ element.number }}</span>
-            <strong class="cell-symbol">{{ element.symbol }}</strong>
-            <span class="cell-name">{{ element.name }}</span>
-            <span class="cell-weight">{{ element.weight | number:'1.2-3' }}</span>
-          </button>
-        } @empty {
-          <div class="no-elements-state">
-            <i class="ph ph-atom"></i>
-            <h3>No se encontraron elementos químicos</h3>
-            <p>Intenta con otro término de búsqueda o selecciona la categoría "All Elements".</p>
-            <button type="button" class="btn-reset-filter" (click)="setCategory('All Elements'); clearSearch();">
-              Restablecer filtros
+          <!-- Marcadores guía de series Lantánidos y Actínidos en la tabla principal -->
+          @if (selectedCategory === 'All Elements' || selectedCategory === 'Metals') {
+            <div class="series-placeholder lanthanides-marker" style="grid-column: 3; grid-row: 6;">
+              <span>57-71</span>
+              <small>La-Lu</small>
+            </div>
+            <div class="series-placeholder actinides-marker" style="grid-column: 3; grid-row: 7;">
+              <span>89-103</span>
+              <small>Ac-Lr</small>
+            </div>
+            <div class="series-label lanthanides-label" style="grid-column: 2; grid-row: 9;">
+              <span>Lantánidos *</span>
+            </div>
+            <div class="series-label actinides-label" style="grid-column: 2; grid-row: 10;">
+              <span>Actínidos **</span>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- ======================================================== -->
+      <!-- TARJETA DE DETALLE DEL ELEMENTO (UBICADA ABAJO DE LA TABLA) -->
+      <!-- ======================================================== -->
+      @if (selectedElement) {
+        <section id="element-detail-section" class="element-detail-card" aria-label="Detalles del elemento seleccionado">
+          <!-- Cabecera de la Tarjeta con Botón de Cierre -->
+          <div class="detail-card-header">
+            <div class="panel-tag">
+              <i class="ph ph-info"></i>
+              <span>Detalle Químico</span>
+              <span class="tag-hint">· Estructura atómica y propiedades de {{ selectedElement.name }} ({{ selectedElement.symbol }})</span>
+            </div>
+            <button
+              type="button"
+              class="btn-close-detail"
+              (click)="selectedElement = null"
+              title="Cerrar detalle"
+              aria-label="Cerrar detalle"
+            >
+              <i class="ph ph-x"></i>
             </button>
           </div>
-        }
 
-        <!-- Marcadores guía de series Lantánidos y Actínidos en la tabla principal -->
-        @if (selectedCategory === 'All Elements' || selectedCategory === 'Metals') {
-          <div class="series-placeholder lanthanides-marker" style="grid-column: 3; grid-row: 6;">
-            <span>57-71</span>
-            <small>La-Lu</small>
-          </div>
-          <div class="series-placeholder actinides-marker" style="grid-column: 3; grid-row: 7;">
-            <span>89-103</span>
-            <small>Ac-Lr</small>
-          </div>
-          <div class="series-label lanthanides-label" style="grid-column: 2; grid-row: 9;">
-            <span>Lantánidos *</span>
-          </div>
-          <div class="series-label actinides-label" style="grid-column: 2; grid-row: 10;">
-            <span>Actínidos **</span>
-          </div>
-        }
-      </div>
-    </div>
-  </main>
+          <div class="detail-card-grid">
+            <!-- Columna 1: Tarjeta Hero del Elemento + Botón de Acción -->
+            <div class="detail-col hero-col">
+              <div class="element-hero-card" [ngClass]="selectedElement.category">
+                <div class="hero-top">
+                  <span class="hero-number">No. {{ selectedElement.number }}</span>
+                  <span class="hero-category-badge">{{ selectedElement.subCategory }}</span>
+                </div>
+                <div class="hero-main">
+                  <h2 class="hero-symbol">{{ selectedElement.symbol }}</h2>
+                  <div class="hero-titles">
+                    <h3 class="hero-name">{{ selectedElement.name }}</h3>
+                    <span class="hero-series">{{ selectedElement.subCategory }} · Periodo {{ selectedElement.period }}</span>
+                  </div>
+                </div>
+                <p class="hero-summary">{{ selectedElement.summary }}</p>
+              </div>
 
-  <!-- Panel Lateral de Detalle del Elemento Fijo a la Derecha -->
-  @if (selectedElement) {
-    <aside class="element-detail-sidebar" aria-label="Detalles del elemento seleccionado">
-      <!-- Cabecera del Panel con Botón de Cierre -->
-      <div class="panel-header">
-        <div class="panel-tag">
-          <i class="ph ph-info"></i>
-          <span>Detalle Químico</span>
+              <!-- Botón de Acción Integrado al Virtual Lab -->
+              <div class="panel-actions">
+                <button type="button" class="btn-action-lab" title="Simular elemento en el Laboratorio Virtual">
+                  <i class="ph ph-flask"></i>
+                  <span>Experimentar con {{ selectedElement.symbol }} en 3D</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Columna 2: Visor del Modelo Atómico Interactivo (Interactive Bohr Model) -->
+            <div class="detail-col bohr-col">
+              <section class="bohr-model-section">
+                <div class="section-title">
+                  <div class="title-with-icon">
+                    <i class="ph ph-atom"></i>
+                    <h4>Modelo de Bohr Interactivo</h4>
+                  </div>
+                  <span class="shells-count">{{ selectedElement.shells.length }} Capas Electrónicas</span>
+                </div>
+
+                <div class="bohr-canvas-container">
+                  <svg
+                    class="bohr-svg"
+                    viewBox="0 0 200 200"
+                    width="100%"
+                    height="210"
+                    role="img"
+                    aria-label="Representación orbital del átomo según el modelo de Bohr"
+                  >
+                    <!-- Gradientes y filtros para efectos cuánticos -->
+                    <defs>
+                      <radialGradient id="nucleusGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#60a5fa" />
+                        <stop offset="60%" stop-color="#2563eb" />
+                        <stop offset="100%" stop-color="#1e3a8a" />
+                      </radialGradient>
+                      <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                    </defs>
+
+                    <!-- Órbitas / Capas concéntricas -->
+                    @for (electrons of selectedElement.shells; track $index) {
+                      <!-- Anillo orbital -->
+                      <circle
+                        class="orbit-ring"
+                        cx="100"
+                        cy="100"
+                        [attr.r]="getShellRadius($index, selectedElement.shells.length)"
+                      />
+
+                      <!-- Electrones distribuidos en la órbita -->
+                      @for (electron of getShellElectrons(electrons, getShellRadius($index, selectedElement.shells.length)); track $index) {
+                        <circle
+                          class="bohr-electron"
+                          [attr.cx]="electron.cx"
+                          [attr.cy]="electron.cy"
+                          r="3.2"
+                          filter="url(#glowEffect)"
+                        />
+                      }
+                    }
+
+                    <!-- Núcleo Atómico Central -->
+                    <circle class="nucleus-core" cx="100" cy="100" r="19" fill="url(#nucleusGradient)" filter="url(#glowEffect)" />
+                    <text class="nucleus-symbol" x="100" y="105" text-anchor="middle">{{ selectedElement.symbol }}</text>
+                  </svg>
+                </div>
+
+                <!-- Indicador de distribución de electrones por capa cuántica (K, L, M, N...) -->
+                <div class="shells-distribution">
+                  <span class="shells-label">Distribución de electrones:</span>
+                  <div class="shells-chips">
+                    @for (electrons of selectedElement.shells; track $index) {
+                      <span class="shell-pill">
+                        <small>n={{ $index + 1 }}</small>
+                        <strong>{{ electrons }}e⁻</strong>
+                      </span>
+                    }
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- Columna 3: Configuración Electrónica y Propiedades Físicas -->
+            <div class="detail-col properties-col">
+              <!-- Configuración Electrónica Destacada -->
+              <section class="electron-config-section">
+                <div class="section-title">
+                  <div class="title-with-icon">
+                    <i class="ph ph-brackets-curly"></i>
+                    <h4>Configuración Electrónica</h4>
+                  </div>
+                  <span class="config-state-badge">Estado Fundamental</span>
+                </div>
+                <div class="config-display-card">
+                  <code class="config-formula">{{ selectedElement.electronConfig }}</code>
+                  <span class="config-electrons-total">
+                    Total: <strong>{{ selectedElement.number }} e⁻</strong>
+                  </span>
+                </div>
+              </section>
+
+              <!-- Sub-grid 2x2 de Propiedades Físicas -->
+              <section class="physical-properties-section">
+                <div class="section-title">
+                  <div class="title-with-icon">
+                    <i class="ph ph-thermometer-simple"></i>
+                    <h4>Propiedades Físicas</h4>
+                  </div>
+                  <span class="phase-badge">{{ selectedElement.phase || 'Solid' }}</span>
+                </div>
+
+                <div class="properties-2x2-grid">
+                  <!-- Masa Atómica -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-scales"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Masa Atómica</span>
+                      <strong class="prop-value">{{ selectedElement.atomicMass }}</strong>
+                    </div>
+                  </div>
+
+                  <!-- Densidad -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-cube"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Densidad</span>
+                      <strong class="prop-value">{{ selectedElement.density }}</strong>
+                    </div>
+                  </div>
+
+                  <!-- Punto de Fusión -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-thermometer-hot"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Punto de Fusión</span>
+                      <strong class="prop-value">{{ selectedElement.meltingPoint }}</strong>
+                    </div>
+                  </div>
+
+                  <!-- Punto de Ebullición -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-flame"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Punto de Ebullición</span>
+                      <strong class="prop-value">{{ selectedElement.boilingPoint }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      }
+    }
+
+    <!-- ======================================================== -->
+    <!-- VISTA 2: MEMORY / PAREJAS DE CELDAS PERIÓDICAS          -->
+    <!-- ======================================================== -->
+    @if (activeTab === 'memory') {
+      <section class="memory-game-section">
+        <!-- HUD / Barra de Estado del Juego -->
+        <div class="memory-hud">
+          <div class="hud-stats">
+            <div class="hud-card">
+              <span class="hud-label"><i class="ph ph-arrows-clockwise"></i> Movimientos</span>
+              <strong class="hud-val">{{ movesCount }}</strong>
+            </div>
+            <div class="hud-card">
+              <span class="hud-label"><i class="ph ph-check-circle"></i> Parejas</span>
+              <strong class="hud-val text-green">{{ matchesCount }} / {{ totalPairs }}</strong>
+            </div>
+            <div class="hud-card">
+              <span class="hud-label"><i class="ph ph-timer"></i> Tiempo</span>
+              <strong class="hud-val text-blue">{{ formattedTime }}</strong>
+            </div>
+          </div>
+
+          <div class="hud-actions">
+            <button
+              type="button"
+              class="btn-restart-game"
+              (click)="initMemoryGame()"
+              title="Reiniciar y barajar cartas"
+            >
+              <i class="ph ph-arrows-counter-clockwise"></i>
+              <span>Reiniciar Partida</span>
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          class="btn-close-detail"
-          (click)="selectedElement = null"
-          title="Cerrar panel de detalle"
-          aria-label="Cerrar panel de detalle"
-        >
-          <i class="ph ph-x"></i>
-        </button>
-      </div>
 
-      <!-- Tarjeta Hero del Elemento Seleccionado -->
-      <div class="element-hero-card" [ngClass]="selectedElement.category">
-        <div class="hero-top">
-          <span class="hero-number">No. {{ selectedElement.number }}</span>
-          <span class="hero-category-badge">{{ selectedElement.subCategory }}</span>
-        </div>
-        <div class="hero-main">
-          <h2 class="hero-symbol">{{ selectedElement.symbol }}</h2>
-          <div class="hero-titles">
-            <h3 class="hero-name">{{ selectedElement.name }}</h3>
-            <span class="hero-series">{{ selectedElement.subCategory }} · Periodo {{ selectedElement.period }}</span>
-          </div>
-        </div>
-        <p class="hero-summary">{{ selectedElement.summary }}</p>
-      </div>
-
-      <!-- Visor del Modelo Atómico Interactivo (Interactive Bohr Model) -->
-      <section class="bohr-model-section">
-        <div class="section-title">
-          <div class="title-with-icon">
-            <i class="ph ph-atom"></i>
-            <h4>Modelo de Bohr Interactivo</h4>
-          </div>
-          <span class="shells-count">{{ selectedElement.shells.length }} Capas Electrónicas</span>
-        </div>
-
-        <div class="bohr-canvas-container">
-          <svg
-            class="bohr-svg"
-            viewBox="0 0 200 200"
-            width="100%"
-            height="210"
-            role="img"
-            aria-label="Representación orbital del átomo según el modelo de Bohr"
-          >
-            <!-- Gradientes y filtros para efectos cuánticos -->
-            <defs>
-              <radialGradient id="nucleusGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#60a5fa" />
-                <stop offset="60%" stop-color="#2563eb" />
-                <stop offset="100%" stop-color="#1e3a8a" />
-              </radialGradient>
-              <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="2.5" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-
-            <!-- Órbitas / Capas concéntricas -->
-            @for (electrons of selectedElement.shells; track $index) {
-              <!-- Anillo orbital -->
-              <circle
-                class="orbit-ring"
-                cx="100"
-                cy="100"
-                [attr.r]="getShellRadius($index, selectedElement.shells.length)"
-              />
-
-              <!-- Electrones distribuidos en la órbita -->
-              @for (electron of getShellElectrons(electrons, getShellRadius($index, selectedElement.shells.length)); track $index) {
-                <circle
-                  class="bohr-electron"
-                  [attr.cx]="electron.cx"
-                  [attr.cy]="electron.cy"
-                  r="3.2"
-                  filter="url(#glowEffect)"
-                />
-              }
-            }
-
-            <!-- Núcleo Atómico Central -->
-            <circle class="nucleus-core" cx="100" cy="100" r="19" fill="url(#nucleusGradient)" filter="url(#glowEffect)" />
-            <text class="nucleus-symbol" x="100" y="105" text-anchor="middle">{{ selectedElement.symbol }}</text>
-          </svg>
-        </div>
-
-        <!-- Indicador de distribución de electrones por capa cuántica (K, L, M, N...) -->
-        <div class="shells-distribution">
-          <span class="shells-label">Distribución de electrones:</span>
-          <div class="shells-chips">
-            @for (electrons of selectedElement.shells; track $index) {
-              <span class="shell-pill">
-                <small>n={{ $index + 1 }}</small>
-                <strong>{{ electrons }}e⁻</strong>
-              </span>
-            }
-          </div>
-        </div>
-      </section>
-
-      <!-- Configuración Electrónica Destacada -->
-      <section class="electron-config-section">
-        <div class="section-title">
-          <div class="title-with-icon">
-            <i class="ph ph-brackets-curly"></i>
-            <h4>Configuración Electrónica</h4>
-          </div>
-          <span class="config-state-badge">Estado Fundamental</span>
-        </div>
-        <div class="config-display-card">
-          <code class="config-formula">{{ selectedElement.electronConfig }}</code>
-          <span class="config-electrons-total">
-            Total: <strong>{{ selectedElement.number }} e⁻</strong>
+        <!-- Filtros por Familia (5 de cada tipo: Metales, No metales, Metaloides, Gases nobles) -->
+        <div class="memory-filter-bar">
+          <span class="filter-instruction">
+            <i class="ph ph-funnel"></i> Selecciona la familia de elementos (5 pares por categoría):
           </span>
+          <div class="game-filter-pills">
+            @for (option of gameCategoryOptions; track option.id) {
+              <button
+                type="button"
+                class="game-pill"
+                [class.active]="selectedGameCategory === option.id"
+                (click)="setGameCategory(option.id)"
+              >
+                {{ option.label }}
+              </button>
+            }
+          </div>
         </div>
+
+        <!-- Tablero de Cartas Memory (3D Flip) -->
+        <div class="memory-grid-container">
+          <div class="memory-grid" [class.dense-grid]="memoryCards.length > 20">
+            @for (card of memoryCards; track card.id) {
+              <div
+                class="memory-card-container"
+                [class.flipped]="card.isFlipped"
+                [class.matched]="card.isMatched"
+                (click)="flipCard(card)"
+                [attr.aria-label]="card.type === 'name' ? 'Carta Nombre ' + card.name : 'Carta Símbolo ' + card.symbol"
+              >
+                <div class="card-inner">
+                  <!-- Reverso de la Carta -->
+                  <div class="card-face card-back">
+                    <div class="card-back-pattern">
+                      <div class="back-icon-circle">
+                        <i class="ph ph-atom back-icon"></i>
+                      </div>
+                      <span class="back-text">ReactivA</span>
+                      <small class="back-sub">Memory</small>
+                    </div>
+                  </div>
+
+                  <!-- Frente de la Carta -->
+                  <div class="card-face card-front" [ngClass]="card.category">
+                    @if (card.type === 'name') {
+                      <!-- Tarjeta con el Nombre -->
+                      <div class="card-header-badge">
+                        <span class="type-pill name-type">Nombre</span>
+                        <span class="phase-tag"><i class="ph ph-drop"></i> {{ card.phase }}</span>
+                      </div>
+
+                      <div class="card-body-name">
+                        <h3 class="element-name-text">{{ card.name }}</h3>
+                        <span class="element-category-name">{{ card.categoryLabel }}</span>
+                      </div>
+
+                      <div class="card-footer-hint">
+                        <small>Empareja con su Símbolo y N°</small>
+                      </div>
+                    } @else {
+                      <!-- Tarjeta con el Símbolo y N° Atómico (ej. Au - 79) -->
+                      <div class="card-header-badge">
+                        <span class="type-pill symbol-type">Símbolo & N°</span>
+                        <strong class="number-tag">No. {{ card.number }}</strong>
+                      </div>
+
+                      <div class="card-body-symbol">
+                        <h2 class="element-symbol-text">{{ card.symbol }}</h2>
+                        <span class="atomic-num-sub">Z = {{ card.number }}</span>
+                      </div>
+
+                      <div class="card-footer-hint">
+                        <span class="category-sub-pill">{{ card.categoryLabel }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Pantalla / Modal de Victoria al Completar el Reto -->
+        @if (gameWon) {
+          <div class="victory-overlay">
+            <div class="victory-card">
+              <div class="trophy-badge">
+                <i class="ph ph-trophy"></i>
+              </div>
+              <h2>¡Reto de Memoria Completado!</h2>
+              <p>Has emparejado con éxito los Nombres de los elementos con sus Símbolos y Números Atómicos.</p>
+
+              <div class="victory-stats-grid">
+                <div class="v-stat">
+                  <span>Movimientos</span>
+                  <strong>{{ movesCount }}</strong>
+                </div>
+                <div class="v-stat">
+                  <span>Tiempo</span>
+                  <strong>{{ formattedTime }}</strong>
+                </div>
+                <div class="v-stat">
+                  <span>Parejas</span>
+                  <strong>{{ matchesCount }} / {{ totalPairs }}</strong>
+                </div>
+              </div>
+
+              <button type="button" class="btn-play-again" (click)="initMemoryGame()">
+                <i class="ph ph-arrows-clockwise"></i>
+                <span>Jugar Otra Partida</span>
+              </button>
+            </div>
+          </div>
+        }
       </section>
-
-      <!-- Sub-grid 2x2 de Propiedades Físicas -->
-      <section class="physical-properties-section">
-        <div class="section-title">
-          <div class="title-with-icon">
-            <i class="ph ph-thermometer-simple"></i>
-            <h4>Propiedades Físicas</h4>
-          </div>
-          <span class="phase-badge">{{ selectedElement.phase || 'Solid' }}</span>
-        </div>
-
-        <div class="properties-2x2-grid">
-          <!-- Masa Atómica -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-scales"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Masa Atómica</span>
-              <strong class="prop-value">{{ selectedElement.atomicMass }}</strong>
-            </div>
-          </div>
-
-          <!-- Densidad -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-cube"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Densidad</span>
-              <strong class="prop-value">{{ selectedElement.density }}</strong>
-            </div>
-          </div>
-
-          <!-- Punto de Fusión -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-thermometer-hot"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Punto de Fusión</span>
-              <strong class="prop-value">{{ selectedElement.meltingPoint }}</strong>
-            </div>
-          </div>
-
-          <!-- Punto de Ebullición -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-flame"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Punto de Ebullición</span>
-              <strong class="prop-value">{{ selectedElement.boilingPoint }}</strong>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Botón de Acción Integrado al Virtual Lab -->
-      <div class="panel-actions">
-        <button type="button" class="btn-action-lab" title="Simular elemento en el Laboratorio Virtual">
-          <i class="ph ph-flask"></i>
-          <span>Experimentar con {{ selectedElement.symbol }} en 3D</span>
-        </button>
-      </div>
-    </aside>
-  }
+    }
+  </main>
 </div>
-
