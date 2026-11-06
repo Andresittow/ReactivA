@@ -1,63 +1,65 @@
 // ============================================================
-// ReactivA - Módulo de Ayuda y Soporte (Help)
-// Identidad visual: Azul (#00a2ed, #1d4ed8), Morado (#635bfc), Fondo (#f4f7f9)
+// ReactivA — Módulo de Ayuda (Help) · Simplificado
+// Paleta: Azul #00a2ed / #1d4ed8, Morado #635bfc, Fondo #f4f7f9
 // ============================================================
 
 $font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-// Paleta Oficial ReactivA
-$c-primary: #00a2ed;
-$c-primary-dark: #1d4ed8;
-$c-primary-hover: #0284c7;
-$c-primary-soft: rgba(0, 162, 237, 0.08);
+$c-primary:        #00a2ed;
+$c-primary-dark:   #1d4ed8;
+$c-primary-hover:  #0284c7;
+$c-primary-soft:   rgba(0, 162, 237, 0.09);
 
-$c-secondary: #635bfc;
-$c-secondary-hover: #4f46e5;
-$c-secondary-soft: rgba(99, 91, 252, 0.08);
+$c-secondary:      #635bfc;
+$c-secondary-soft: rgba(99, 91, 252, 0.09);
 
-$c-bg: #f4f7f9;
-$c-card: #ffffff;
-$c-border: #e2e8f0;
-$c-border-subtle: #f1f5f9;
+$c-bg:             #f4f7f9;
+$c-card:           #ffffff;
+$c-border:         #e2e8f0;
+$c-border-subtle:  #f1f5f9;
 
-$c-text-main: #0f172a;
-$c-text-body: #334155;
+$c-text-main:  #0f172a;
+$c-text-body:  #334155;
 $c-text-muted: #64748b;
 $c-text-light: #94a3b8;
 
-// Tonos Semánticos y Temas
-$c-success: #10b981;
-$c-success-bg: #dcfce7;
-$c-success-text: #15803d;
+$c-cyan:        #06b6d4;
+$c-cyan-bg:     #cffafe;
+$c-cyan-text:   #0e7490;
 
-$c-warning: #f59e0b;
-$c-warning-bg: #fef3c7;
-$c-warning-text: #b45309;
-
-$c-cyan: #06b6d4;
-$c-cyan-bg: #cffafe;
-$c-cyan-text: #0e7490;
-
-$c-purple: #8b5cf6;
-$c-purple-bg: #f3e8ff;
+$c-purple:      #8b5cf6;
+$c-purple-bg:   #f3e8ff;
 $c-purple-text: #7e22ce;
 
+$c-amber:       #f59e0b;
+$c-amber-bg:    #fef3c7;
+$c-amber-text:  #b45309;
+
+$c-success:     #10b981;
+
 $radius-card: 18px;
-$radius-btn: 12px;
+$radius-btn:  12px;
 $radius-pill: 50px;
 
-$shadow-card: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+$shadow-card:  0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
 $shadow-hover: 0 10px 25px rgba(0, 162, 237, 0.08);
 
+// ─── HOST ────────────────────────────────────────────────────
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: $c-bg;
+}
+
+// ─── PAGE WRAPPER ────────────────────────────────────────────
 .help-page {
   font-family: $font-family;
   background-color: $c-bg;
-  min-height: 100vh;
-  padding: 2rem 2.5rem 4rem 2.5rem;
+  padding: 2rem 2.5rem 4rem;
   box-sizing: border-box;
 }
 
-// Toast Flotante
+// ─── TOAST ───────────────────────────────────────────────────
 .toast-banner {
   position: fixed;
   top: 1.5rem;
@@ -69,358 +71,133 @@ $shadow-hover: 0 10px 25px rgba(0, 162, 237, 0.08);
   background-color: #0f172a;
   color: #ffffff;
   padding: 0.85rem 1.4rem;
-  border-radius: 9999px;
+  border-radius: $radius-pill;
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
   font-size: 0.88rem;
   font-weight: 600;
   border-left: 4px solid $c-success;
 
-  .toast-icon {
-    color: $c-success;
-    font-size: 1.25rem;
-  }
+  .toast-icon { color: $c-success; font-size: 1.25rem; }
 }
 
-// 1. Hero Header & Buscador
-.help-hero-banner {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+// ─── HEADER SIMPLE ───────────────────────────────────────────
+.help-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  background-color: $c-card;
   border: 1px solid $c-border;
-  border-radius: 24px;
-  padding: 3rem 2.5rem 2.5rem;
-  margin-bottom: 2.5rem;
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
   box-shadow: $shadow-card;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(0, 162, 237, 0.12) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -60px;
-    left: -40px;
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(circle, rgba(99, 91, 252, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
 }
 
-.hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 820px;
-  margin: 0 auto;
-}
-
-.badge-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
+.help-header-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
   background-color: $c-primary-soft;
-  color: $c-primary-hover;
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.4rem 0.9rem;
-  border-radius: $radius-pill;
-  margin-bottom: 1rem;
-
-  i {
-    font-size: 1rem;
-  }
-}
-
-.hero-title {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: $c-text-main;
-  margin: 0 0 0.85rem 0;
-  letter-spacing: -0.03em;
-}
-
-.hero-subtitle {
-  font-size: 1.02rem;
-  color: $c-text-muted;
-  line-height: 1.55;
-  margin: 0 0 2rem 0;
-}
-
-// Buscador
-.search-box-wrapper {
-  max-width: 680px;
-  margin: 0 auto;
-}
-
-.search-bar {
+  color: $c-primary;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  background-color: #ffffff;
-  border: 2px solid $c-border;
-  border-radius: 16px;
-  padding: 0.75rem 1.25rem;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  &:focus-within {
-    border-color: $c-primary;
-    box-shadow: 0 0 0 4px rgba(0, 162, 237, 0.15);
-  }
-
-  .search-icon {
-    font-size: 1.35rem;
-    color: $c-text-muted;
-  }
-
-  .search-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-family: inherit;
-    font-size: 0.96rem;
-    color: $c-text-main;
-    background: transparent;
-
-    &::placeholder {
-      color: $c-text-light;
-    }
-  }
-
-  .btn-clear-search {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: $c-text-muted;
-    font-size: 1.15rem;
-    padding: 0.2rem;
-    display: flex;
-    align-items: center;
-    border-radius: 50%;
-
-    &:hover {
-      background-color: #f1f5f9;
-      color: $c-text-main;
-    }
-  }
-}
-
-// Pills de categorías
-.category-pills-row {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1.25rem;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+
+  i { font-size: 1.5rem; line-height: 1; }
 }
 
-.pill-filter {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background-color: #ffffff;
-  border: 1px solid $c-border;
-  border-radius: $radius-pill;
-  padding: 0.45rem 1rem;
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: $c-text-body;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  i {
-    font-size: 0.95rem;
-  }
-
-  &:hover {
-    background-color: #f8fafc;
-    border-color: #cbd5e1;
-  }
-
-  &.active {
-    background-color: $c-primary;
-    border-color: $c-primary;
-    color: #ffffff;
-    box-shadow: 0 3px 10px rgba(0, 162, 237, 0.3);
-  }
-}
-
-// 2. Secciones Generales
-.section-container {
-  margin-bottom: 2.75rem;
-}
-
-.section-header {
+.help-header-text {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 1.4rem;
-  gap: 1rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
-.section-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: $c-primary-hover;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.35rem;
-
-  i {
-    font-size: 0.9rem;
-  }
-}
-
-.section-title {
+.help-title {
   margin: 0;
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 800;
   color: $c-text-main;
   letter-spacing: -0.02em;
 }
 
-.section-subtitle {
-  margin: 0.35rem 0 0 0;
-  font-size: 0.92rem;
+.help-subtitle {
+  margin: 0;
+  font-size: 0.93rem;
+  color: $c-text-muted;
+  line-height: 1.5;
+}
+
+// ─── SECCIONES GENÉRICAS ─────────────────────────────────────
+.section-block {
+  margin-bottom: 2.5rem;
+}
+
+.section-heading {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: $c-text-main;
+  letter-spacing: -0.02em;
+}
+
+.section-subheading {
+  margin: 0 0 1.25rem 0;
+  font-size: 0.9rem;
   color: $c-text-muted;
 }
 
-.active-filter-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background-color: #ffffff;
-  padding: 0.45rem 0.9rem;
-  border-radius: $radius-pill;
-  border: 1px solid $c-border;
-  font-size: 0.82rem;
-  color: $c-text-body;
-
-  .btn-reset-filters {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    border: none;
-    background: transparent;
-    color: $c-primary;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.82rem;
-    padding: 0;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-// 3. Grid de Categorías (4 Cards)
+// ─── GRID DE CATEGORÍAS ──────────────────────────────────────
 .categories-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
+  gap: 1.1rem;
+  margin-top: 1.1rem;
 
-  @media (max-width: 1100px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: 1fr; }
 }
 
 .category-card {
   background-color: $c-card;
   border: 1px solid $c-border;
   border-radius: $radius-card;
-  padding: 1.4rem;
+  padding: 1.3rem;
   display: flex;
   flex-direction: column;
   box-shadow: $shadow-card;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-3px);
     box-shadow: $shadow-hover;
-    border-color: #cbd5e1;
-  }
-
-  .cat-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
   }
 
   .cat-icon-cell {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.45rem;
-    line-height: 1;
+    font-size: 1.4rem;
+    margin-bottom: 0.9rem;
+    flex-shrink: 0;
 
-    i {
-      font-size: 1.45rem;
-      line-height: 1;
-      display: inline-flex;
-    }
+    i { font-size: 1.4rem; line-height: 1; display: inline-flex; }
   }
 
-  .cat-filter-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    border: 1px solid $c-border-subtle;
-    background-color: #f8fafc;
-    color: $c-text-muted;
-    border-radius: $radius-pill;
-    padding: 0.35rem 0.75rem;
-    font-family: inherit;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover,
-    &.active-cat {
-      background-color: $c-primary;
-      color: #ffffff;
-      border-color: $c-primary;
-    }
-  }
-
-  .cat-card-title {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.08rem;
+  .cat-title {
+    margin: 0 0 0.45rem 0;
+    font-size: 1rem;
     font-weight: 800;
     color: $c-text-main;
   }
 
-  .cat-card-desc {
-    margin: 0 0 1rem 0;
-    font-size: 0.86rem;
+  .cat-desc {
+    margin: 0 0 0.9rem 0;
+    font-size: 0.84rem;
     line-height: 1.45;
     color: $c-text-body;
     flex: 1;
@@ -429,229 +206,173 @@ $shadow-hover: 0 10px 25px rgba(0, 162, 237, 0.08);
   .cat-tags-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-bottom: 1.15rem;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
 
     .tag-chip {
       background-color: #f1f5f9;
       color: $c-text-muted;
       border-radius: 6px;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
-      padding: 0.2rem 0.5rem;
+      padding: 0.18rem 0.48rem;
     }
   }
 
-  .cat-card-footer {
+  .cat-footer {
     border-top: 1px solid $c-border-subtle;
-    padding-top: 0.85rem;
+    padding-top: 0.8rem;
   }
 
-  .cat-nav-link {
+  .cat-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     color: $c-primary;
-    font-size: 0.84rem;
+    font-size: 0.83rem;
     font-weight: 700;
     text-decoration: none;
-    transition: gap 0.2s ease, color 0.2s ease;
+    transition: gap 0.15s ease, color 0.15s ease;
 
-    &:hover {
-      color: $c-primary-hover;
-      gap: 0.6rem;
-    }
-
-    i {
-      font-size: 0.9rem;
-    }
+    &:hover { color: $c-primary-hover; gap: 0.55rem; }
+    i { font-size: 0.88rem; }
   }
 
-  // Temas de Categoría
-  &.theme-blue .cat-icon-cell {
-    background-color: rgba(0, 162, 237, 0.12);
-    color: $c-primary;
-  }
-
-  &.theme-cyan .cat-icon-cell {
-    background-color: $c-cyan-bg;
-    color: $c-cyan-text;
-  }
-
-  &.theme-purple .cat-icon-cell {
-    background-color: $c-purple-bg;
-    color: $c-purple-text;
-  }
-
-  &.theme-amber .cat-icon-cell {
-    background-color: $c-warning-bg;
-    color: $c-warning-text;
-  }
+  // Temas de color del icono por categoría
+  &.theme-cyan    .cat-icon-cell { background-color: $c-cyan-bg;              color: $c-cyan-text; }
+  &.theme-purple  .cat-icon-cell { background-color: $c-purple-bg;            color: $c-purple-text; }
+  &.theme-amber   .cat-icon-cell { background-color: $c-amber-bg;             color: $c-amber-text; }
+  &.theme-blue    .cat-icon-cell { background-color: $c-primary-soft;         color: $c-primary; }
 }
 
-// 4. Guía Rápida de Simulación (Cards 1-2-3)
+// ─── GUÍA RÁPIDA (PASOS 1-2-3) ───────────────────────────────
 .steps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 1.25rem;
+  margin-top: 1.1rem;
 
-  @media (max-width: 950px) {
-    grid-template-columns: 1fr;
-  }
+  @media (max-width: 950px) { grid-template-columns: 1fr; }
 }
 
 .step-card {
   background-color: $c-card;
   border: 1px solid $c-border;
   border-radius: $radius-card;
-  padding: 1.6rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   box-shadow: $shadow-card;
-  position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
   }
 
-  .step-card-lead {
+  .step-lead {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.1rem;
+    margin-bottom: 1rem;
   }
 
-  .step-badge-number {
-    font-size: 0.76rem;
+  .step-badge {
+    font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 0.35rem 0.8rem;
+    padding: 0.3rem 0.75rem;
     border-radius: $radius-pill;
   }
 
   .step-icon-wrap {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.35rem;
+    font-size: 1.3rem;
 
-    i {
-      font-size: 1.35rem;
-      line-height: 1;
-      display: inline-flex;
-    }
+    i { font-size: 1.3rem; line-height: 1; display: inline-flex; }
   }
 
   .step-sub {
     display: block;
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     color: $c-text-muted;
     letter-spacing: 0.04em;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.3rem;
   }
 
   .step-title {
-    margin: 0 0 0.65rem 0;
-    font-size: 1.15rem;
+    margin: 0 0 0.6rem 0;
+    font-size: 1.08rem;
     font-weight: 800;
     color: $c-text-main;
   }
 
-  .step-description {
-    margin: 0 0 1.25rem 0;
-    font-size: 0.88rem;
+  .step-desc {
+    margin: 0 0 1.1rem 0;
+    font-size: 0.86rem;
     line-height: 1.5;
     color: $c-text-body;
     flex: 1;
   }
 
-  .step-tip-box {
+  .step-tip {
     background-color: #f8fafc;
     border: 1px solid $c-border;
-    border-radius: 12px;
-    padding: 0.75rem 0.95rem;
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
     display: flex;
     align-items: flex-start;
-    gap: 0.65rem;
+    gap: 0.55rem;
+    font-size: 0.78rem;
+    color: $c-text-body;
+    line-height: 1.4;
+    font-weight: 500;
 
-    .tip-icon {
-      color: $c-warning;
-      font-size: 1.15rem;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .tip-text {
-      font-size: 0.8rem;
-      color: $c-text-body;
-      line-height: 1.4;
-      font-weight: 500;
-    }
+    .tip-icon { color: $c-amber; font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
   }
 
-  // Temas de pasos
-  &.step-theme-cyan {
+  // Tema de borde superior y colores del badge/icono
+  &.step-cyan {
     border-top: 4px solid $c-cyan;
-
-    .step-badge-number {
-      background-color: $c-cyan-bg;
-      color: $c-cyan-text;
-    }
-
-    .step-icon-wrap {
-      background-color: $c-cyan-bg;
-      color: $c-cyan-text;
-    }
+    .step-badge    { background-color: $c-cyan-bg;      color: $c-cyan-text; }
+    .step-icon-wrap { background-color: $c-cyan-bg;      color: $c-cyan-text; }
   }
 
-  &.step-theme-blue {
+  &.step-blue {
     border-top: 4px solid $c-primary;
-
-    .step-badge-number {
-      background-color: rgba(0, 162, 237, 0.12);
-      color: $c-primary-hover;
-    }
-
-    .step-icon-wrap {
-      background-color: rgba(0, 162, 237, 0.12);
-      color: $c-primary;
-    }
+    .step-badge    { background-color: $c-primary-soft;  color: $c-primary-hover; }
+    .step-icon-wrap { background-color: $c-primary-soft;  color: $c-primary; }
   }
 
-  &.step-theme-purple {
+  &.step-purple {
     border-top: 4px solid $c-secondary;
-
-    .step-badge-number {
-      background-color: $c-purple-bg;
-      color: $c-purple-text;
-    }
-
-    .step-icon-wrap {
-      background-color: $c-purple-bg;
-      color: $c-purple-text;
-    }
+    .step-badge    { background-color: $c-purple-bg;     color: $c-purple-text; }
+    .step-icon-wrap { background-color: $c-purple-bg;     color: $c-purple-text; }
   }
 }
 
-// 5. FAQ Acordeón Interactivo
-.faq-accordion-list {
+// ─── FAQ ACORDEÓN ────────────────────────────────────────────
+.faq-block { margin-top: 0.25rem; }
+
+.faq-list {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
 }
 
-.faq-accordion-item {
+.faq-item {
   background-color: $c-card;
   border: 1px solid $c-border;
-  border-radius: 16px;
+  border-radius: 15px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -660,552 +381,164 @@ $shadow-hover: 0 10px 25px rgba(0, 162, 237, 0.08);
     border-color: #cbd5e1;
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
 
-    .faq-header-btn {
-      background-color: #fafbfc;
-    }
+    .faq-btn { background-color: #fafbfc; }
   }
 
-  .faq-header-btn {
+  .faq-btn {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem 1.5rem;
+    padding: 1.15rem 1.4rem;
     border: none;
     background: transparent;
     cursor: pointer;
     text-align: left;
     font-family: inherit;
     gap: 1rem;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.15s ease;
 
-    &:hover {
-      background-color: #f8fafc;
-    }
+    &:hover { background-color: #f8fafc; }
   }
 
-  .faq-question-lead {
+  .faq-question-block {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
   }
 
-  .faq-cat-badge {
+  .faq-label {
     align-self: flex-start;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
     color: $c-primary-hover;
     background-color: $c-primary-soft;
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
+    padding: 0.18rem 0.55rem;
+    border-radius: 5px;
+    letter-spacing: 0.03em;
   }
 
-  .faq-question-text {
+  .faq-question {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
     color: $c-text-main;
   }
 
-  .faq-caret-cell {
-    width: 34px;
-    height: 34px;
+  .faq-caret {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background-color: #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: center;
     color: $c-text-muted;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
   }
 
-  .faq-content-body {
-    padding: 0 1.5rem 1.5rem 1.5rem;
-    font-size: 0.92rem;
+  .faq-body {
+    padding: 0 1.4rem 1.4rem;
+    border-top: 1px solid $c-border-subtle;
+    font-size: 0.9rem;
     color: $c-text-body;
     line-height: 1.6;
-    border-top: 1px solid $c-border-subtle;
 
-    p {
-      margin: 1rem 0 0.75rem 0;
-    }
+    p  { margin: 0.9rem 0 0.65rem; }
 
     ol, ul {
-      margin: 0 0 1rem 0;
-      padding-left: 1.4rem;
+      margin: 0 0 0.9rem;
+      padding-left: 1.35rem;
 
-      li {
-        margin-bottom: 0.4rem;
-      }
+      li { margin-bottom: 0.38rem; }
     }
 
     code {
       background-color: #f1f5f9;
       color: $c-primary-dark;
-      padding: 0.15rem 0.35rem;
+      padding: 0.12rem 0.32rem;
       border-radius: 4px;
       font-weight: 600;
-      font-size: 0.88em;
+      font-size: 0.87em;
     }
 
-    strong {
-      color: $c-text-main;
-    }
+    strong { color: $c-text-main; }
   }
 }
 
-.faq-empty-state {
-  background-color: $c-card;
-  border: 1px dashed $c-border;
-  border-radius: $radius-card;
-  padding: 3rem 2rem;
-  text-align: center;
-  max-width: 460px;
-  margin: 1rem auto;
-
-  .empty-icon-cell {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background-color: #f1f5f9;
-    color: $c-text-muted;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    margin: 0 auto 1rem auto;
-  }
-
-  h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: $c-text-main;
-  }
-
-  p {
-    margin: 0 0 1.25rem 0;
-    font-size: 0.88rem;
-    color: $c-text-muted;
-  }
-
-  .btn-clear-all {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background-color: $c-primary;
-    color: #ffffff;
-    border: none;
-    border-radius: $radius-btn;
-    padding: 0.65rem 1.25rem;
-    font-family: inherit;
-    font-size: 0.86rem;
-    font-weight: 700;
-    cursor: pointer;
-
-    &:hover {
-      background-color: $c-primary-hover;
-    }
-  }
-}
-
-// 6. Tarjeta de Asistencia Directa y Soporte
-.support-action-banner {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  border-radius: 20px;
-  padding: 2.2rem 2.5rem;
-  margin-bottom: 2.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  color: #ffffff;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
-
-  @media (max-width: 900px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-.support-banner-content {
-  display: flex;
-  align-items: center;
-  gap: 1.35rem;
-
-  .support-avatar-symbol {
-    width: 60px;
-    height: 60px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, $c-primary 0%, $c-secondary 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: #ffffff;
-    flex-shrink: 0;
-    box-shadow: 0 6px 18px rgba(0, 162, 237, 0.4);
-  }
-
-  .support-heading {
-    margin: 0 0 0.35rem 0;
-    font-size: 1.3rem;
-    font-weight: 800;
-  }
-
-  .support-subheading {
-    margin: 0;
-    font-size: 0.92rem;
-    color: #94a3b8;
-    line-height: 1.45;
-    max-width: 580px;
-
-    strong {
-      color: #e2e8f0;
-    }
-  }
-}
-
-.support-buttons-group {
-  display: flex;
-  gap: 0.85rem;
-  flex-shrink: 0;
-
-  @media (max-width: 540px) {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .btn-action-assistant {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background: linear-gradient(135deg, $c-primary 0%, $c-primary-hover 100%);
-    color: #ffffff;
-    text-decoration: none;
-    padding: 0.75rem 1.4rem;
-    border-radius: $radius-btn;
-    font-weight: 700;
-    font-size: 0.88rem;
-    box-shadow: 0 4px 14px rgba(0, 162, 237, 0.35);
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-    }
-
-    i {
-      font-size: 1.15rem;
-    }
-  }
-
-  .btn-action-ticket {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    background-color: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    padding: 0.75rem 1.4rem;
-    border-radius: $radius-btn;
-    font-weight: 600;
-    font-size: 0.88rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    i {
-      font-size: 1.1rem;
-    }
-  }
-}
-
-// 7. Footer Institucional
-.institutional-footer-card {
+// ─── FOOTER INSTITUCIONAL ────────────────────────────────────
+.inst-footer {
   background-color: $c-card;
   border: 1px solid $c-border;
   border-radius: $radius-card;
-  padding: 2.2rem;
+  padding: 1.8rem 2rem;
   box-shadow: $shadow-card;
-}
-
-.inst-top-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1.4fr;
-  gap: 2.5rem;
-  padding-bottom: 1.8rem;
-  border-bottom: 1px solid $c-border-subtle;
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
+  margin-top: 0.5rem;
 }
 
 .inst-logo-row {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.8rem;
 
   .inst-logo-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
     background: linear-gradient(135deg, $c-primary 0%, $c-primary-dark 100%);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.35rem;
+    font-size: 1.3rem;
+    flex-shrink: 0;
   }
 
-  .inst-brand-title {
+  .inst-name {
     margin: 0;
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 800;
     color: $c-text-main;
   }
 
   .inst-tagline {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
     color: $c-text-muted;
   }
 }
 
-.inst-summary {
-  margin: 0;
-  font-size: 0.88rem;
+.inst-desc {
+  margin: 0 0 1.1rem;
+  font-size: 0.87rem;
   color: $c-text-body;
   line-height: 1.55;
 }
 
-.inst-meta-col {
+.inst-meta-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  margin-bottom: 1rem;
 }
 
 .inst-meta-item {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-
-  i {
-    color: $c-primary;
-    font-size: 1.25rem;
-    margin-top: 2px;
-  }
-
-  strong {
-    display: block;
-    font-size: 0.82rem;
-    color: $c-text-main;
-    font-weight: 700;
-  }
-
-  span {
-    font-size: 0.82rem;
-    color: $c-text-muted;
-  }
-}
-
-.inst-bottom-bar {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 1.4rem;
-  font-size: 0.8rem;
+  gap: 0.5rem;
+  font-size: 0.82rem;
   color: $c-text-muted;
-  flex-wrap: wrap;
-  gap: 0.75rem;
 
-  .inst-quote {
-    color: $c-text-body;
-  }
+  i { color: $c-primary; font-size: 1.1rem; }
 }
 
-// 8. Modal de Contacto Soporte
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(4px);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-}
-
-.modal-card {
-  background-color: #ffffff;
-  border-radius: 20px;
-  width: 100%;
-  max-width: 540px;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
-  overflow: hidden;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.4rem 1.6rem;
-  border-bottom: 1px solid $c-border-subtle;
-
-  .modal-title-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
-  }
-
-  .modal-icon-cell {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background-color: $c-primary-soft;
-    color: $c-primary;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-  }
-
-  .modal-title {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: $c-text-main;
-  }
-
-  .modal-subtitle {
-    font-size: 0.78rem;
-    color: $c-text-muted;
-  }
-
-  .btn-dismiss-modal {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: $c-text-muted;
-    font-size: 1.25rem;
-    border-radius: 8px;
-    padding: 0.3rem;
-
-    &:hover {
-      background-color: #f1f5f9;
-      color: $c-text-main;
-    }
-  }
-}
-
-.modal-form {
-  padding: 1.5rem 1.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-}
-
-.form-row-dual {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-
-  label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: $c-text-body;
-  }
-
-  .input-text,
-  .input-select,
-  .input-textarea {
-    border: 1px solid $c-border;
-    border-radius: 10px;
-    padding: 0.65rem 0.85rem;
-    font-family: inherit;
-    font-size: 0.88rem;
-    color: $c-text-main;
-    background-color: #ffffff;
-    transition: border-color 0.2s ease;
-
-    &:focus {
-      outline: none;
-      border-color: $c-primary;
-    }
-
-    &[readonly] {
-      background-color: #f8fafc;
-      color: $c-text-muted;
-    }
-  }
-
-  .input-textarea {
-    resize: vertical;
-  }
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding-top: 0.75rem;
+.inst-quote {
+  margin: 0;
+  font-size: 0.82rem;
+  color: $c-text-muted;
   border-top: 1px solid $c-border-subtle;
-
-  .btn-cancel {
-    border: 1px solid $c-border;
-    background-color: #ffffff;
-    color: $c-text-body;
-    padding: 0.65rem 1.2rem;
-    border-radius: $radius-btn;
-    font-family: inherit;
-    font-weight: 600;
-    font-size: 0.86rem;
-    cursor: pointer;
-
-    &:hover {
-      background-color: #f1f5f9;
-    }
-  }
-
-  .btn-submit {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    border: none;
-    background-color: $c-primary;
-    color: #ffffff;
-    padding: 0.65rem 1.35rem;
-    border-radius: $radius-btn;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 0.86rem;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 162, 237, 0.3);
-
-    &:hover {
-      background-color: $c-primary-hover;
-    }
-
-    i {
-      font-size: 1rem;
-    }
-  }
+  padding-top: 0.9rem;
 }
-
