@@ -1,0 +1,888 @@
+<div class="settings-page" [class.theme-dark-preview]="preferences.theme === 'dark'" [class.high-contrast]="preferences.highContrast" [class.reduce-motion]="preferences.reduceMotion" [attr.data-font-size]="preferences.fontSize">
+
+  <!-- Toast Notification System -->
+  @if (toastMessage) {
+    <div class="toast-alert" [ngClass]="'toast-' + toastType" role="status" aria-live="polite">
+      <div class="toast-icon">
+        @if (toastType === 'success') { <i class="ph ph-check-circle"></i> }
+        @if (toastType === 'info') { <i class="ph ph-info"></i> }
+        @if (toastType === 'warning') { <i class="ph ph-warning-circle"></i> }
+      </div>
+      <span class="toast-text">{{ toastMessage }}</span>
+      <button type="button" class="toast-close" (click)="toastMessage = null" aria-label="Cerrar notificación">
+        <i class="ph ph-x"></i>
+      </button>
+    </div>
+  }
+
+  <!-- Header Principal -->
+  <header class="settings-header">
+    <div class="header-lead">
+      <div class="header-icon-badge">
+        <i class="ph ph-gear-six"></i>
+      </div>
+      <div class="header-headings">
+        <div class="header-tagline">
+          <span class="tagline-dot"></span>
+          <span>Plataforma ReactivA</span>
+        </div>
+        <h1 class="header-title">Configuración</h1>
+        <p class="header-subtitle">Personaliza tu experiencia en ReactivA y administra tus preferencias</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-restore" (click)="showConfirmReset = true" title="Restaurar valores de fábrica">
+        <i class="ph ph-arrow-counter-clockwise"></i>
+        <span>Restaurar por Defecto</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Layout Principal: Barra lateral de Categorías + Contenedor Dinámico -->
+  <div class="settings-body-grid">
+
+    <!-- Navegación por Categorías (Tabs) -->
+    <nav class="settings-nav-sidebar" aria-label="Categorías de Configuración">
+      <div class="nav-cluster">
+        <span class="nav-cluster-label">Preferencias del Sistema</span>
+        <ul class="nav-list">
+          @for (tab of tabs; track tab.id) {
+            <li>
+              <button 
+                type="button" 
+                class="nav-tab-btn" 
+                [class.active]="activeTab === tab.id"
+                (click)="activeTab = tab.id"
+                [attr.aria-selected]="activeTab === tab.id"
+                role="tab">
+                <div class="tab-icon-wrap">
+                  <i class="ph" [ngClass]="tab.icon"></i>
+                </div>
+                <div class="tab-label-wrap">
+                  <span class="tab-title">{{ tab.label }}</span>
+                  <span class="tab-desc">{{ tab.description }}</span>
+                </div>
+                <i class="ph ph-caret-right chevron-icon"></i>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- Card Informativa de Soporte Escolar -->
+      <div class="nav-footer-card">
+        <div class="footer-card-icon">
+          <i class="ph ph-shield-check"></i>
+        </div>
+        <div class="footer-card-text">
+          <strong>Protección FERPA & COPPA</strong>
+          <p>Tus datos educativos están cifrados y validados para entornos escolares.</p>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenido Dinámico según la Categoría Seleccionada -->
+    <main class="settings-content-area" role="tabpanel">
+
+      <!-- ============================================================== -->
+      <!-- CATEGORÍA 1: MI CUENTA -->
+      <!-- ============================================================== -->
+      @if (activeTab === 'account') {
+        <section class="tab-pane-view animate-fade">
+          <div class="pane-header">
+            <div>
+              <h2 class="pane-title">Mi Cuenta</h2>
+              <p class="pane-subtitle">Consulta y actualiza la información básica de tu perfil institucional.</p>
+            </div>
+            @if (!isEditingAccount) {
+              <button type="button" class="btn-action-primary" (click)="startEditingAccount()">
+                <i class="ph ph-pencil-simple"></i>
+                <span>Editar Información</span>
+              </button>
+            }
+          </div>
+
+          <!-- Tarjeta de Perfil y Avatar -->
+          <div class="settings-card user-identity-card">
+            <div class="user-avatar-zone">
+              <div class="avatar-holder">
+                <img [src]="userData.avatarUrl" [alt]="userData.fullName" class="avatar-img" (error)="onAvatarError($event)" />
+                <button type="button" class="avatar-change-overlay" (click)="showAvatarModal = true" title="Cambiar fotografía">
+                  <i class="ph ph-camera"></i>
+                  <span>Cambiar</span>
+                </button>
+              </div>
+              <div class="avatar-actions-sub">
+                <button type="button" class="btn-text-action" (click)="showAvatarModal = true">
+                  <i class="ph ph-image"></i> Cambiar fotografía
+                </button>
+              </div>
+            </div>
+
+            <div class="user-details-zone">
+              @if (!isEditingAccount) {
+                <div class="info-view-stack">
+                  <div class="info-group">
+                    <span class="info-label">Nombre Completo</span>
+                    <strong class="info-value">{{ userData.fullName }}</strong>
+                  </div>
+                  <div class="info-group">
+                    <span class="info-label">Correo Institucional</span>
+                    <span class="info-value text-muted-val">{{ userData.email }}</span>
+                  </div>
+                  <div class="info-group">
+                    <span class="info-label">Nombre de Usuario</span>
+                    <span class="info-value mono-val">&#64;{{ userData.username }}</span>
+                  </div>
+                  <div class="info-group">
+                    <span class="info-label">Rol en ReactivA</span>
+                    <span class="badge-role">{{ userData.role }}</span>
+                  </div>
+                  <div class="info-group">
+                    <span class="info-label">Miembro desde</span>
+                    <span class="info-value text-muted-val">{{ userData.joinDate }}</span>
+                  </div>
+                </div>
+              } @else {
+                <!-- Formulario de Edición en Línea -->
+                <form [formGroup]="accountForm" (ngSubmit)="saveAccountChanges()" class="edit-account-form">
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="fullName">Nombre Completo *</label>
+                      <input id="fullName" type="text" formControlName="fullName" class="form-input" placeholder="Tu nombre y apellidos" />
+                      @if (accountForm.get('fullName')?.invalid && accountForm.get('fullName')?.touched) {
+                        <span class="field-error">Ingresa un nombre válido (mín. 3 caracteres)</span>
+                      }
+                    </div>
+
+                    <div class="form-field">
+                      <label for="username">Nombre de Usuario *</label>
+                      <div class="input-with-affix">
+                        <span class="affix">&#64;</span>
+                        <input id="username" type="text" formControlName="username" class="form-input" placeholder="usuario_lab" />
+                      </div>
+                      @if (accountForm.get('username')?.invalid && accountForm.get('username')?.touched) {
+                        <span class="field-error">El nombre de usuario es obligatorio</span>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="email">Correo Institucional *</label>
+                      <input id="email" type="email" formControlName="email" class="form-input" placeholder="tu.correo@institucion.edu" />
+                      @if (accountForm.get('email')?.invalid && accountForm.get('email')?.touched) {
+                        <span class="field-error">Correo electrónico inválido</span>
+                      }
+                    </div>
+
+                    <div class="form-field">
+                      <label for="role">Rol Educativo</label>
+                      <select id="role" formControlName="role" class="form-select">
+                        <option value="Estudiante (10° Grado)">Estudiante (10° Grado)</option>
+                        <option value="Estudiante (11° Grado)">Estudiante (11° Grado)</option>
+                        <option value="Docente / Tutor de Química">Docente / Tutor de Química</option>
+                        <option value="Investigador / Auxiliar">Investigador / Auxiliar</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-actions-bar">
+                    <button type="button" class="btn-cancel" (click)="cancelEditingAccount()">Cancelar</button>
+                    <button type="submit" class="btn-save" [disabled]="accountForm.invalid">
+                      <i class="ph ph-check"></i>
+                      <span>Guardar Cambios</span>
+                    </button>
+                  </div>
+                </form>
+              }
+            </div>
+          </div>
+
+          <!-- Estado de la Cuenta y Cuota Escolar -->
+          <div class="settings-card meta-status-card">
+            <div class="card-lead-row">
+              <div class="meta-icon-cell">
+                <i class="ph ph-certificate"></i>
+              </div>
+              <div class="meta-text-cell">
+                <h3 class="meta-title">Estado de la Licencia Escolar</h3>
+                <p class="meta-desc">Vinculado al Convenio Institucional ReactivA Ciencias 2024-2025.</p>
+              </div>
+              <span class="meta-tag active-tag">Licencia Activa</span>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ============================================================== -->
+      <!-- CATEGORÍA 2: APARIENCIA -->
+      <!-- ============================================================== -->
+      @if (activeTab === 'appearance') {
+        <section class="tab-pane-view animate-fade">
+          <div class="pane-header">
+            <div>
+              <h2 class="pane-title">Apariencia</h2>
+              <p class="pane-subtitle">Personaliza la presentación visual de ReactivA según tus preferencias de lectura.</p>
+            </div>
+          </div>
+
+          <!-- Selector de Modo de Tema -->
+          <div class="settings-card">
+            <h3 class="section-card-title">Tema de la Plataforma</h3>
+            <p class="section-card-desc">Elige entre una interfaz clara de alto contraste o una experiencia nocturna descansada.</p>
+
+            <div class="theme-options-grid">
+              <!-- Tema Claro -->
+              <div 
+                class="theme-card" 
+                [class.selected]="preferences.theme === 'light'"
+                (click)="setTheme('light')"
+                role="button"
+                tabindex="0">
+                <div class="theme-preview-box light-preview">
+                  <div class="preview-mini-sidebar"></div>
+                  <div class="preview-mini-content">
+                    <div class="mini-bar blue-bar"></div>
+                    <div class="mini-box"></div>
+                  </div>
+                </div>
+                <div class="theme-label-row">
+                  <span class="theme-name">Modo Claro</span>
+                  <i class="ph ph-sun"></i>
+                </div>
+              </div>
+
+              <!-- Tema Oscuro -->
+              <div 
+                class="theme-card" 
+                [class.selected]="preferences.theme === 'dark'"
+                (click)="setTheme('dark')"
+                role="button"
+                tabindex="0">
+                <div class="theme-preview-box dark-preview">
+                  <div class="preview-mini-sidebar"></div>
+                  <div class="preview-mini-content">
+                    <div class="mini-bar purple-bar"></div>
+                    <div class="mini-box"></div>
+                  </div>
+                </div>
+                <div class="theme-label-row">
+                  <span class="theme-name">Modo Oscuro</span>
+                  <i class="ph ph-moon"></i>
+                </div>
+              </div>
+
+              <!-- Tema Sistema -->
+              <div 
+                class="theme-card" 
+                [class.selected]="preferences.theme === 'system'"
+                (click)="setTheme('system')"
+                role="button"
+                tabindex="0">
+                <div class="theme-preview-box system-preview">
+                  <div class="split-side light"></div>
+                  <div class="split-side dark"></div>
+                </div>
+                <div class="theme-label-row">
+                  <span class="theme-name">Automático (Sistema)</span>
+                  <i class="ph ph-laptop"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tamaño de Tipografía -->
+          <div class="settings-card">
+            <h3 class="section-card-title">Tamaño de Fuente</h3>
+            <p class="section-card-desc">Ajusta el tamaño del texto para mejorar la legibilidad en fórmulas y tablas.</p>
+
+            <div class="segmented-control">
+              <button 
+                type="button" 
+                class="segment-btn" 
+                [class.active]="preferences.fontSize === 'sm'"
+                (click)="setFontSize('sm')">
+                <span class="font-indicator sm">A</span>
+                <span>Pequeño</span>
+              </button>
+              <button 
+                type="button" 
+                class="segment-btn" 
+                [class.active]="preferences.fontSize === 'md'"
+                (click)="setFontSize('md')">
+                <span class="font-indicator md">A</span>
+                <span>Mediano (Estándar)</span>
+              </button>
+              <button 
+                type="button" 
+                class="segment-btn" 
+                [class.active]="preferences.fontSize === 'lg'"
+                (click)="setFontSize('lg')">
+                <span class="font-indicator lg">A</span>
+                <span>Grande</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Animaciones y Transiciones -->
+          <div class="settings-card">
+            <div class="toggle-row">
+              <div class="toggle-text">
+                <h4 class="toggle-title">Reducción de Movimiento y Animaciones</h4>
+                <p class="toggle-desc">Minimiza las transiciones y efectos dinámicos en las pantallas para mayor rendimiento o sensibilidad visual.</p>
+              </div>
+              <label class="switch-control">
+                <input 
+                  type="checkbox" 
+                  [checked]="preferences.reduceMotion" 
+                  (change)="togglePreference('reduceMotion')" 
+                  aria-label="Reducción de movimiento" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ============================================================== -->
+      <!-- CATEGORÍA 3: NOTIFICACIONES -->
+      <!-- ============================================================== -->
+      @if (activeTab === 'notifications') {
+        <section class="tab-pane-view animate-fade">
+          <div class="pane-header">
+            <div>
+              <h2 class="pane-title">Notificaciones</h2>
+              <p class="pane-subtitle">Configura los avisos, recordatorios y actualizaciones que deseas recibir.</p>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3 class="section-card-title">Avisos Académicos & Desafíos</h3>
+            <p class="section-card-desc">Controla los eventos sobre tus prácticas de laboratorio y misiones químicas.</p>
+
+            <div class="toggles-list">
+              <div class="toggle-item">
+                <div class="toggle-icon-cell blue-icon">
+                  <i class="ph ph-trophy"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Nuevos Desafíos y Misiones</span>
+                  <p class="toggle-sub">Recibe alertas cuando se habiliten nuevos niveles o retos en Misión Orgánica.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.notifChallenges" (change)="togglePreference('notifChallenges')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell purple-icon">
+                  <i class="ph ph-clock-countdown"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Recordatorios de Prácticas Pendientes</span>
+                  <p class="toggle-sub">Avisos preventivos sobre simulaciones y reportes programados por tu docente.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.notifReminders" (change)="togglePreference('notifReminders')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell amber-icon">
+                  <i class="ph ph-medal"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Logros, Insignias y Rachas</span>
+                  <p class="toggle-sub">Notificación instantánea al desbloquear reconocimientos por tu aprendizaje.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.notifAchievements" (change)="togglePreference('notifAchievements')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell green-icon">
+                  <i class="ph ph-sparkle"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Sugerencias del Asistente Átomo</span>
+                  <p class="toggle-sub">Tips pedagógicos y recomendaciones de estudio personalizadas.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.notifLearningTips" (change)="togglePreference('notifLearningTips')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell gray-icon">
+                  <i class="ph ph-arrows-clockwise"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Actualizaciones de la Plataforma</span>
+                  <p class="toggle-sub">Información sobre nuevas simulaciones 3D e instrumentos virtuales añadidos.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.notifUpdates" (change)="togglePreference('notifUpdates')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ============================================================== -->
+      <!-- CATEGORÍA 4: PRIVACIDAD Y SEGURIDAD -->
+      <!-- ============================================================== -->
+      @if (activeTab === 'privacy') {
+        <section class="tab-pane-view animate-fade">
+          <div class="pane-header">
+            <div>
+              <h2 class="pane-title">Privacidad y Seguridad</h2>
+              <p class="pane-subtitle">Administra la visibilidad de tus datos, sesiones y credenciales de acceso.</p>
+            </div>
+          </div>
+
+          <!-- Visibilidad del Perfil -->
+          <div class="settings-card">
+            <h3 class="section-card-title">Visibilidad del Perfil y Progreso</h3>
+            <p class="section-card-desc">Define quién puede ver tus estadísticas y dominio curricular en ReactivA.</p>
+
+            <div class="radio-cards-grid">
+              <label class="radio-card" [class.selected]="preferences.profileVisibility === 'public'">
+                <input 
+                  type="radio" 
+                  name="visibility" 
+                  value="public" 
+                  [checked]="preferences.profileVisibility === 'public'" 
+                  (change)="preferences.profileVisibility = 'public'; savePreferences()" />
+                <div class="radio-content">
+                  <div class="radio-top">
+                    <i class="ph ph-globe"></i>
+                    <strong>Público Escolar</strong>
+                  </div>
+                  <p>Visible para docentes y compañeros de tu institución.</p>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="preferences.profileVisibility === 'institutional'">
+                <input 
+                  type="radio" 
+                  name="visibility" 
+                  value="institutional" 
+                  [checked]="preferences.profileVisibility === 'institutional'" 
+                  (change)="preferences.profileVisibility = 'institutional'; savePreferences()" />
+                <div class="radio-content">
+                  <div class="radio-top">
+                    <i class="ph ph-buildings"></i>
+                    <strong>Solo Mi Cátedra</strong>
+                  </div>
+                  <p>Visible únicamente para tu profesor titular y tutores asignados.</p>
+                </div>
+              </label>
+
+              <label class="radio-card" [class.selected]="preferences.profileVisibility === 'private'">
+                <input 
+                  type="radio" 
+                  name="visibility" 
+                  value="private" 
+                  [checked]="preferences.profileVisibility === 'private'" 
+                  (change)="preferences.profileVisibility = 'private'; savePreferences()" />
+                <div class="radio-content">
+                  <div class="radio-top">
+                    <i class="ph ph-lock"></i>
+                    <strong>Privado</strong>
+                  </div>
+                  <p>Ocultar historial de prácticas de compañeros.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Seguridad de la Cuenta & Contraseña -->
+          <div class="settings-card">
+            <h3 class="section-card-title">Credenciales y Acceso Seguro</h3>
+            <p class="section-card-desc">Mantén tu cuenta protegida y gestiona tus contraseñas institucionales.</p>
+
+            <div class="security-actions-list">
+              <div class="action-item">
+                <div class="action-meta">
+                  <strong>Contraseña de Acceso</strong>
+                  <p>Última actualización registrada hace 45 días.</p>
+                </div>
+                <button type="button" class="btn-outline-primary" (click)="openPasswordModal()">
+                  <i class="ph ph-key"></i> Cambiar Contraseña
+                </button>
+              </div>
+
+              <div class="action-item">
+                <div class="action-meta">
+                  <strong>Sesiones Abiertas</strong>
+                  <p>Estás conectado desde este navegador (macOS • Chrome).</p>
+                </div>
+                <button type="button" class="btn-outline-danger" (click)="closeOtherSessions()">
+                  <i class="ph ph-sign-out"></i> Cerrar otras sesiones
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Zona de Peligro / Acciones Importantes -->
+          <div class="settings-card danger-zone-card">
+            <div class="danger-header">
+              <i class="ph ph-warning-octagon"></i>
+              <div>
+                <h4 class="danger-title">Zona de Gestión Institucional</h4>
+                <p class="danger-desc">Las solicitudes de baja requieren autorización formal de la secretaría académica.</p>
+              </div>
+            </div>
+            <button type="button" class="btn-danger-ghost" (click)="showDeleteConfirmModal = true">
+              Solicitar Eliminación de Cuenta
+            </button>
+          </div>
+        </section>
+      }
+
+      <!-- ============================================================== -->
+      <!-- CATEGORÍA 5: PREFERENCIAS DE APRENDIZAJE -->
+      <!-- ============================================================== -->
+      @if (activeTab === 'learning') {
+        <section class="tab-pane-view animate-fade">
+          <div class="pane-header">
+            <div>
+              <h2 class="pane-title">Preferencias de Aprendizaje</h2>
+              <p class="pane-subtitle">Adapta el ritmo, dificultad y enfoque pedagógico de tus prácticas de química.</p>
+            </div>
+          </div>
+
+          <!-- Área favorita -->
+          <div class="settings-card">
+            <h3 class="section-card-title">Rama Química de Mayor Interés</h3>
+            <p class="section-card-desc">Priorizaremos misiones y recomendaciones relacionadas con este campo en tu Dashboard.</p>
+
+            <div class="select-field-wrap">
+              <select 
+                class="form-select custom-select" 
+                [(ngModel)]="preferences.favoriteBranch" 
+                (ngModelChange)="savePreferences()"
+                aria-label="Rama favorita de química">
+                <option value="Química General e Inorgánica">Química General e Inorgánica</option>
+                <option value="Tabla Periódica & Modelos Atómicos">Tabla Periódica & Modelos Atómicos</option>
+                <option value="Estequiometría y Balanceo Redox">Estequiometría y Balanceo Redox</option>
+                <option value="Química Orgánica & Hidrocarburos">Química Orgánica & Hidrocarburos (Misión Orgánica)</option>
+                <option value="Termoquímica y Cinética de Gases">Termoquímica y Cinética de Gases</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Nivel de Dificultad Preferido -->
+          <div class="settings-card">
+            <h3 class="section-card-title">Nivel de Reto Inicial</h3>
+            <p class="section-card-desc">Selecciona la complejidad de los ejercicios sugeridos para tu autoaprendizaje.</p>
+
+            <div class="difficulty-pills-row">
+              <button 
+                type="button" 
+                class="diff-pill diff-green" 
+                [class.selected]="preferences.preferredDifficulty === 'basico'"
+                (click)="setDifficulty('basico')">
+                <i class="ph ph-seedling"></i>
+                <div class="pill-text">
+                  <strong>Básico</strong>
+                  <span>Conceptos y fundamentos</span>
+                </div>
+              </button>
+
+              <button 
+                type="button" 
+                class="diff-pill diff-blue" 
+                [class.selected]="preferences.preferredDifficulty === 'intermedio'"
+                (click)="setDifficulty('intermedio')">
+                <i class="ph ph-test-tube"></i>
+                <div class="pill-text">
+                  <strong>Intermedio</strong>
+                  <span>Fórmulas y mecanismos</span>
+                </div>
+              </button>
+
+              <button 
+                type="button" 
+                class="diff-pill diff-purple" 
+                [class.selected]="preferences.preferredDifficulty === 'avanzado'"
+                (click)="setDifficulty('avanzado')">
+                <i class="ph ph-atom"></i>
+                <div class="pill-text">
+                  <strong>Avanzado</strong>
+                  <span>IUPAC y síntesis compleja</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Opciones pedagógicas adicionales -->
+          <div class="settings-card">
+            <h3 class="section-card-title">Asistencia Pedagógica en Laboratorio</h3>
+
+            <div class="toggles-list">
+              <div class="toggle-item">
+                <div class="toggle-icon-cell purple-icon">
+                  <i class="ph ph-speaker-high"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Sonidos de Retroalimentación en Reacciones</span>
+                  <p class="toggle-sub">Efectos auditivos sutiles al completar balanceos o combinaciones moleculares.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.audioFeedback" (change)="togglePreference('audioFeedback')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell blue-icon">
+                  <i class="ph ph-lightbulb"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Mostrar Explicación Paso a Paso Inmediata</span>
+                  <p class="toggle-sub">Despliega el fundamento teórico justo después de resolver cada pregunta.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.autoStepSolutions" (change)="togglePreference('autoStepSolutions')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ============================================================== -->
+      <!-- CATEGORÍA 6: ACCESIBILIDAD -->
+      <!-- ============================================================== -->
+      @if (activeTab === 'accessibility') {
+        <section class="tab-pane-view animate-fade">
+          <div class="pane-header">
+            <div>
+              <h2 class="pane-title">Accesibilidad</h2>
+              <p class="pane-subtitle">Configuraciones que garantizan una navegación inclusiva, cómoda y accesible.</p>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="toggles-list">
+              <div class="toggle-item">
+                <div class="toggle-icon-cell blue-icon">
+                  <i class="ph ph-contrast"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Modo de Alto Contraste</span>
+                  <p class="toggle-sub">Refuerza bordes, divisores y colores de texto para usuarios con baja visión.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.highContrast" (change)="togglePreference('highContrast')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell green-icon">
+                  <i class="ph ph-text-aa"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Fuente Amigable para Dislexia</span>
+                  <p class="toggle-sub">Aumenta el espaciado entre letras y la distinción de caracteres similares (C, O, G, 0).</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.dyslexicFont" (change)="togglePreference('dyslexicFont')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell amber-icon">
+                  <i class="ph ph-hand-pointing"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Áreas de Clic Ampliadas</span>
+                  <p class="toggle-sub">Botones e interruptores con mayor zona táctil para pantallas táctiles y ratones sensibles.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.largeInteractiveTargets" (change)="togglePreference('largeInteractiveTargets')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-icon-cell purple-icon">
+                  <i class="ph ph-ear"></i>
+                </div>
+                <div class="toggle-info-cell">
+                  <span class="toggle-name">Optimización para Lectores de Pantalla</span>
+                  <p class="toggle-sub">Prioriza etiquetas ARIA y descripciones semánticas en la tabla periódica y fórmulas.</p>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" [checked]="preferences.screenReaderOptimized" (change)="togglePreference('screenReaderOptimized')" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+    </main>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- MODALES DE DIÁLOGO Y CONFIRMACIÓN -->
+  <!-- ============================================================== -->
+
+  <!-- Modal: Cambiar Fotografía / Avatar -->
+  @if (showAvatarModal) {
+    <div class="modal-backdrop" (click)="showAvatarModal = false">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster">
+            <i class="ph ph-camera modal-icon"></i>
+            <h3>Seleccionar Fotografía de Perfil</h3>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="showAvatarModal = false" aria-label="Cerrar modal">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <p class="modal-description">Escoge uno de los avatares institucionales predeterminados para tu cuenta:</p>
+          <div class="avatars-gallery">
+            @for (avatar of presetAvatars; track avatar) {
+              <button 
+                type="button" 
+                class="avatar-pick-btn" 
+                [class.active]="userData.avatarUrl === avatar"
+                (click)="selectPresetAvatar(avatar)">
+                <img [src]="avatar" alt="Avatar opción" class="avatar-thumb" />
+                @if (userData.avatarUrl === avatar) {
+                  <span class="check-badge"><i class="ph ph-check"></i></span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="showAvatarModal = false">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal: Cambiar Contraseña -->
+  @if (showPasswordModal) {
+    <div class="modal-backdrop" (click)="closePasswordModal()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster">
+            <i class="ph ph-lock-key modal-icon"></i>
+            <h3>Actualizar Contraseña</h3>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="closePasswordModal()" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" class="modal-form">
+          <div class="modal-body">
+            <div class="form-field">
+              <label for="currentPassword">Contraseña Actual</label>
+              <input id="currentPassword" type="password" formControlName="currentPassword" class="form-input" placeholder="••••••••" />
+              @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
+                <span class="field-error">Ingresa tu contraseña actual (mín. 6 caracteres)</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="newPassword">Nueva Contraseña</label>
+              <input id="newPassword" type="password" formControlName="newPassword" class="form-input" placeholder="Mínimo 8 caracteres" />
+              @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+                <span class="field-error">La nueva contraseña debe tener al menos 8 caracteres</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="confirmNewPassword">Confirmar Nueva Contraseña</label>
+              <input id="confirmNewPassword" type="password" formControlName="confirmNewPassword" class="form-input" placeholder="Repite la nueva contraseña" />
+              @if (passwordForm.get('confirmNewPassword')?.invalid && passwordForm.get('confirmNewPassword')?.touched) {
+                <span class="field-error">La confirmación es obligatoria</span>
+              }
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closePasswordModal()">Cancelar</button>
+            <button type="submit" class="btn-save" [disabled]="passwordForm.invalid">Actualizar Contraseña</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal: Confirmar Restauración -->
+  @if (showConfirmReset) {
+    <div class="modal-backdrop" (click)="showConfirmReset = false">
+      <div class="modal-box modal-sm" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster warning-title">
+            <i class="ph ph-arrow-counter-clockwise modal-icon"></i>
+            <h3>Restaurar Preferencias</h3>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="showConfirmReset = false" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas restablecer todas las configuraciones visuales, de notificaciones y accesibilidad a sus valores predeterminados?</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="showConfirmReset = false">Cancelar</button>
+          <button type="button" class="btn-action-primary" (click)="resetToDefaults()">Sí, Restaurar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal: Solicitar Eliminación de Cuenta -->
+  @if (showDeleteConfirmModal) {
+    <div class="modal-backdrop" (click)="showDeleteConfirmModal = false">
+      <div class="modal-box modal-sm" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster danger-title">
+            <i class="ph ph-warning-octagon modal-icon"></i>
+            <h3>Solicitud de Baja</h3>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="showDeleteConfirmModal = false" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <p>Esta acción notificará al Administrador Escolar de ReactivA para procesar la baja de tu expediente de laboratorio. ¿Deseas enviar la solicitud formal?</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="showDeleteConfirmModal = false">Cancelar</button>
+          <button type="button" class="btn-danger-solid" (click)="confirmDeleteAccount()">Enviar Solicitud</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
+
