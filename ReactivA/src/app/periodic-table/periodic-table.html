@@ -139,6 +139,211 @@
           }
         </div>
       </div>
+      <!-- ======================================================== -->
+      <!-- TARJETA DE DETALLE DEL ELEMENTO (UBICADA ABAJO DE LA TABLA) -->
+      <!-- ======================================================== -->
+      @if (selectedElement) {
+        <section id="element-detail-section" class="element-detail-card" aria-label="Detalles del elemento seleccionado">
+          <!-- Cabecera de la Tarjeta con Botón de Cierre -->
+          <div class="detail-card-header">
+            <div class="panel-tag">
+              <i class="ph ph-info"></i>
+              <span>Detalle Químico</span>
+              <span class="tag-hint">· Estructura atómica y propiedades de {{ selectedElement.name }} ({{ selectedElement.symbol }})</span>
+            </div>
+            <button
+              type="button"
+              class="btn-close-detail"
+              (click)="selectedElement = null"
+              title="Cerrar detalle"
+              aria-label="Cerrar detalle"
+            >
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+
+          <div class="detail-card-grid">
+            <!-- Columna 1: Tarjeta Hero del Elemento + Botón de Acción -->
+            <div class="detail-col hero-col">
+              <div class="element-hero-card" [ngClass]="selectedElement.category">
+                <div class="hero-top">
+                  <span class="hero-number">No. {{ selectedElement.number }}</span>
+                  <span class="hero-category-badge">{{ selectedElement.subCategory }}</span>
+                </div>
+                <div class="hero-main">
+                  <h2 class="hero-symbol">{{ selectedElement.symbol }}</h2>
+                  <div class="hero-titles">
+                    <h3 class="hero-name">{{ selectedElement.name }}</h3>
+                    <span class="hero-series">{{ selectedElement.subCategory }} · Periodo {{ selectedElement.period }}</span>
+                  </div>
+                </div>
+                <p class="hero-summary">{{ selectedElement.summary }}</p>
+              </div>
+
+              <!-- Botón de Acción Integrado al Virtual Lab -->
+              <div class="panel-actions">
+                <button type="button" class="btn-action-lab" title="Simular elemento en el Laboratorio Virtual">
+                  <i class="ph ph-flask"></i>
+                  <span>Experimentar con {{ selectedElement.symbol }} en 3D</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Columna 2: Visor del Modelo Atómico Interactivo (Interactive Bohr Model) -->
+            <div class="detail-col bohr-col">
+              <section class="bohr-model-section">
+                <div class="section-title">
+                  <div class="title-with-icon">
+                    <i class="ph ph-atom"></i>
+                    <h4>Modelo de Bohr Interactivo</h4>
+                  </div>
+                  <span class="shells-count">{{ selectedElement.shells.length }} Capas Electrónicas</span>
+                </div>
+
+                <div class="bohr-canvas-container">
+                  <svg
+                    class="bohr-svg"
+                    viewBox="0 0 200 200"
+                    width="100%"
+                    height="210"
+                    role="img"
+                    aria-label="Representación orbital del átomo según el modelo de Bohr"
+                  >
+                    <!-- Gradientes y filtros para efectos cuánticos -->
+                    <defs>
+                      <radialGradient id="nucleusGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#60a5fa" />
+                        <stop offset="60%" stop-color="#2563eb" />
+                        <stop offset="100%" stop-color="#1e3a8a" />
+                      </radialGradient>
+                      <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="2.5" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                      </filter>
+                    </defs>
+
+                    <!-- Órbitas / Capas concéntricas -->
+                    @for (electrons of selectedElement.shells; track $index) {
+                      <!-- Anillo orbital -->
+                      <circle
+                        class="orbit-ring"
+                        cx="100"
+                        cy="100"
+                        [attr.r]="getShellRadius($index, selectedElement.shells.length)"
+                      />
+
+                      <!-- Electrones distribuidos en la órbita -->
+                      @for (electron of getShellElectrons(electrons, getShellRadius($index, selectedElement.shells.length)); track $index) {
+                        <circle
+                          class="bohr-electron"
+                          [attr.cx]="electron.cx"
+                          [attr.cy]="electron.cy"
+                          r="3.2"
+                          filter="url(#glowEffect)"
+                        />
+                      }
+                    }
+
+                    <!-- Núcleo Atómico Central -->
+                    <circle class="nucleus-core" cx="100" cy="100" r="19" fill="url(#nucleusGradient)" filter="url(#glowEffect)" />
+                    <text class="nucleus-symbol" x="100" y="105" text-anchor="middle">{{ selectedElement.symbol }}</text>
+                  </svg>
+                </div>
+
+                <!-- Indicador de distribución de electrones por capa cuántica (K, L, M, N...) -->
+                <div class="shells-distribution">
+                  <span class="shells-label">Distribución de electrones:</span>
+                  <div class="shells-chips">
+                    @for (electrons of selectedElement.shells; track $index) {
+                      <span class="shell-pill">
+                        <small>n={{ $index + 1 }}</small>
+                        <strong>{{ electrons }}e⁻</strong>
+                      </span>
+                    }
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- Columna 3: Configuración Electrónica y Propiedades Físicas -->
+            <div class="detail-col properties-col">
+              <!-- Configuración Electrónica Destacada -->
+              <section class="electron-config-section">
+                <div class="section-title">
+                  <div class="title-with-icon">
+                    <i class="ph ph-brackets-curly"></i>
+                    <h4>Configuración Electrónica</h4>
+                  </div>
+                  <span class="config-state-badge">Estado Fundamental</span>
+                </div>
+                <div class="config-display-card">
+                  <code class="config-formula">{{ selectedElement.electronConfig }}</code>
+                  <span class="config-electrons-total">
+                    Total: <strong>{{ selectedElement.number }} e⁻</strong>
+                  </span>
+                </div>
+              </section>
+
+              <!-- Sub-grid 2x2 de Propiedades Físicas -->
+              <section class="physical-properties-section">
+                <div class="section-title">
+                  <div class="title-with-icon">
+                    <i class="ph ph-thermometer-simple"></i>
+                    <h4>Propiedades Físicas</h4>
+                  </div>
+                  <span class="phase-badge">{{ selectedElement.phase || 'Solid' }}</span>
+                </div>
+
+                <div class="properties-2x2-grid">
+                  <!-- Masa Atómica -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-scales"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Masa Atómica</span>
+                      <strong class="prop-value">{{ selectedElement.atomicMass }}</strong>
+                    </div>
+                  </div>
+
+                  <!-- Densidad -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-cube"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Densidad</span>
+                      <strong class="prop-value">{{ selectedElement.density }}</strong>
+                    </div>
+                  </div>
+
+                  <!-- Punto de Fusión -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-thermometer-hot"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Punto de Fusión</span>
+                      <strong class="prop-value">{{ selectedElement.meltingPoint }}</strong>
+                    </div>
+                  </div>
+
+                  <!-- Punto de Ebullición -->
+                  <div class="property-card">
+                    <div class="prop-icon-box">
+                      <i class="ph ph-flame"></i>
+                    </div>
+                    <div class="prop-info">
+                      <span class="prop-label">Punto de Ebullición</span>
+                      <strong class="prop-value">{{ selectedElement.boilingPoint }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      }
     }
 
     <!-- ======================================================== -->
@@ -293,198 +498,4 @@
       </section>
     }
   </main>
-
-  <!-- Panel Lateral de Detalle del Elemento Fijo a la Derecha (Visible en modo Tabla) -->
-  @if (activeTab === 'table' && selectedElement) {
-    <aside class="element-detail-sidebar" aria-label="Detalles del elemento seleccionado">
-      <!-- Cabecera del Panel con Botón de Cierre -->
-      <div class="panel-header">
-        <div class="panel-tag">
-          <i class="ph ph-info"></i>
-          <span>Detalle Químico</span>
-        </div>
-        <button
-          type="button"
-          class="btn-close-detail"
-          (click)="selectedElement = null"
-          title="Cerrar panel de detalle"
-          aria-label="Cerrar panel de detalle"
-        >
-          <i class="ph ph-x"></i>
-        </button>
-      </div>
-
-      <!-- Tarjeta Hero del Elemento Seleccionado -->
-      <div class="element-hero-card" [ngClass]="selectedElement.category">
-        <div class="hero-top">
-          <span class="hero-number">No. {{ selectedElement.number }}</span>
-          <span class="hero-category-badge">{{ selectedElement.subCategory }}</span>
-        </div>
-        <div class="hero-main">
-          <h2 class="hero-symbol">{{ selectedElement.symbol }}</h2>
-          <div class="hero-titles">
-            <h3 class="hero-name">{{ selectedElement.name }}</h3>
-            <span class="hero-series">{{ selectedElement.subCategory }} · Periodo {{ selectedElement.period }}</span>
-          </div>
-        </div>
-        <p class="hero-summary">{{ selectedElement.summary }}</p>
-      </div>
-
-      <!-- Visor del Modelo Atómico Interactivo (Interactive Bohr Model) -->
-      <section class="bohr-model-section">
-        <div class="section-title">
-          <div class="title-with-icon">
-            <i class="ph ph-atom"></i>
-            <h4>Modelo de Bohr Interactivo</h4>
-          </div>
-          <span class="shells-count">{{ selectedElement.shells.length }} Capas Electrónicas</span>
-        </div>
-
-        <div class="bohr-canvas-container">
-          <svg
-            class="bohr-svg"
-            viewBox="0 0 200 200"
-            width="100%"
-            height="210"
-            role="img"
-            aria-label="Representación orbital del átomo según el modelo de Bohr"
-          >
-            <!-- Gradientes y filtros para efectos cuánticos -->
-            <defs>
-              <radialGradient id="nucleusGradient" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#60a5fa" />
-                <stop offset="60%" stop-color="#2563eb" />
-                <stop offset="100%" stop-color="#1e3a8a" />
-              </radialGradient>
-              <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="2.5" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-
-            <!-- Órbitas / Capas concéntricas -->
-            @for (electrons of selectedElement.shells; track $index) {
-              <!-- Anillo orbital -->
-              <circle
-                class="orbit-ring"
-                cx="100"
-                cy="100"
-                [attr.r]="getShellRadius($index, selectedElement.shells.length)"
-              />
-
-              <!-- Electrones distribuidos en la órbita -->
-              @for (electron of getShellElectrons(electrons, getShellRadius($index, selectedElement.shells.length)); track $index) {
-                <circle
-                  class="bohr-electron"
-                  [attr.cx]="electron.cx"
-                  [attr.cy]="electron.cy"
-                  r="3.2"
-                  filter="url(#glowEffect)"
-                />
-              }
-            }
-
-            <!-- Núcleo Atómico Central -->
-            <circle class="nucleus-core" cx="100" cy="100" r="19" fill="url(#nucleusGradient)" filter="url(#glowEffect)" />
-            <text class="nucleus-symbol" x="100" y="105" text-anchor="middle">{{ selectedElement.symbol }}</text>
-          </svg>
-        </div>
-
-        <!-- Indicador de distribución de electrones por capa cuántica (K, L, M, N...) -->
-        <div class="shells-distribution">
-          <span class="shells-label">Distribución de electrones:</span>
-          <div class="shells-chips">
-            @for (electrons of selectedElement.shells; track $index) {
-              <span class="shell-pill">
-                <small>n={{ $index + 1 }}</small>
-                <strong>{{ electrons }}e⁻</strong>
-              </span>
-            }
-          </div>
-        </div>
-      </section>
-
-      <!-- Configuración Electrónica Destacada -->
-      <section class="electron-config-section">
-        <div class="section-title">
-          <div class="title-with-icon">
-            <i class="ph ph-brackets-curly"></i>
-            <h4>Configuración Electrónica</h4>
-          </div>
-          <span class="config-state-badge">Estado Fundamental</span>
-        </div>
-        <div class="config-display-card">
-          <code class="config-formula">{{ selectedElement.electronConfig }}</code>
-          <span class="config-electrons-total">
-            Total: <strong>{{ selectedElement.number }} e⁻</strong>
-          </span>
-        </div>
-      </section>
-
-      <!-- Sub-grid 2x2 de Propiedades Físicas -->
-      <section class="physical-properties-section">
-        <div class="section-title">
-          <div class="title-with-icon">
-            <i class="ph ph-thermometer-simple"></i>
-            <h4>Propiedades Físicas</h4>
-          </div>
-          <span class="phase-badge">{{ selectedElement.phase || 'Solid' }}</span>
-        </div>
-
-        <div class="properties-2x2-grid">
-          <!-- Masa Atómica -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-scales"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Masa Atómica</span>
-              <strong class="prop-value">{{ selectedElement.atomicMass }}</strong>
-            </div>
-          </div>
-
-          <!-- Densidad -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-cube"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Densidad</span>
-              <strong class="prop-value">{{ selectedElement.density }}</strong>
-            </div>
-          </div>
-
-          <!-- Punto de Fusión -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-thermometer-hot"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Punto de Fusión</span>
-              <strong class="prop-value">{{ selectedElement.meltingPoint }}</strong>
-            </div>
-          </div>
-
-          <!-- Punto de Ebullición -->
-          <div class="property-card">
-            <div class="prop-icon-box">
-              <i class="ph ph-flame"></i>
-            </div>
-            <div class="prop-info">
-              <span class="prop-label">Punto de Ebullición</span>
-              <strong class="prop-value">{{ selectedElement.boilingPoint }}</strong>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Botón de Acción Integrado al Virtual Lab -->
-      <div class="panel-actions">
-        <button type="button" class="btn-action-lab" title="Simular elemento en el Laboratorio Virtual">
-          <i class="ph ph-flask"></i>
-          <span>Experimentar con {{ selectedElement.symbol }} en 3D</span>
-        </button>
-      </div>
-    </aside>
-  }
 </div>
