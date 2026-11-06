@@ -19,6 +19,17 @@ export const routes: Routes = [
     loadComponent: () => import('./virtual-lab/virtual-lab').then(m => m.VirtualLabComponent)
   },
 
+  // Ruta de la Tabla Periódica (Dentro del Layout con Sidebar)
+  {
+    path: 'periodic-table',
+    loadComponent: () => import('./periodic-table/periodic-table').then(m => m.PeriodicTableComponent)
+  },
+  {
+    path: 'tabla-periodica',
+    redirectTo: 'periodic-table',
+    pathMatch: 'full'
+  },
+
   // Redirecciones por defecto con las rutas existentes
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
