@@ -1,5 +1,6 @@
 <div class="help-page">
-  <!-- Toast Informativo Flotante -->
+
+  <!-- Toast Informativo -->
   @if (toastMessage) {
     <div class="toast-banner" role="status" aria-live="polite">
       <i class="ph ph-check-circle toast-icon"></i>
@@ -7,125 +8,37 @@
     </div>
   }
 
-  <!-- 1. Encabezado Principal y Buscador de Ayuda -->
-  <header class="help-hero-banner">
-    <div class="hero-content">
-      <div class="badge-pill">
-        <i class="ph ph-lightbulb"></i>
-        <span>Base de Conocimiento & Soporte Estudiantil</span>
-      </div>
-      <h1 class="hero-title">Centro de Ayuda y Soporte 💡</h1>
-      <p class="hero-subtitle">
-        ¿Tienes dudas sobre cómo usar ReactivA? Encuentra guías rápidas, tutoriales y respuestas a preguntas frecuentes sobre laboratorios, simulaciones y evaluaciones.
+  <!-- 1. Encabezado Simple y Limpio -->
+  <header class="help-header">
+    <div class="help-header-icon">
+      <i class="ph ph-question"></i>
+    </div>
+    <div class="help-header-text">
+      <h1 class="help-title">Guía de Ayuda y Preguntas Frecuentes</h1>
+      <p class="help-subtitle">
+        Todo lo que necesitas saber para aprovechar al máximo los módulos de ReactivA: Virtual Lab, Tabla Periódica, Misión Orgánica y tu Perfil Académico.
       </p>
-
-      <!-- Buscador Interactivo en Tiempo Real -->
-      <div class="search-box-wrapper">
-        <div class="search-bar">
-          <i class="ph ph-magnifying-glass search-icon"></i>
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            placeholder="Buscar en la ayuda (ej. balanceo, estequiometría, puntos XP, PDF, notas...)"
-            class="search-input"
-            aria-label="Buscar en la ayuda"
-          />
-          @if (searchQuery) {
-            <button
-              type="button"
-              class="btn-clear-search"
-              (click)="clearSearch()"
-              title="Borrar búsqueda"
-              aria-label="Borrar búsqueda">
-              <i class="ph ph-x"></i>
-            </button>
-          }
-        </div>
-
-        <!-- Filtros Rápidos por Categoría -->
-        <div class="category-pills-row" role="tablist">
-          <button
-            type="button"
-            class="pill-filter"
-            [class.active]="selectedCategory === 'all'"
-            (click)="filterByCategory('all')">
-            <span>Todos los temas</span>
-          </button>
-          <button
-            type="button"
-            class="pill-filter"
-            [class.active]="selectedCategory === 'virtual-lab'"
-            (click)="filterByCategory('virtual-lab')">
-            <i class="ph ph-test-tube"></i>
-            <span>Simulador & Virtual Lab</span>
-          </button>
-          <button
-            type="button"
-            class="pill-filter"
-            [class.active]="selectedCategory === 'periodic-table'"
-            (click)="filterByCategory('periodic-table')">
-            <i class="ph ph-table"></i>
-            <span>Tabla Periódica</span>
-          </button>
-          <button
-            type="button"
-            class="pill-filter"
-            [class.active]="selectedCategory === 'organic-mission'"
-            (click)="filterByCategory('organic-mission')">
-            <i class="ph ph-tree-structure"></i>
-            <span>Misión Orgánica</span>
-          </button>
-          <button
-            type="button"
-            class="pill-filter"
-            [class.active]="selectedCategory === 'account'"
-            (click)="filterByCategory('account')">
-            <i class="ph ph-user-circle"></i>
-            <span>Perfil & Notas</span>
-          </button>
-        </div>
-      </div>
     </div>
   </header>
 
-  <!-- 2. Categorías de Ayuda Rápida (Grid de Tarjetas Accesibles) -->
-  <section class="section-container" aria-label="Categorías de ayuda rápida">
-    <div class="section-header">
-      <div class="section-title-wrap">
-        <h2 class="section-title">Categorías de Ayuda Rápida</h2>
-        <p class="section-subtitle">Explora las guías por cada módulo de la plataforma ReactivA</p>
-      </div>
-    </div>
-
+  <!-- 2. Categorías de Ayuda Rápida (Grid de 4 Cards) -->
+  <section class="section-block" aria-label="Categorías de ayuda rápida">
+    <h2 class="section-heading">Módulos de la Plataforma</h2>
     <div class="categories-grid">
       @for (cat of categories; track cat.id) {
         <article class="category-card" [ngClass]="'theme-' + cat.colorTheme">
-          <div class="cat-card-header">
-            <div class="cat-icon-cell">
-              <i [class]="cat.icon"></i>
-            </div>
-            <button
-              type="button"
-              class="cat-filter-btn"
-              [class.active-cat]="selectedCategory === cat.id"
-              (click)="filterByCategory(cat.id)"
-              title="Filtrar preguntas de este tema">
-              <i class="ph ph-funnel"></i>
-              <span>Filtrar</span>
-            </button>
+          <div class="cat-icon-cell">
+            <i [class]="cat.icon"></i>
           </div>
-
-          <h3 class="cat-card-title">{{ cat.title }}</h3>
-          <p class="cat-card-desc">{{ cat.description }}</p>
-
+          <h3 class="cat-title">{{ cat.title }}</h3>
+          <p class="cat-desc">{{ cat.description }}</p>
           <div class="cat-tags-row">
             @for (tag of cat.tags; track tag) {
               <span class="tag-chip">{{ tag }}</span>
             }
           </div>
-
-          <div class="cat-card-footer">
-            <a [routerLink]="cat.linkRoute" class="cat-nav-link">
+          <div class="cat-footer">
+            <a [routerLink]="cat.linkRoute" class="cat-link">
               <span>Ir al módulo</span>
               <i class="ph ph-arrow-right"></i>
             </a>
@@ -135,269 +48,87 @@
     </div>
   </section>
 
-  <!-- 3. Guía Rápida de Simulación (Tutorial en Pasos 1-2-3) -->
-  <section class="section-container tutorial-section" aria-label="Tutorial de simulación">
-    <div class="section-header">
-      <div class="section-title-wrap">
-        <div class="section-badge">
-          <i class="ph ph-compass"></i>
-          <span>Tutorial Interactivo</span>
-        </div>
-        <h2 class="section-title">Guía Rápida de Simulación en Laboratorio</h2>
-        <p class="section-subtitle">
-          Flujo metodológico de 3 pasos para completar tus prácticas experimentales y obtener la mejor calificación
-        </p>
-      </div>
-    </div>
-
+  <!-- 3. Guía Rápida de Uso (Tutorial 1-2-3) -->
+  <section class="section-block" aria-label="Guía rápida de simulación">
+    <h2 class="section-heading">Guía Rápida de Simulación</h2>
+    <p class="section-subheading">Flujo de 3 pasos para completar tus prácticas y obtener la mejor calificación</p>
     <div class="steps-grid">
-      @for (step of simulationSteps; track step.stepNumber) {
-        <div class="step-card" [ngClass]="'step-theme-' + step.colorTheme">
-          <div class="step-card-lead">
-            <span class="step-badge-number">{{ step.stepBadge }}</span>
+      @for (step of guideSteps; track step.stepBadge) {
+        <div class="step-card" [ngClass]="'step-' + step.colorTheme">
+          <div class="step-lead">
+            <span class="step-badge">{{ step.stepBadge }}</span>
             <div class="step-icon-wrap">
               <i [class]="step.icon"></i>
             </div>
           </div>
+          <span class="step-sub">{{ step.subtitle }}</span>
+          <h3 class="step-title">{{ step.title }}</h3>
+          <p class="step-desc">{{ step.description }}</p>
+          <div class="step-tip">
+            <i class="ph ph-lightbulb tip-icon"></i>
+            <span>{{ step.tip }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
 
-          <div class="step-card-body">
-            <span class="step-sub">{{ step.subtitle }}</span>
-            <h3 class="step-title">{{ step.title }}</h3>
-            <p class="step-description">{{ step.description }}</p>
+  <!-- 4. Preguntas Frecuentes (Acordeón) -->
+  <section class="section-block faq-block" aria-label="Preguntas Frecuentes">
+    <h2 class="section-heading">Preguntas Frecuentes (FAQ)</h2>
+    <p class="section-subheading">Respuestas paso a paso a las dudas más comunes sobre la plataforma</p>
 
-            <div class="step-tip-box">
-              <i class="ph ph-lightbulb tip-icon"></i>
-              <span class="tip-text">{{ step.tip }}</span>
+    <div class="faq-list">
+      @for (faq of faqs; track faq.id) {
+        <article class="faq-item" [class.is-open]="faq.isOpen">
+          <button
+            type="button"
+            class="faq-btn"
+            (click)="toggleFaq(faq.id)"
+            [attr.aria-expanded]="faq.isOpen">
+            <div class="faq-question-block">
+              <span class="faq-label">{{ faq.categoryLabel }}</span>
+              <h3 class="faq-question">{{ faq.question }}</h3>
             </div>
-          </div>
-        </div>
-      }
-    </div>
-  </section>
-
-  <!-- 4. Preguntas Frecuentes (Acordeón Interactivo / FAQ) -->
-  <section class="section-container faq-section" aria-label="Preguntas Frecuentes">
-    <div class="section-header">
-      <div class="section-title-wrap">
-        <h2 class="section-title">Preguntas Frecuentes (FAQ)</h2>
-        <p class="section-subtitle">
-          Respuestas paso a paso a las dudas más comunes sobre balanceo, notas, puntos y el simulador
-        </p>
-      </div>
-      @if (searchQuery || selectedCategory !== 'all') {
-        <div class="active-filter-indicator">
-          <span class="filter-caption">
-            Mostrando <strong>{{ filteredFaqs.length }}</strong> resultado(s)
-            @if (searchQuery) {
-              para "<em>{{ searchQuery }}</em>"
-            }
-          </span>
-          <button type="button" class="btn-reset-filters" (click)="clearSearch(); filterByCategory('all')">
-            <i class="ph ph-arrows-counter-clockwise"></i>
-            <span>Ver todas</span>
+            <div class="faq-caret">
+              <i class="ph" [class.ph-caret-down]="!faq.isOpen" [class.ph-caret-up]="faq.isOpen"></i>
+            </div>
           </button>
-        </div>
+          @if (faq.isOpen) {
+            <div class="faq-body" [innerHTML]="faq.answerHtml"></div>
+          }
+        </article>
       }
     </div>
-
-    @if (filteredFaqs.length > 0) {
-      <div class="faq-accordion-list">
-        @for (faq of filteredFaqs; track faq.id) {
-          <article class="faq-accordion-item" [class.is-open]="faq.isOpen">
-            <button
-              type="button"
-              class="faq-header-btn"
-              (click)="toggleFaq(faq.id)"
-              [attr.aria-expanded]="faq.isOpen">
-              <div class="faq-question-lead">
-                <span class="faq-cat-badge">{{ faq.categoryLabel }}</span>
-                <h3 class="faq-question-text">{{ faq.question }}</h3>
-              </div>
-              <div class="faq-caret-cell">
-                <i class="ph" [class.ph-caret-down]="!faq.isOpen" [class.ph-caret-up]="faq.isOpen"></i>
-              </div>
-            </button>
-
-            @if (faq.isOpen) {
-              <div class="faq-content-body" [innerHTML]="faq.answerHtml"></div>
-            }
-          </article>
-        }
-      </div>
-    } @else {
-      <!-- Estado Vacío Cuando no hay Coincidencias -->
-      <div class="faq-empty-state">
-        <div class="empty-icon-cell">
-          <i class="ph ph-magnifying-glass"></i>
-        </div>
-        <h3>No encontramos resultados para tu búsqueda</h3>
-        <p>Intenta con otras palabras clave (ej. "balanceo", "notas", "reactivos", "atomo") o restablece los filtros.</p>
-        <button type="button" class="btn-clear-all" (click)="clearSearch(); filterByCategory('all')">
-          <i class="ph ph-arrows-counter-clockwise"></i>
-          <span>Restablecer Búsqueda</span>
-        </button>
-      </div>
-    }
   </section>
 
-  <!-- 5. Tarjeta de Asistencia Directa y Soporte -->
-  <section class="support-action-banner">
-    <div class="support-banner-content">
-      <div class="support-avatar-symbol">
-        <i class="ph ph-robot"></i>
+  <!-- 5. Footer Institucional -->
+  <footer class="inst-footer">
+    <div class="inst-logo-row">
+      <div class="inst-logo-icon">
+        <i class="ph ph-flask"></i>
       </div>
-      <div class="support-text-block">
-        <h2 class="support-heading">¿Aún tienes dudas pedagógicas o técnicas?</h2>
-        <p class="support-subheading">
-          El <strong>Asistente Átomo</strong> está listo para explicarte conceptos moleculares paso a paso, o puedes enviar una consulta a la cátedra docente.
-        </p>
+      <div>
+        <h2 class="inst-name">ReactivA</h2>
+        <span class="inst-tagline">Plataforma Educativa de Química Interactiva</span>
       </div>
     </div>
-    <div class="support-buttons-group">
-      <a routerLink="/virtual-lab" class="btn-action-assistant">
-        <i class="ph ph-robot"></i>
-        <span>Preguntar a Átomo en Lab</span>
-      </a>
-      <button type="button" class="btn-action-ticket" (click)="openContactModal()">
-        <i class="ph ph-paper-plane-tilt"></i>
-        <span>Enviar Ticket a Soporte</span>
-      </button>
-    </div>
-  </section>
-
-  <!-- 6. Información Institucional del Proyecto Educativo ReactivA -->
-  <footer class="institutional-footer-card">
-    <div class="inst-top-grid">
-      <div class="inst-brand-col">
-        <div class="inst-logo-row">
-          <div class="inst-logo-icon">
-            <i class="ph ph-flask"></i>
-          </div>
-          <div>
-            <h2 class="inst-brand-title">ReactivA</h2>
-            <span class="inst-tagline">Plataforma Educativa de Química Interactiva</span>
-          </div>
-        </div>
-        <p class="inst-summary">
-          Entorno virtual de aprendizaje y simulación 3D diseñado para potenciar el pensamiento científico en estudiantes de Educación Media (Grados 10° y 11°). Cumple con los Estándares Básicos de Competencias en Ciencias Naturales.
-        </p>
+    <p class="inst-desc">
+      Entorno virtual de aprendizaje y simulación 3D para Educación Media (Grados 10° y 11°), alineado con los Estándares Básicos de Competencias en Ciencias Naturales.
+    </p>
+    <div class="inst-meta-row">
+      <div class="inst-meta-item">
+        <i class="ph ph-certificate"></i>
+        <span>Versión v2.4.0 · Edición Curricular 2024–2025</span>
       </div>
-
-      <div class="inst-meta-col">
-        <div class="inst-meta-item">
-          <i class="ph ph-buildings"></i>
-          <div>
-            <strong>Cátedra Responsable</strong>
-            <span>Cátedra de Ciencias Experimentales • Área de Química</span>
-          </div>
-        </div>
-
-        <div class="inst-meta-item">
-          <i class="ph ph-certificate"></i>
-          <div>
-            <strong>Versión del Sistema</strong>
-            <span>v2.4.0 (Edición Curricular 2024 - 2025)</span>
-          </div>
-        </div>
-
-        <div class="inst-meta-item">
-          <i class="ph ph-clock-countdown"></i>
-          <div>
-            <strong>Horario de Tutoría</strong>
-            <span>Lunes a Viernes • 7:00 a.m. a 4:00 p.m.</span>
-          </div>
-        </div>
+      <div class="inst-meta-item">
+        <i class="ph ph-clock-countdown"></i>
+        <span>Tutoría Lunes a Viernes · 7:00 a.m. a 4:00 p.m.</span>
       </div>
     </div>
-
-    <div class="inst-bottom-bar">
-      <span class="inst-copyright">
-        © 2024 ReactivA Educational System • Todos los derechos reservados.
-      </span>
-      <span class="inst-quote">
-        <em>"Inspirando la curiosidad científica a través de la simulación digital y el aprendizaje activo."</em>
-      </span>
-    </div>
+    <p class="inst-quote">
+      <em>"Inspirando la curiosidad científica a través de la simulación digital y el aprendizaje activo."</em>
+    </p>
   </footer>
 
-  <!-- 7. MODAL: Enviar Ticket de Soporte Técnico -->
-  @if (isContactModalOpen) {
-    <div class="modal-overlay" (click)="closeContactModal()">
-      <div class="modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-        <div class="modal-header">
-          <div class="modal-title-wrap">
-            <div class="modal-icon-cell">
-              <i class="ph ph-paper-plane-tilt"></i>
-            </div>
-            <div>
-              <h2 class="modal-title">Soporte Técnico & Pedagógico</h2>
-              <span class="modal-subtitle">Envía tu consulta al equipo docente de ReactivA</span>
-            </div>
-          </div>
-          <button type="button" class="btn-dismiss-modal" (click)="closeContactModal()" aria-label="Cerrar modal">
-            <i class="ph ph-x"></i>
-          </button>
-        </div>
-
-        <form (ngSubmit)="submitSupportTicket()" class="modal-form">
-          <div class="form-row-dual">
-            <div class="form-field">
-              <label for="studentName">Estudiante</label>
-              <input id="studentName" type="text" [(ngModel)]="contactTicket.name" name="name" class="input-text" readonly />
-            </div>
-            <div class="form-field">
-              <label for="studentGrade">Grado y Grupo</label>
-              <input id="studentGrade" type="text" [(ngModel)]="contactTicket.grade" name="grade" class="input-text" readonly />
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label for="ticketTopic">Módulo Relacionado</label>
-            <select id="ticketTopic" [(ngModel)]="contactTicket.topic" name="topic" class="input-select">
-              <option value="virtual-lab">Virtual Lab / Simulador de Reacciones</option>
-              <option value="periodic-table">Tabla Periódica & Modelo de Bohr</option>
-              <option value="mision-organica">Misión Orgánica & Desafíos</option>
-              <option value="profile">Perfil, Historial de Notas o Descarga PDF</option>
-              <option value="general">Duda General de Química o Cuenta</option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label for="ticketSubject">Asunto de la Consulta *</label>
-            <input
-              id="ticketSubject"
-              type="text"
-              [(ngModel)]="contactTicket.subject"
-              name="subject"
-              placeholder="Ej. Duda en la reacción de combustión del propano"
-              class="input-text"
-              required
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="ticketMessage">Descripción Detallada *</label>
-            <textarea
-              id="ticketMessage"
-              [(ngModel)]="contactTicket.message"
-              name="message"
-              rows="4"
-              placeholder="Describe lo ocurrido o tu pregunta científica para que el docente pueda orientarte..."
-              class="input-textarea"
-              required
-            ></textarea>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn-cancel" (click)="closeContactModal()">Cancelar</button>
-            <button type="submit" class="btn-submit">
-              <i class="ph ph-paper-plane-tilt"></i>
-              <span>Enviar Consulta</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  }
 </div>
-
