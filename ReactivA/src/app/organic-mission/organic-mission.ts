@@ -76,6 +76,8 @@ export class MisionOrganicaComponent implements OnInit, OnDestroy {
   // ── Animaciones ────────────────────────────────────────
   showCelebration = signal<boolean>(false);
   showBadgeUnlock = signal<boolean>(false);
+  /** Índice del corazón recién perdido para disparar animación (-1 = ninguno) */
+  lostLifeIndex = signal<number>(-1);
 
   constructor(public gameService: GameService) {}
 
@@ -153,6 +155,7 @@ export class MisionOrganicaComponent implements OnInit, OnDestroy {
       this.triggerCelebration();
     } else {
       this.feedbackMessage.set('Respuesta incorrecta 😔');
+      this.triggerLostLife();
     }
   }
 
@@ -276,6 +279,7 @@ export class MisionOrganicaComponent implements OnInit, OnDestroy {
     if (q) {
       this.gameService.recordAnswer(this.activeLevelId(), q.id, q.difficulty, false);
       this.feedbackMessage.set('¡Tiempo agotado! ⏱');
+      this.triggerLostLife();
     }
   }
 
@@ -349,21 +353,36 @@ export class MisionOrganicaComponent implements OnInit, OnDestroy {
     setTimeout(() => this.showCelebration.set(false), 1500);
   }
 
+  /** Anima el corazón que acaba de perderse */
+  private triggerLostLife(): void {
+    const lp = this.gameService.getLevelProgress(this.activeLevelId());
+    // El corazón perdido es el que está justo en la posición lives (0-based)
+    this.lostLifeIndex.set(lp?.lives ?? -1);
+    setTimeout(() => this.lostLifeIndex.set(-1), 700);
+  }
+
+  /** Retorna las vidas actuales del nivel activo */
+  currentLives(): number {
+    return this.gameService.getLevelProgress(this.activeLevelId())?.lives ?? 0;
+  }
+
   progressPercent(): number {
     const total = this.levelQuestions().length;
     if (total === 0) return 0;
     return Math.round((this.currentQuestionIndex() / total) * 100);
   }
 
-  livesArray(): number[] {
+  livesArray(): boolean[] {
     const lp = this.gameService.getLevelProgress(this.activeLevelId());
-    return Array.from({ length: lp?.lives ?? 0 });
+    const lives = lp?.lives ?? 0;
+    // Retorna array de 5 booleanos: true = vida activa, false = perdida
+    return Array.from({ length: 5 }, (_, i) => i < lives);
   }
 
   lostLivesArray(): number[] {
     const lp = this.gameService.getLevelProgress(this.activeLevelId());
     if (!lp) return [];
-    const lost = 3 - lp.lives;
+    const lost = 5 - lp.lives;
     return Array.from({ length: Math.max(0, lost) });
   }
 

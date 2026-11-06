@@ -233,14 +233,39 @@
         </span>
       </div>
 
-      <!-- Vidas -->
-      <div class="lives-display">
-        @for (life of livesArray(); track $index) {
-          <span class="life full">❤️</span>
-        }
-        @for (life of lostLivesArray(); track $index) {
-          <span class="life lost">🖤</span>
-        }
+      <!-- ── Vidas: 5 corazones SVG ── -->
+      <div class="lives-bar">
+        <span class="lives-label">Vidas</span>
+        <div class="hearts-row">
+          @for (alive of livesArray(); track $index) {
+            <div
+              class="heart-wrap"
+              [class.heart-lost]="!alive"
+              [class.heart-breaking]="!alive && lostLifeIndex() === $index"
+            >
+              <svg class="heart-svg" viewBox="0 0 32 29" xmlns="http://www.w3.org/2000/svg">
+                @if (alive) {
+                  <!-- Corazón lleno -->
+                  <path
+                    d="M16 27S2 18.5 2 9.5A7.5 7.5 0 0 1 16 5.4 7.5 7.5 0 0 1 30 9.5C30 18.5 16 27 16 27Z"
+                    fill="#ef4444" stroke="#c41d1d" stroke-width="1.5"
+                  />
+                  <path
+                    d="M9 10.5 Q11 7.5 14 9"
+                    stroke="rgba(255,255,255,0.5)" stroke-width="1.5" fill="none" stroke-linecap="round"
+                  />
+                } @else {
+                  <!-- Corazón vacío -->
+                  <path
+                    d="M16 27S2 18.5 2 9.5A7.5 7.5 0 0 1 16 5.4 7.5 7.5 0 0 1 30 9.5C30 18.5 16 27 16 27Z"
+                    fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"
+                  />
+                }
+              </svg>
+            </div>
+          }
+        </div>
+        <span class="lives-count">{{ currentLives() }}/5</span>
       </div>
 
       @if (currentQuestion(); as q) {

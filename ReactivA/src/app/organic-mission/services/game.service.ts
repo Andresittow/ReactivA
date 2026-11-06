@@ -87,7 +87,7 @@ export class GameService {
         levelId: l.id,
         completed: false,
         score: 0,
-        lives: 3,
+        lives: 5,
         correctAnswers: 0,
         wrongAnswers: 0,
         perfectLevel: false,
@@ -221,7 +221,7 @@ export class GameService {
     // Descontar los puntos previamente ganados en este nivel
     this.progress.totalScore = Math.max(0, this.progress.totalScore - lp.score);
     lp.score = 0;
-    lp.lives = 3;
+    lp.lives = 5;
     lp.correctAnswers = 0;
     lp.wrongAnswers = 0;
     lp.perfectLevel = false;
