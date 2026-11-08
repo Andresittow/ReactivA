@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 /**
- * Tarjeta de Módulo Interactivo para el Home
+ * Tarjeta Informativa de Módulo para el Home (Solo presentación informativa)
  */
 export interface FeatureModuleCard {
   id: string;
@@ -12,22 +12,20 @@ export interface FeatureModuleCard {
   category: string;
   badge: string;
   description: string;
-  route: string;
   icon: string;
-  themeColor: 'cyan' | 'emerald' | 'purple' | 'amber' | 'blue' | 'rose';
-  stats: string;
-  actionText: string;
+  themeColor: 'blue' | 'emerald' | 'purple' | 'amber';
+  highlights: string[];
 }
 
 /**
- * Métrica Pedagógica o Estadística Clave
+ * Métrica Pedagógica o Estadística Curricular (MEN)
  */
 export interface PedagogicMetric {
   value: string;
   label: string;
   description: string;
   icon: string;
-  accent: 'emerald' | 'cyan' | 'purple' | 'amber';
+  accent: 'blue' | 'emerald' | 'purple' | 'amber';
 }
 
 @Component({
@@ -39,60 +37,53 @@ export interface PedagogicMetric {
 })
 export class HomeComponent {
   /**
-   * Colección de módulos principales interactivos ya implementados en ReactivA
+   * Colección de módulos informativos de ReactivA.
+   * Nota: Las tarjetas son puramente informativas; para acceder se requiere iniciar sesión.
    */
   readonly modules: FeatureModuleCard[] = [
     {
       id: 'periodic-table',
-      title: 'Tabla Periódica & Modelo de Bohr',
-      subtitle: 'Matriz Cuántica de 18 Columnas',
+      title: 'Tabla Periódica Interactiva',
+      subtitle: 'Matriz Cuántica & Modelo de Bohr',
       category: 'Estructura Atómica',
-      badge: '118 Elementos · 3D Memory',
-      description: 'Explora familias químicas en una matriz de 18 columnas con posicionamiento exacto, visor de Bohr en SVG cuántico y desafía tu mente con el minijuego Memory en 3D.',
-      route: '/periodic-table',
+      badge: '118 Elementos Químicos',
+      description: 'Explora familias químicas en una grilla de 18 columnas con posicionamiento atómico exacto, visor orbital de Bohr en SVG cuántico y minijuego de memoria 3D.',
       icon: 'ph-table',
-      themeColor: 'cyan',
-      stats: '118 elementos · Gráficos cuánticos',
-      actionText: 'Explorar Matriz'
+      themeColor: 'blue',
+      highlights: ['Matriz de 18 columnas', 'Modelo atómico de Bohr', 'Memory de parejas 3D']
     },
     {
       id: 'virtual-lab',
       title: 'Laboratorio Virtual 3D',
       subtitle: 'Simulador Molecular Interactivo',
       category: 'Experimentación Segura',
-      badge: 'Simulación en Vivo',
-      description: 'Mesa de trabajo tridimensional para mezclar reactivos químicos, simular enlaces iónicos y covalentes, y calcular estequiometría sin riesgos de un laboratorio físico.',
-      route: '/virtual-lab',
+      badge: 'Simulación Sin Riesgos',
+      description: 'Mesa de trabajo virtual para combinar reactivos químicos, deducir enlaces iónicos y covalentes, y comprobar estequiometría sin riesgos de un laboratorio físico.',
       icon: 'ph-test-tube',
       themeColor: 'emerald',
-      stats: 'Fórmulas 3D · Cero riesgos',
-      actionText: 'Entrar al Lab'
+      highlights: ['Simulaciones moleculares 3D', 'Combinación de reactivos', 'Cálculos estequiométricos']
     },
     {
       id: 'organic-mission',
       title: 'Misión Orgánica: Domina el Carbono',
       subtitle: 'Química Orgánica para Grado 11',
       category: 'Gamificación Pedagógica',
-      badge: '4 Niveles · Vidas & XP',
-      description: 'Supera 4 niveles progresivos: detectives del carbono, hidrocarburos, desafío de nomenclatura IUPAC y prueba maestra con feedback didáctico adaptado.',
-      route: '/mision-organica',
+      badge: '4 Niveles Progresivos',
+      description: 'Supera 4 niveles temáticos: detectives del carbono, cazadores de hidrocarburos, desafío de nomenclatura IUPAC y prueba maestra con feedback didáctico.',
       icon: 'ph-tree-structure',
       themeColor: 'purple',
-      stats: '4 Niveles · Match & IUPAC',
-      actionText: 'Iniciar Misión'
+      highlights: ['Hibridación del carbono', 'Nomenclatura IUPAC oficial', 'Mecánicas de match & vidas']
     },
     {
       id: 'challenges-arena',
       title: 'Desafíos & Arena de Logros',
       subtitle: 'Competición & Clasificación Escolar',
-      category: 'Torneos y Gamificación',
+      category: 'Torneos y Competencias',
       badge: 'Temporada 3 En Vivo',
-      description: 'Arena de torneos escolares en vivo (Gran Enlace Covalente), vitrina con 18 trofeos coleccionables, ranking por clase y evaluación de competencias MEN.',
-      route: '/challenges',
+      description: 'Arena competitiva escolar con torneos en vivo, leaderboard por clase y colegio, vitrina de trofeos con 18 insignias y evaluación de competencias MEN.',
       icon: 'ph-trophy',
       themeColor: 'amber',
-      stats: 'Temporada 3 · 18 Insignias',
-      actionText: 'Ver Clasificación'
+      highlights: ['Torneo Gran Enlace Covalente', 'Leaderboard escolar', '18 Insignias coleccionables']
     },
     {
       id: 'dashboard',
@@ -100,43 +91,39 @@ export class HomeComponent {
       subtitle: 'Dashboard Central del Estudiante',
       category: 'Gestión del Aprendizaje',
       badge: 'Racha Activa 🔥',
-      description: 'Visualiza tus misiones diarias con checklist interactivo, buscador rápido de unidades con Reactive Forms y métricas de avance dinámico por unidad.',
-      route: '/dashboard',
+      description: 'Organiza tus misiones diarias con checklist interactivo, buscador rápido de unidades con Reactive Forms y métricas de progreso dinámico por tema.',
       icon: 'ph-squares-four',
       themeColor: 'blue',
-      stats: 'Racha 5 días · Misiones To-Do',
-      actionText: 'Ir al Dashboard'
+      highlights: ['Buscador reactivo en vivo', 'Misiones diarias To-Do', 'Racha de días activos']
     },
     {
       id: 'academic-profile',
       title: 'Perfil y Reporte Académico',
-      subtitle: 'Analítica de Desempeño',
+      subtitle: 'Analítica de Desempeño Escolar',
       category: 'Evaluación Curricular',
       badge: 'Estándares MEN',
       description: 'Monitorea tus competencias de indagación, explicación de fenómenos y uso comprensivo del conocimiento científico con informes detallados para docentes.',
-      route: '/profile',
       icon: 'ph-user-circle',
-      themeColor: 'rose',
-      stats: '94.2% Eficiencia · Grado 10°-11°',
-      actionText: 'Ver Perfil'
+      themeColor: 'emerald',
+      highlights: ['Eficiencia pedagógica (94.2%)', 'Seguimiento por estándares', 'Historial de actividades']
     }
   ];
 
   /**
-   * Métricas Pedagógicas y Estándares Curriculares (MEN)
+   * Métricas y Estándares Curriculares de Ciencias Naturales (MEN)
    */
   readonly metrics: PedagogicMetric[] = [
     {
       value: '118',
       label: 'Elementos Químicos',
-      description: 'Modelos cuánticos de Bohr, capas cuánticas y propiedades físicas integradas.',
+      description: 'Modelos cuánticos de Bohr, capas electrónicas y propiedades físicas integradas.',
       icon: 'ph-atom',
-      accent: 'cyan'
+      accent: 'blue'
     },
     {
       value: '94.2%',
       label: 'Eficiencia Pedagógica',
-      description: 'Tasa media de acierto al primer intento en problemas y balanceo redox.',
+      description: 'Tasa media de acierto al primer intento en resolución de problemas químicos.',
       icon: 'ph-chart-line-up',
       accent: 'emerald'
     },
@@ -150,14 +137,14 @@ export class HomeComponent {
     {
       value: '100%',
       label: 'Alineado al MEN',
-      description: 'Cumplimiento estricto de los Estándares Básicos de Competencias en Ciencias.',
+      description: 'Cumplimiento de los Estándares Básicos de Competencias en Ciencias Naturales.',
       icon: 'ph-certificate',
       accent: 'amber'
     }
   ];
 
   /**
-   * Desplazamiento suave hacia la sección de módulos
+   * Desplazamiento suave hacia la sección de módulos informativos
    */
   scrollToModules(): void {
     const el = document.getElementById('modules-section');
@@ -166,4 +153,3 @@ export class HomeComponent {
     }
   }
 }
-
