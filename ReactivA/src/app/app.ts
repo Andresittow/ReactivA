@@ -12,7 +12,7 @@ import { SidebarComponent } from './sidebar/sidebar';
 export class AppComponent {
   constructor(public router: Router) {}
 
-  // Determina si estamos en una pantalla de autenticación (login o registro) para ocultar el sidebar
+  // Determina si estamos en una pantalla pública o de autenticación (home, login o registro) para ocultar el sidebar
   isAuthPage(): boolean {
     const currentUrl = this.router.url;
     return (
@@ -20,6 +20,8 @@ export class AppComponent {
       currentUrl.startsWith('/login') ||
       currentUrl === '/register' ||
       currentUrl.startsWith('/register') ||
+      currentUrl === '/home' ||
+      currentUrl.startsWith('/home') ||
       currentUrl === '/' ||
       currentUrl === ''
     );
