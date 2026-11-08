@@ -1,5 +1,6 @@
 <aside class="sidebar" [class.collapsed]="isCollapsed">
-  <!-- Cabecera de la Marca y Botón Toggle (Clase 4b) -->
+
+  <!-- Cabecera de Marca: ReactivA -->
   <div class="brand">
     <div class="brand-info">
       <div class="logo-icon">
@@ -7,31 +8,31 @@
       </div>
       @if (!isCollapsed) {
         <div class="brand-text">
-          <h2>Lab Stage</h2>
-          <span>Active Experiment</span>
+          <h2>ReactivA</h2>
+          <span>Plataforma de Química</span>
         </div>
       }
     </div>
 
-    <!-- Botón de Colapsar / Expandir -->
-    <button 
-      type="button" 
-      class="btn-toggle" 
-      (click)="toggleSidebar()" 
+    <!-- Botón Colapsar / Expandir -->
+    <button
+      type="button"
+      class="btn-toggle"
+      (click)="toggleSidebar()"
       [title]="isCollapsed ? 'Expandir menú' : 'Colapsar menú'"
       [attr.aria-label]="isCollapsed ? 'Expandir menú' : 'Colapsar menú'">
       <i class="ph" [class.ph-caret-left]="!isCollapsed" [class.ph-caret-right]="isCollapsed"></i>
     </button>
   </div>
 
-  <!-- Navegación Principal Dinámica con @for y routerLinkActive (Clase 3 y 4b) -->
+  <!-- Navegación Principal -->
   <nav class="nav-menu">
     <ul>
       @for (item of menuItems; track item.route) {
         <li>
-          <a 
-            [routerLink]="item.route" 
-            routerLinkActive="active" 
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
             [title]="item.label">
             <i class="ph" [ngClass]="item.icon"></i>
@@ -44,28 +45,14 @@
     </ul>
   </nav>
 
-  <!-- Botón del Asistente Átomo con Manejo de Eventos (Clase 3 y 5c) -->
-  <div class="sidebar-action">
-    <button 
-      type="button" 
-      class="btn-assistant" 
-      (click)="onAssistantClick()"
-      [title]="'Asistente Átomo'">
-      <i class="ph ph-robot"></i>
-      @if (!isCollapsed) {
-        <span>Asistente Átomo</span>
-      }
-    </button>
-  </div>
-
-  <!-- Menú Inferior Dinámico con @for y Eventos (Clase 3 y 5c) -->
+  <!-- Menú Inferior (Settings & Help) -->
   <div class="footer-menu">
     <ul>
       @for (item of footerMenuItems; track item.route) {
         <li>
-          <a 
-            [routerLink]="item.route" 
-            routerLinkActive="active" 
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
             (click)="onFooterClick(item)"
             [title]="item.label">
             <i class="ph" [ngClass]="item.icon"></i>
@@ -77,4 +64,5 @@
       }
     </ul>
   </div>
+
 </aside>

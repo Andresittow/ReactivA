@@ -85,10 +85,10 @@ export class ProfileComponent {
     rank: 'Alquimista Teórico',
     // Estudiante de ciencias con cabello oscuro estilo micro bob estructurado
     avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
-    academicYear: '2024',
+    academicYear: '2026',
     institution: 'Cátedra de Ciencias Experimentales - ReactivA',
     gradeLevel: '10° Grado de Bachillerato Científico',
-    email: 'valeria.gongora@reactiva-lab.edu'
+    email: 'valeria.gongora3026@gmail.com'
   };
 
   // Avatares prediseñados con temática STEM / Ciencias
