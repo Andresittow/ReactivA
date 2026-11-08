@@ -64,7 +64,13 @@ export const routes: Routes = [
     loadComponent: () => import('./challenges/challenges').then(m => m.ChallengesComponent)
   },
 
-  // Redirecciones por defecto con las rutas existentes
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: '**', redirectTo: 'login' }
+  // Ruta de Bienvenida / Landing Page Principal
+  {
+    path: 'home',
+    loadComponent: () => import('./home/home').then(m => m.HomeComponent)
+  },
+
+  // Redirección inicial por defecto a la página principal (Home)
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '**', redirectTo: 'home' }
 ];
