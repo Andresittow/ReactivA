@@ -1,0 +1,310 @@
+<div class="home-container">
+  <!-- Efectos de Luces y Gradientes de Fondo (Glow Sci-Fi) -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-purple"></div>
+  <div class="ambient-glow glow-emerald"></div>
+
+  <!-- ======================================================== -->
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR DEL HOME                    -->
+  <!-- ======================================================== -->
+  <header class="home-navbar">
+    <div class="nav-brand">
+      <div class="brand-logo-box">
+        <i class="ph ph-flask brand-icon"></i>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">ReactivA</span>
+        <span class="brand-badge">Lab Stage 2.0</span>
+      </div>
+    </div>
+
+    <nav class="nav-links" aria-label="Navegación del sitio">
+      <a href="#hero-section" class="nav-link active">Inicio</a>
+      <a href="#modules-section" class="nav-link">Módulos Interactivos</a>
+      <a href="#pedagogic-section" class="nav-link">Estándares MEN</a>
+      <a href="#benefits-section" class="nav-link">Beneficios</a>
+    </nav>
+
+    <!-- Botones de Autenticación Rápida (Login & Register) -->
+    <div class="nav-auth-actions">
+      <a routerLink="/login" class="nav-btn btn-login" title="Acceder a tu cuenta de estudiante o docente">
+        <i class="ph ph-sign-in"></i>
+        <span>Iniciar Sesión</span>
+      </a>
+      <a routerLink="/register" class="nav-btn btn-register" title="Crear una cuenta nueva">
+        <i class="ph ph-sparkle"></i>
+        <span>Registrarse</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 1. HERO SECTION (CABECERA PRINCIPAL)                     -->
+  <!-- ======================================================== -->
+  <section id="hero-section" class="hero-section">
+    <div class="hero-content">
+      <!-- Badge de Nivel y Categoría -->
+      <div class="hero-badge">
+        <span class="live-pulse-dot"></span>
+        <span>Plataforma Educativa de Ciencias · Grados 10° y 11°</span>
+      </div>
+
+      <!-- Título Principal con Efecto Neón y Gradiente -->
+      <h1 class="hero-title">
+        ReactivA <span class="title-emoji">🧪⚡</span>
+        <span class="hero-gradient-text">Aprende química de forma interactiva, moderna y gamificada</span>
+      </h1>
+
+      <!-- Descripción Pedagógica -->
+      <p class="hero-description">
+        Sumérgete en simuladores moleculares 3D, explora la tabla periódica con modelos atómicos cuánticos de Bohr, domina la química orgánica en misiones interactivas y compite en la arena de desafíos escolares.
+      </p>
+
+      <!-- Botones de Acción Rápida (Call to Action) -->
+      <div class="hero-cta-group">
+        <a routerLink="/register" class="hero-cta-btn btn-primary-adventure">
+          <i class="ph ph-rocket-launch"></i>
+          <span>Comenzar Aventura</span>
+        </a>
+        <button type="button" (click)="scrollToModules()" class="hero-cta-btn btn-secondary-explore">
+          <i class="ph ph-squares-four"></i>
+          <span>Explorar Módulos</span>
+        </button>
+      </div>
+
+      <!-- Acceso Rápido Alternativo -->
+      <div class="hero-login-hint">
+        <span>¿Ya eres parte de un aula escolar?</span>
+        <a routerLink="/login" class="login-inline-link">
+          Ingresa a tu cuenta aquí <i class="ph ph-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Escena Visual Tecnológica del Hero (Átomo Orbital y Chips) -->
+    <div class="hero-visual-showcase">
+      <div class="tech-card-glass hero-atom-card">
+        <div class="atom-visual-container">
+          <!-- Órbitas cuánticas concéntricas animadas -->
+          <div class="orbit-ring orbit-1">
+            <span class="quantum-electron electron-1"></span>
+          </div>
+          <div class="orbit-ring orbit-2">
+            <span class="quantum-electron electron-2"></span>
+          </div>
+          <div class="orbit-ring orbit-3">
+            <span class="quantum-electron electron-3"></span>
+          </div>
+
+          <!-- Núcleo Atómico -->
+          <div class="atom-nucleus">
+            <i class="ph ph-atom nucleus-icon"></i>
+            <span class="nucleus-text">ReactivA</span>
+          </div>
+        </div>
+
+        <!-- Chips Flotantes de Gamificación y Química -->
+        <div class="floating-chip chip-redox">
+          <i class="ph ph-lightning"></i>
+          <span>Redox: Fe³⁺ + e⁻ ➔ Fe²⁺</span>
+        </div>
+        <div class="floating-chip chip-streak">
+          <span class="fire-icon">🔥</span>
+          <span>Racha: 5 Días Activos</span>
+        </div>
+        <div class="floating-chip chip-xp">
+          <i class="ph ph-trophy"></i>
+          <span>+500 XP Desafío Épico</span>
+        </div>
+        <div class="floating-chip chip-organic">
+          <i class="ph ph-tree-structure"></i>
+          <span>C₆H₆ · Anillo Bencénico</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 2. RESUMEN DE MÓDULOS INTERACTIVOS (GRID DE CARDS)       -->
+  <!-- ======================================================== -->
+  <section id="modules-section" class="modules-section">
+    <div class="section-title-header">
+      <div class="badge-tag">
+        <i class="ph ph-cube"></i>
+        <span>Ecosistema de Aprendizaje</span>
+      </div>
+      <h2 class="section-headline">Módulos y Herramientas del Laboratorio</h2>
+      <p class="section-lead">
+        Cada módulo está diseñado con rigor pedagógico, simuladores tridimensionales y gamificación en tiempo real para asegurar el dominio de los conceptos científicos.
+      </p>
+    </div>
+
+    <!-- Grid de Tarjetas de Módulos -->
+    <div class="modules-grid">
+      @for (module of modules; track module.id) {
+        <article class="module-card" [ngClass]="module.themeColor">
+          <div class="card-glow-edge"></div>
+
+          <!-- Cabecera de la Tarjeta -->
+          <div class="card-header">
+            <span class="module-badge" [ngClass]="module.themeColor">
+              {{ module.badge }}
+            </span>
+            <div class="module-icon-box" [ngClass]="module.themeColor">
+              <i class="ph" [ngClass]="module.icon"></i>
+            </div>
+          </div>
+
+          <!-- Cuerpo de la Tarjeta -->
+          <div class="card-body">
+            <span class="module-category">{{ module.category }}</span>
+            <h3 class="module-title">{{ module.title }}</h3>
+            <span class="module-subtitle">{{ module.subtitle }}</span>
+            <p class="module-description">{{ module.description }}</p>
+          </div>
+
+          <!-- Pie de la Tarjeta con Enlace Interactivo -->
+          <div class="card-footer">
+            <span class="module-stats">
+              <i class="ph ph-check-circle"></i>
+              {{ module.stats }}
+            </span>
+
+            <a [routerLink]="module.route" class="btn-card-action" [ngClass]="module.themeColor">
+              <span>{{ module.actionText }}</span>
+              <i class="ph ph-arrow-right"></i>
+            </a>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 3. SECCIÓN DE ESTADÍSTICAS Y ESTÁNDARES CURRICULARES     -->
+  <!-- ======================================================== -->
+  <section id="pedagogic-section" class="pedagogic-section">
+    <div class="section-title-header">
+      <div class="badge-tag">
+        <i class="ph ph-certificate"></i>
+        <span>Estándares de Calidad</span>
+      </div>
+      <h2 class="section-headline">Respaldado por Competencias Científicas (MEN)</h2>
+      <p class="section-lead">
+        Desarrollamos habilidades de indagación, explicación de fenómenos y uso comprensivo del conocimiento científico con métricas comprobadas.
+      </p>
+    </div>
+
+    <div class="metrics-grid">
+      @for (metric of metrics; track metric.label) {
+        <div class="metric-card" [ngClass]="metric.accent">
+          <div class="metric-icon-box" [ngClass]="metric.accent">
+            <i class="ph" [ngClass]="metric.icon"></i>
+          </div>
+          <strong class="metric-value">{{ metric.value }}</strong>
+          <span class="metric-label">{{ metric.label }}</span>
+          <p class="metric-desc">{{ metric.description }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 4. BENEFICIOS CLAVE DE LA EXPERIENCIA EDUCATIVA          -->
+  <!-- ======================================================== -->
+  <section id="benefits-section" class="benefits-section">
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon emerald">
+          <i class="ph ph-shield-check"></i>
+        </div>
+        <h3 class="benefit-title">Laboratorio 100% Seguro</h3>
+        <p class="benefit-desc">
+          Realiza mezclas de reactivos, balanceo de reacciones químicas y experimentación sin riesgo de accidentes o manipulación de sustancias peligrosas.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon cyan">
+          <i class="ph ph-game-controller"></i>
+        </div>
+        <h3 class="benefit-title">Gamificación Motivacional</h3>
+        <p class="benefit-desc">
+          Acumula puntos XP, desbloquea insignias en la vitrina de trofeos y escala posiciones en el leaderboard de tu clase y colegio en torneos escolares en vivo.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon purple">
+          <i class="ph ph-chalkboard-teacher"></i>
+        </div>
+        <h3 class="benefit-title">Feedback Didáctico Inmediato</h3>
+        <p class="benefit-desc">
+          Cada error se convierte en una oportunidad pedagógica con explicaciones adaptadas a grado 11 que aclaran las reglas y conceptos detrás de cada respuesta.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 5. CALL TO ACTION FINAL (BANNER DE CIERRE)               -->
+  <!-- ======================================================== -->
+  <section class="final-cta-section">
+    <div class="final-cta-card">
+      <div class="cta-card-content">
+        <div class="badge-tag">
+          <i class="ph ph-sparkle"></i>
+          <span>Comienza Hoy Mismo</span>
+        </div>
+        <h2 class="cta-headline">¿Listo para transformar tu forma de aprender química?</h2>
+        <p class="cta-subtitle">
+          Únete a miles de estudiantes y docentes que ya experimentan con la ciencia en un entorno interactivo y tridimensional.
+        </p>
+
+        <div class="cta-actions-row">
+          <a routerLink="/register" class="hero-cta-btn btn-primary-adventure">
+            <i class="ph ph-user-plus"></i>
+            <span>Crear Cuenta Gratuita</span>
+          </a>
+          <a routerLink="/login" class="hero-cta-btn btn-secondary-explore">
+            <i class="ph ph-sign-in"></i>
+            <span>Iniciar Sesión en tu Aula</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- PIE DE PÁGINA (FOOTER DEL HOME)                          -->
+  <!-- ======================================================== -->
+  <footer class="home-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="brand-logo-box small">
+          <i class="ph ph-flask"></i>
+        </div>
+        <span class="footer-brand-name">ReactivA 🧪⚡</span>
+      </div>
+      <p class="footer-tagline">
+        Plataforma pedagógica gamificada de ciencias naturales y química interactiva para educación secundaria y media vocacional.
+      </p>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 ReactivA. Diseñado con excelencia pedagógica para la enseñanza de las ciencias.</span>
+      <div class="footer-links">
+        <a routerLink="/login">Login</a>
+        <span class="sep">·</span>
+        <a routerLink="/register">Registro</a>
+        <span class="sep">·</span>
+        <a routerLink="/dashboard">Dashboard</a>
+        <span class="sep">·</span>
+        <a routerLink="/periodic-table">Tabla Periódica</a>
+        <span class="sep">·</span>
+        <a routerLink="/virtual-lab">Virtual Lab</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
