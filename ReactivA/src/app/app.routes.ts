@@ -58,6 +58,12 @@ export const routes: Routes = [
     loadComponent: () => import('./help/help').then(m => m.HelpComponent)
   },
 
+  // Ruta para Challenges
+  {
+    path: 'challenges',
+    loadComponent: () => import('./challenges/challenges').then(m => m.ChallengesComponent)
+  },
+
   // Redirecciones por defecto con las rutas existentes
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
