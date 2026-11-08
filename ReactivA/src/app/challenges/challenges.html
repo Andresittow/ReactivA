@@ -1,0 +1,534 @@
+<div class="challenges-page">
+  <!-- Toast Notificación de Acciones y Recompensas -->
+  @if (toastNotification.visible) {
+    <div class="toast-notification" [ngClass]="toastNotification.type" role="alert">
+      <i class="ph" [ngClass]="toastNotification.type === 'success' ? 'ph-check-circle' : 'ph-info'"></i>
+      <span>{{ toastNotification.message }}</span>
+    </div>
+  }
+
+  <!-- ======================================================== -->
+  <!-- 1. ENCABEZADO Y RESUMEN DE PROGRESO DE LA TEMPORADA      -->
+  <!-- ======================================================== -->
+  <header class="challenges-header">
+    <div class="header-main-info">
+      <!-- Tag de Temporada y Badge En Vivo -->
+      <div class="season-badge-wrapper">
+        <span class="season-tag">
+          <i class="ph ph-sparkle"></i>
+          {{ seasonTag }}
+        </span>
+        <span class="live-pill">
+          <span class="live-dot"></span>
+          EN VIVO
+        </span>
+      </div>
+
+      <!-- Título y Subtítulo -->
+      <h1 class="page-title">
+        Desafíos & Arena de Logros
+        <span class="trophy-emoji">🏆</span>
+      </h1>
+      <p class="page-subtitle">
+        Pon a prueba tus conocimientos en química, compite en torneos escolares y sube en la clasificación global.
+      </p>
+    </div>
+
+    <!-- Widgets Superiores: Nivel de Alquimista y Torneo Activo -->
+    <div class="header-widgets-grid">
+      <!-- Widget 1: Nivel de Usuario, Racha y Barra de XP -->
+      <div class="status-widget level-widget">
+        <div class="widget-top">
+          <div class="level-identity">
+            <div class="level-avatar-ring">
+              <span class="level-num">{{ userLevel }}</span>
+            </div>
+            <div class="level-text-info">
+              <span class="level-label">Nivel Actual</span>
+              <strong class="level-title">{{ userTitle }}</strong>
+            </div>
+          </div>
+
+          <!-- Racha Activa -->
+          <div class="streak-pill" title="Racha consecutiva de experimentos">
+            <span class="fire-icon">🔥</span>
+            <div class="streak-meta">
+              <strong>{{ userStreakDays }} Días</strong>
+              <small>Racha</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de Progreso XP -->
+        <div class="xp-bar-container">
+          <div class="xp-labels">
+            <span class="xp-stat">
+              <strong>{{ currentXP | number }}</strong> / {{ nextLevelXP | number }} XP
+            </span>
+            <span class="xp-percentage">{{ xpProgressPercent }}%</span>
+          </div>
+          <div class="progress-track" role="progressbar" [attr.aria-valuenow]="xpProgressPercent" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-fill xp-fill" [style.width.%]="xpProgressPercent"></div>
+          </div>
+          <div class="xp-hint">
+            <small>Faltan <strong>{{ nextLevelXP - currentXP }} XP</strong> para alcanzar el Nivel {{ userLevel + 1 }}</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Widget 2: Torneo Activo (Gran Enlace Covalente) -->
+      <div class="status-widget tournament-widget">
+        <div class="tournament-top">
+          <div class="tournament-badge">
+            <i class="ph ph-trophy"></i>
+            <span>{{ activeTournament.badge }}</span>
+          </div>
+          <div class="tournament-countdown" title="Tiempo restante del torneo">
+            <i class="ph ph-clock"></i>
+            <span>{{ activeTournament.timeLeftText }} restantes</span>
+          </div>
+        </div>
+
+        <div class="tournament-body">
+          <h3 class="tournament-title">{{ activeTournament.title }}</h3>
+          <p class="tournament-desc">Competición escolar de balanceo redox y enlaces moleculares en tiempo real.</p>
+        </div>
+
+        <div class="tournament-footer">
+          <div class="tournament-stat">
+            <span class="label">Posición:</span>
+            <strong class="val">#{{ activeTournament.rankPosition }} de {{ activeTournament.totalCompetitors }}</strong>
+          </div>
+          <div class="tournament-reward-chip">
+            <i class="ph ph-gift"></i>
+            <span>{{ activeTournament.topReward }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 2. SECCIÓN: MISIONES Y DESAFÍOS ACTIVOS (GRID 4 CARDS)   -->
+  <!-- ======================================================== -->
+  <section class="section-container challenges-section">
+    <div class="section-header-bar">
+      <div class="section-title-wrap">
+        <div class="section-icon-box">
+          <i class="ph ph-target"></i>
+        </div>
+        <div>
+          <h2 class="section-title">Misiones y Desafíos Activos</h2>
+          <p class="section-subtitle">Completa los objetivos pedagógicos diarios y semanales para sumar XP y desbloquear insignias.</p>
+        </div>
+      </div>
+
+      <!-- Reloj de Actualización en Vivo -->
+      <div class="refresh-clock-badge" title="Tiempo para renovación de misiones">
+        <i class="ph ph-arrows-clockwise refresh-icon"></i>
+        <div class="clock-info">
+          <span class="clock-label">Actualización en:</span>
+          <strong class="clock-digits">{{ refreshCountdown }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de 4 Tarjetas de Desafíos -->
+    <div class="challenges-cards-grid">
+      @for (challenge of activeChallenges; track challenge.id) {
+        <article
+          class="challenge-card"
+          [ngClass]="[challenge.tagType, challenge.isClaimed ? 'is-claimed-card' : '']"
+        >
+          <!-- Cabecera de la Tarjeta -->
+          <div class="card-top">
+            <span class="tag-pill" [ngClass]="challenge.tagType">
+              {{ challenge.tag }}
+            </span>
+            <div class="card-icon-bubble">
+              <i class="ph" [ngClass]="challenge.icon"></i>
+            </div>
+          </div>
+
+          <!-- Información Principal -->
+          <div class="card-content">
+            <span class="challenge-category">{{ challenge.category }}</span>
+            <h3 class="challenge-title">{{ challenge.title }}</h3>
+            
+            <!-- Recompensa especial si existe -->
+            @if (challenge.badgeReward) {
+              <div class="reward-preview-pill">
+                <i class="ph ph-sparkle"></i>
+                <span>{{ challenge.badgeReward }}</span>
+              </div>
+            }
+
+            <!-- Métrica de Competencia Pedagógica Curricular -->
+            <div class="curricular-tag">
+              <i class="ph ph-graduation-cap"></i>
+              <span>{{ challenge.competencyTrack }}</span>
+            </div>
+          </div>
+
+          <!-- Barra de Progreso Dinámica -->
+          <div class="card-progress-section">
+            <div class="progress-meta">
+              <span class="progress-counter">
+                <strong>{{ challenge.currentProgress }}/{{ challenge.totalProgress }}</strong> {{ challenge.unit }}
+              </span>
+              <span class="progress-percent-text">{{ challenge.progressPercent }}%</span>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [ngClass]="challenge.tagType"
+                [style.width.%]="challenge.progressPercent"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Botón de Acción según el estado -->
+          <div class="card-action">
+            @if (challenge.buttonActionType === 'claimed') {
+              <button
+                type="button"
+                class="btn-challenge-action btn-claimed"
+                disabled
+                aria-label="Recompensa ya reclamada"
+              >
+                <i class="ph ph-check-circle"></i>
+                <span>{{ challenge.buttonLabel }}</span>
+              </button>
+            } @else if (challenge.buttonActionType === 'continue') {
+              <button
+                type="button"
+                class="btn-challenge-action btn-continue"
+                (click)="onChallengeAction(challenge)"
+                [attr.aria-label]="challenge.buttonLabel"
+              >
+                <span>{{ challenge.buttonLabel }}</span>
+                <i class="ph ph-arrow-right"></i>
+              </button>
+            } @else if (challenge.buttonActionType === 'view') {
+              <button
+                type="button"
+                class="btn-challenge-action btn-view"
+                (click)="onChallengeAction(challenge)"
+                [attr.aria-label]="challenge.buttonLabel"
+              >
+                <i class="ph ph-eye"></i>
+                <span>{{ challenge.buttonLabel }}</span>
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn-challenge-action btn-enter"
+                (click)="onChallengeAction(challenge)"
+                [attr.aria-label]="challenge.buttonLabel"
+              >
+                <i class="ph ph-flask"></i>
+                <span>{{ challenge.buttonLabel }}</span>
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 3. SECCIÓN INFERIOR: CLASIFICACIÓN Y VITRINA DE TROFEOS  -->
+  <!-- ======================================================== -->
+  <div class="lower-arena-grid">
+    <!-- PANEL IZQUIERDO: TABLA DE CLASIFICACIÓN (LEADERBOARD) -->
+    <section class="section-container leaderboard-panel">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <i class="ph ph-chart-line-up panel-icon"></i>
+          <div>
+            <h2 class="panel-title">Tabla de Clasificación</h2>
+            <p class="panel-sub">Compara tu rendimiento y escala en la clasificación escolar.</p>
+          </div>
+        </div>
+
+        <!-- Filtros por Pestañas (Mi Clase, Colegio, Top Nacional) -->
+        <nav class="leaderboard-tabs" aria-label="Filtro de clasificación">
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="activeLeaderboardTab === 'class'"
+            (click)="setLeaderboardTab('class')"
+          >
+            <i class="ph ph-users-three"></i>
+            <span>Mi Clase (10° B)</span>
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="activeLeaderboardTab === 'school'"
+            (click)="setLeaderboardTab('school')"
+          >
+            <i class="ph ph-buildings"></i>
+            <span>Colegio</span>
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="activeLeaderboardTab === 'national'"
+            (click)="setLeaderboardTab('national')"
+          >
+            <i class="ph ph-globe"></i>
+            <span>Top Nacional</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tarjeta Destacada del Líder de la Clase (Mateo R.) -->
+      @if (activeLeaderboardTab === 'class' && classLeaderboard[0]) {
+        <div class="class-leader-card">
+          <div class="leader-crown-badge">
+            <i class="ph ph-crown"></i>
+            <span>Líder de la Clase</span>
+          </div>
+
+          <div class="leader-profile">
+            <div class="leader-avatar-box">
+              <span class="avatar-initials">{{ classLeaderboard[0].avatarText }}</span>
+              <span class="gold-medal-icon">🥇</span>
+            </div>
+
+            <div class="leader-details">
+              <h3 class="leader-name">{{ classLeaderboard[0].name }}</h3>
+              <div class="leader-meta">
+                <span class="grade-tag">{{ classLeaderboard[0].schoolGrade }}</span>
+                <span class="dot-sep">·</span>
+                <span class="level-tag">Nivel {{ classLeaderboard[0].level }}</span>
+                <span class="dot-sep">·</span>
+                <span class="streak-tag">🔥 {{ classLeaderboard[0].streakDays }} días</span>
+              </div>
+            </div>
+
+            <div class="leader-score">
+              <strong class="xp-val">{{ classLeaderboard[0].xp | number }}</strong>
+              <small class="xp-sub">Puntos XP</small>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Lista Clasificatoria del Leaderboard -->
+      <div class="leaderboard-list">
+        @for (player of currentLeaderboard; track player.rank) {
+          <div
+            class="leaderboard-row"
+            [class.current-user-row]="player.isCurrentUser"
+            [class.top-three-row]="player.rank <= 3"
+          >
+            <!-- Posición en el Ranking -->
+            <div class="rank-badge-box">
+              @if (player.rank === 1) {
+                <span class="rank-medal gold">🥇</span>
+              } @else if (player.rank === 2) {
+                <span class="rank-medal silver">🥈</span>
+              } @else if (player.rank === 3) {
+                <span class="rank-medal bronze">🥉</span>
+              } @else {
+                <span class="rank-number">#{{ player.rank }}</span>
+              }
+            </div>
+
+            <!-- Avatar y Nombre -->
+            <div class="player-info">
+              <div class="player-avatar" [class.user-avatar]="player.isCurrentUser">
+                {{ player.avatarText }}
+              </div>
+              <div class="player-text">
+                <span class="player-name">
+                  {{ player.name }}
+                  @if (player.isCurrentUser) {
+                    <span class="you-pill">TÚ</span>
+                  }
+                </span>
+                <small class="player-sub">
+                  Nivel {{ player.level }} · {{ player.schoolGrade }} · 🔥 {{ player.streakDays }}d
+                </small>
+              </div>
+            </div>
+
+            <!-- Puntaje XP -->
+            <div class="player-xp-box">
+              <strong class="player-xp">{{ player.xp | number }}</strong>
+              <span class="xp-unit">XP</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO: VITRINA DE TROFEOS & INSIGNIAS -->
+    <section class="section-container trophies-panel">
+      <div class="panel-header">
+        <div class="panel-title-group">
+          <i class="ph ph-trophy panel-icon trophy-color"></i>
+          <div>
+            <h2 class="panel-title">Vitrina de Trofeos</h2>
+            <p class="panel-sub">Insignias pedagógicas ganadas por dominio conceptual.</p>
+          </div>
+        </div>
+
+        <!-- Indicador de Nivel Coleccionista -->
+        <div class="collector-indicator-pill">
+          <i class="ph ph-seal-check"></i>
+          <span>{{ collectorLevel }}</span>
+        </div>
+      </div>
+
+      <!-- Barra de Progreso de la Colección -->
+      <div class="trophies-progress-box">
+        <div class="progress-labels">
+          <span class="unlocked-text">
+            <strong>{{ unlockedBadgesCount }}</strong> de {{ totalBadgesCount }} insignias desbloqueadas
+          </span>
+          <span class="percent-badge">{{ badgesProgressPercent }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill collector-fill" [style.width.%]="badgesProgressPercent"></div>
+        </div>
+      </div>
+
+      <!-- Grilla de Insignias / Badges -->
+      <div class="trophy-badges-grid">
+        @for (badge of trophyBadges; track badge.id) {
+          <button
+            type="button"
+            class="badge-card"
+            [class.unlocked]="badge.unlocked"
+            [class.locked]="!badge.unlocked"
+            (click)="openBadgeModal(badge)"
+            [attr.aria-label]="badge.name + (badge.unlocked ? ' (Desbloqueada)' : ' (Bloqueada)')"
+          >
+            <div class="badge-icon-circle">
+              <i class="ph" [ngClass]="badge.icon"></i>
+            </div>
+            <strong class="badge-name">{{ badge.name }}</strong>
+            <span class="badge-rarity" [ngClass]="badge.rarity.toLowerCase()">
+              {{ badge.rarity }}
+            </span>
+            @if (!badge.unlocked) {
+              <div class="locked-overlay">
+                <i class="ph ph-lock"></i>
+              </div>
+            }
+          </button>
+        }
+      </div>
+
+      <!-- Detalle Pedagógico Rápido de la Vitrina -->
+      <div class="vitrina-footer-note">
+        <i class="ph ph-lightbulb"></i>
+        <span>Gana las insignias restantes completando desafíos de química cuántica y estequiometría.</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 4. SEGUIMIENTO ACADÉMICO Y EVALUACIÓN CURRICULAR         -->
+  <!-- ======================================================== -->
+  <section class="section-container academic-evaluation-panel">
+    <div class="academic-header">
+      <div class="academic-title-wrap">
+        <div class="eval-icon-box">
+          <i class="ph ph-certificate"></i>
+        </div>
+        <div>
+          <h2 class="eval-title">Seguimiento Académico y Evaluación Curricular</h2>
+          <p class="eval-subtitle">Métricas de eficiencia en resolución de problemas según el plan de ciencias naturales y competencias MEN.</p>
+        </div>
+      </div>
+
+      <!-- Indicador Global de Eficiencia -->
+      <div class="efficiency-global-score">
+        <div class="score-circle">
+          <strong>{{ globalPedagogicEfficiency }}%</strong>
+        </div>
+        <div class="score-meta">
+          <span class="score-label">Eficiencia Pedagógica</span>
+          <small class="score-desc">Tasa de acierto al 1er intento</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards de Competencias Curriculares -->
+    <div class="competencies-grid">
+      @for (comp of curricularMetrics; track comp.name) {
+        <div class="competency-card">
+          <div class="comp-top">
+            <span class="comp-status-badge">{{ comp.status }}</span>
+            <span class="comp-eval-count">{{ comp.evaluatedProblems }} problemas evaluados</span>
+          </div>
+
+          <h3 class="comp-name">{{ comp.name }}</h3>
+          <p class="comp-standard">{{ comp.standard }}</p>
+
+          <div class="comp-score-section">
+            <div class="comp-score-labels">
+              <span class="comp-score-val">Cumplimiento: <strong>{{ comp.efficiencyScore }}%</strong></span>
+              <span class="comp-target">Meta: {{ comp.targetScore }}%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill comp-fill" [style.width.%]="comp.efficiencyScore"></div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- MODAL DE DETALLE DE INSIGNIA PEDAGÓGICA                  -->
+  <!-- ======================================================== -->
+  @if (selectedBadge) {
+    <div class="badge-modal-backdrop" (click)="closeBadgeModal()">
+      <div class="badge-modal-card" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="btn-close-modal"
+          (click)="closeBadgeModal()"
+          aria-label="Cerrar modal"
+        >
+          <i class="ph ph-x"></i>
+        </button>
+
+        <div class="modal-badge-icon" [class.unlocked]="selectedBadge.unlocked">
+          <i class="ph" [ngClass]="selectedBadge.icon"></i>
+        </div>
+
+        <span class="modal-rarity" [ngClass]="selectedBadge.rarity.toLowerCase()">
+          {{ selectedBadge.rarity }} · {{ selectedBadge.category }}
+        </span>
+
+        <h3 class="modal-badge-name">{{ selectedBadge.name }}</h3>
+        <p class="modal-badge-desc">{{ selectedBadge.description }}</p>
+
+        <div class="modal-status-box">
+          @if (selectedBadge.unlocked) {
+            <span class="status-unlocked-text">
+              <i class="ph ph-check-circle"></i>
+              Desbloqueada ({{ selectedBadge.unlockedDate }})
+            </span>
+          } @else {
+            <span class="status-locked-text">
+              <i class="ph ph-lock"></i>
+              Insignia bloqueada. Requiere completar retos específicos.
+            </span>
+          }
+        </div>
+
+        <button type="button" class="btn-modal-action" (click)="closeBadgeModal()">
+          Entendido
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
