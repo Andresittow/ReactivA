@@ -1,0 +1,2235 @@
+// ============================================================
+// ESTILOS – Dashboard del Profesor (ReactivA)
+// Identidad Cromática Verde & Azul Complementario
+// ============================================================
+
+$font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+// Paleta Oficial Docente ReactivA
+$c-green-primary:   #198754;
+$c-green-dark:      #146C43;
+$c-green-soft:      #E8F5ED;
+$c-green-support:   #A7D7B8;
+$c-bg-general:      #F7FAF8;
+$c-white:           #FFFFFF;
+$c-text-main:       #26352D;
+$c-text-secondary:  #718078;
+$c-blue-complement: #3678C8;
+$c-blue-soft:       #EBF3FA;
+
+// Tonos de acento complementarios
+$c-purple:          #635bfc;
+$c-purple-soft:     #f3e8ff;
+$c-orange:          #f97316;
+$c-orange-soft:     #ffedd5;
+$c-danger:          #ef4444;
+$c-danger-soft:     #fee2e2;
+$c-border:          #E5ECE8;
+$c-border-subtle:   #EEF3F0;
+
+// Radios de Borde (16px a 20px)
+$radius-card: 18px;
+$radius-sm:   10px;
+$radius-btn:  12px;
+$radius-pill: 50px;
+
+// Sombras sutiles
+$shadow-card:  0 4px 20px rgba(20, 108, 67, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+$shadow-hover: 0 8px 24px rgba(25, 135, 84, 0.12);
+$shadow-modal: 0 20px 50px rgba(20, 108, 67, 0.18);
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: $c-bg-general;
+  font-family: $font-family;
+  color: $c-text-main;
+}
+
+.teacher-dashboard-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $c-bg-general;
+}
+
+// ============================================================
+// 1. TOPBAR HEADER SUPERIOR
+// ============================================================
+.topbar-header {
+  height: 72px;
+  background-color: $c-white;
+  border-bottom: 1px solid $c-border;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.8rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+  }
+}
+
+// Brand
+.brand-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .brand-flask-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, $c-green-primary, $c-green-dark);
+    color: $c-white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.25);
+  }
+
+  .brand-titles {
+    display: flex;
+    flex-direction: column;
+
+    .brand-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: $c-text-main;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-role {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: $c-green-primary;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+}
+
+// Selector Institucional
+.institution-dropdown-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.9rem;
+  background-color: $c-bg-general;
+  border: 1px solid $c-border;
+  border-radius: $radius-btn;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .inst-icon {
+    color: $c-green-dark;
+    font-size: 1.1rem;
+  }
+
+  .inst-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+
+    .inst-name {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: $c-text-main;
+      line-height: 1.2;
+    }
+
+    .inst-dept {
+      font-size: 0.72rem;
+      color: $c-text-secondary;
+    }
+  }
+
+  .inst-caret {
+    font-size: 0.85rem;
+    color: $c-text-secondary;
+    margin-left: 0.2rem;
+  }
+
+  &:hover {
+    background-color: $c-green-soft;
+    border-color: $c-green-support;
+  }
+}
+
+// Ciclo Académico
+.cycle-indicator-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  background-color: $c-white;
+  border: 1px solid $c-border;
+  border-radius: $radius-pill;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $c-text-secondary;
+
+  i {
+    color: $c-blue-complement;
+    font-size: 0.95rem;
+  }
+}
+
+// Botón Crear Práctica
+.btn-top-assignment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 1.25rem;
+  background: linear-gradient(135deg, #1b538c, #13406f);
+  color: $c-white;
+  border: none;
+  border-radius: $radius-pill;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(27, 83, 140, 0.2);
+
+  i {
+    font-size: 1.05rem;
+  }
+
+  &:hover {
+    background: linear-gradient(135deg, #13406f, #0d2f53);
+    box-shadow: 0 6px 16px rgba(27, 83, 140, 0.3);
+    transform: translateY(-1px);
+  }
+}
+
+// Campana de Notificaciones
+.btn-top-notif {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid $c-border;
+  background-color: $c-white;
+  color: $c-text-secondary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .notif-badge-dot {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: $c-orange;
+    border: 2px solid $c-white;
+  }
+
+  &:hover {
+    background-color: $c-green-soft;
+    color: $c-green-dark;
+  }
+}
+
+// Perfil Docente
+.teacher-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-left: 0.4rem;
+
+  .teacher-text-block {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+
+    .teacher-name {
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: $c-text-main;
+      line-height: 1.2;
+    }
+
+    .teacher-role {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: $c-text-secondary;
+    }
+  }
+
+  .teacher-avatar-circle {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid $c-green-support;
+
+    .teacher-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .teacher-online-dot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: $c-green-primary;
+      border: 1.5px solid $c-white;
+    }
+  }
+}
+
+// ============================================================
+// 2. DASHBOARD BODY: SIDEBAR + MAIN CONTENT
+// ============================================================
+.dashboard-body-container {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+}
+
+// Sidebar Lateral del Docente
+.teacher-sidebar {
+  background-color: $c-white;
+  border-right: 1px solid $c-border;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 0.9rem;
+  position: sticky;
+  top: 72px;
+  height: calc(100vh - 72px);
+  box-sizing: border-box;
+
+  .nav-items-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .sidebar-nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    border-radius: $radius-btn;
+    background: transparent;
+    border: none;
+    color: $c-text-secondary;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+
+    i {
+      font-size: 1.25rem;
+      transition: color 0.2s ease;
+    }
+
+    &:hover:not(.active) {
+      background-color: $c-bg-general;
+      color: $c-text-main;
+
+      i {
+        color: $c-green-primary;
+      }
+    }
+
+    &.active {
+      background: linear-gradient(135deg, $c-green-soft, #f0fdf4);
+      color: $c-green-dark;
+      font-weight: 700;
+
+      i {
+        color: $c-green-primary;
+      }
+    }
+  }
+
+  .sidebar-bottom-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-top: 1rem;
+    border-top: 1px solid $c-border-subtle;
+
+    .sidebar-help-link {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.65rem 0.85rem;
+      background: transparent;
+      border: none;
+      color: $c-text-secondary;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+
+      i {
+        font-size: 1.15rem;
+      }
+
+      &:hover {
+        background-color: $c-bg-general;
+        color: $c-text-main;
+      }
+    }
+
+    .server-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.85rem;
+      background-color: $c-green-soft;
+      border: 1px solid $c-green-support;
+      border-radius: $radius-pill;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: $c-green-dark;
+
+      .status-pulse-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: $c-green-primary;
+        box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.2);
+        animation: pulseDot 2s infinite;
+      }
+
+      .server-text {
+        flex: 1;
+      }
+
+      .server-version {
+        font-weight: 700;
+        color: $c-green-dark;
+      }
+    }
+  }
+}
+
+@keyframes pulseDot {
+  0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(25, 135, 84, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+}
+
+// Workspace Principal
+.dashboard-main-content {
+  padding: 1.8rem 2.2rem 4rem 2.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  min-width: 0;
+}
+
+// ============================================================
+// 3. BANNER PRINCIPAL DE GESTIÓN DOCENTE
+// ============================================================
+.teacher-hero-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  background: linear-gradient(135deg, #ffffff 65%, #f0fdf4 100%);
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.75rem 2rem;
+  box-shadow: $shadow-card;
+
+  .hero-text-side {
+    max-width: 680px;
+
+    .hero-badges-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+
+      .period-chip {
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $c-blue-complement;
+        background-color: $c-blue-soft;
+        padding: 0.3rem 0.75rem;
+        border-radius: $radius-pill;
+      }
+
+      .live-connected-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: $c-green-dark;
+        background-color: $c-green-soft;
+        padding: 0.3rem 0.75rem;
+        border-radius: $radius-pill;
+
+        .live-pulse {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background-color: $c-green-primary;
+          animation: pulseDot 1.5s infinite;
+        }
+      }
+    }
+
+    .hero-heading {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: $c-text-main;
+      margin: 0 0 0.4rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-subheading {
+      font-size: 0.92rem;
+      color: $c-text-secondary;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+
+  // Tarjeta de PIN Activo
+  .active-pin-card {
+    background-color: $c-white;
+    border: 1.5px solid $c-green-support;
+    border-radius: 16px;
+    padding: 1.1rem 1.4rem;
+    box-shadow: 0 4px 16px rgba(25, 135, 84, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-width: 250px;
+
+    .pin-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .pin-lead {
+      display: flex;
+      flex-direction: column;
+
+      .pin-caption {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: $c-text-secondary;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .pin-code-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+
+        .pin-key-icon {
+          color: $c-green-primary;
+          font-size: 1.25rem;
+        }
+
+        .pin-digits {
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size: 1.45rem;
+          font-weight: 800;
+          color: $c-green-dark;
+          letter-spacing: 0.04em;
+        }
+      }
+    }
+
+    .pin-action-icons {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+
+      .pin-icon-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background-color: $c-bg-general;
+        border: 1px solid $c-border;
+        color: $c-text-secondary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+          background-color: $c-green-soft;
+          color: $c-green-primary;
+          border-color: $c-green-support;
+        }
+      }
+    }
+
+    .btn-new-virtual-task {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1rem;
+      background: linear-gradient(135deg, $c-green-primary, $c-green-dark);
+      color: $c-white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: linear-gradient(135deg, $c-green-dark, #0d462b);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+      }
+    }
+  }
+}
+
+// ============================================================
+// 4. FILA DE KPIS / MÉTRICAS GENERALES
+// ============================================================
+.kpi-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+.kpi-card {
+  background-color: $c-white;
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.35rem 1.4rem;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  .kpi-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+
+    .kpi-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: $c-text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kpi-icon-bubble {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+  }
+
+  .kpi-main-number-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.45rem;
+
+    .kpi-big-number {
+      font-size: 1.95rem;
+      font-weight: 800;
+      color: $c-text-main;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .kpi-delta-tag {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: $radius-pill;
+
+      &.delta-positive {
+        background-color: $c-green-soft;
+        color: $c-green-dark;
+      }
+    }
+
+    .kpi-timeline-label,
+    .kpi-students-label {
+      font-size: 0.82rem;
+      color: $c-text-secondary;
+      font-weight: 500;
+    }
+
+    .kpi-status-badge.badge-optimal {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background-color: $c-green-soft;
+      color: $c-green-dark;
+      padding: 0.2rem 0.6rem;
+      border-radius: $radius-pill;
+    }
+  }
+
+  .kpi-footer-note {
+    font-size: 0.78rem;
+    color: $c-text-secondary;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .kpi-alert-sub-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    .kpi-alert-topic {
+      font-size: 0.78rem;
+      color: $c-orange;
+      font-weight: 600;
+    }
+
+    .btn-link-alerts {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: $c-green-primary;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // Temas cromáticos para cada KPI
+  &.theme-students .kpi-icon-bubble {
+    background-color: $c-blue-soft;
+    color: $c-blue-complement;
+  }
+  &.theme-practices .kpi-icon-bubble {
+    background-color: $c-purple-soft;
+    color: $c-purple;
+  }
+  &.theme-accuracy .kpi-icon-bubble {
+    background-color: $c-green-soft;
+    color: $c-green-primary;
+  }
+  &.theme-alerts .kpi-icon-bubble {
+    background-color: $c-orange-soft;
+    color: $c-orange;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-hover;
+  }
+}
+
+// ============================================================
+// 5. LAYOUT EN DOS COLUMNAS
+// ============================================================
+.two-columns-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.8rem;
+  align-items: start;
+}
+
+.left-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  min-width: 0;
+}
+
+.right-widgets-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// Tarjeta Base (.dashboard-card)
+.dashboard-card {
+  background-color: $c-white;
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.75rem;
+  box-shadow: $shadow-card;
+
+  .card-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.4rem;
+
+    .card-section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: $c-text-main;
+      margin: 0 0 0.25rem 0;
+      letter-spacing: -0.01em;
+    }
+
+    .card-section-subtitle {
+      font-size: 0.85rem;
+      color: $c-text-secondary;
+      margin: 0;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// SESIÓN EN CURSO / LABORATORIO EN VIVO
+// ------------------------------------------------------------
+.live-session-card {
+  .session-title-cluster {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+
+    .session-wifi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, $c-green-soft, #d1fae5);
+      color: $c-green-dark;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.45rem;
+    }
+
+    .session-heading-line {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .session-title {
+        font-size: 1.12rem;
+        font-weight: 800;
+        color: $c-text-main;
+        margin: 0;
+      }
+
+      .status-pill-badge {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.25rem 0.65rem;
+        border-radius: $radius-pill;
+
+        &.badge-running {
+          background-color: $c-green-soft;
+          color: $c-green-dark;
+          border: 1px solid $c-green-support;
+        }
+        &.badge-paused {
+          background-color: $c-orange-soft;
+          color: $c-orange;
+          border: 1px solid #fed7aa;
+        }
+      }
+    }
+
+    .session-subtitle {
+      font-size: 0.84rem;
+      color: $c-text-secondary;
+      margin: 0.2rem 0 0 0;
+    }
+  }
+
+  .session-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+
+    .btn-control-pause {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.6rem 1.05rem;
+      background-color: $c-white;
+      border: 1px solid $c-border;
+      border-radius: $radius-btn;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: $c-text-main;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $c-bg-general;
+        border-color: $c-text-secondary;
+      }
+    }
+
+    .btn-control-screens {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.6rem 1.15rem;
+      background: linear-gradient(135deg, #1b538c, #13406f);
+      color: $c-white;
+      border: none;
+      border-radius: $radius-btn;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: linear-gradient(135deg, #13406f, #0d2f53);
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  // Progreso temporal
+  .session-timing-section {
+    background-color: $c-bg-general;
+    border: 1px solid $c-border;
+    border-radius: 14px;
+    padding: 1.15rem 1.3rem;
+    margin-bottom: 1.5rem;
+
+    .timing-labels-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.84rem;
+      color: $c-text-secondary;
+      margin-bottom: 0.75rem;
+
+      .timing-left {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        i { color: $c-green-primary; font-size: 1rem; }
+        strong { color: $c-text-main; }
+      }
+
+      .timing-right strong {
+        color: $c-green-dark;
+      }
+    }
+
+    .session-progress-rail {
+      height: 9px;
+      background-color: #e2e8f0;
+      border-radius: $radius-pill;
+      overflow: hidden;
+      margin-bottom: 0.85rem;
+
+      .session-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, $c-green-primary, $c-green-dark);
+        border-radius: $radius-pill;
+        transition: width 0.4s ease;
+      }
+    }
+
+    .session-phases-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+
+      .phase-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: $c-white;
+        border: 1px solid $c-border;
+        padding: 0.35rem 0.75rem;
+        border-radius: $radius-pill;
+        font-size: 0.76rem;
+        color: $c-text-secondary;
+
+        .phase-percent {
+          color: $c-green-dark;
+        }
+      }
+    }
+  }
+
+  // Feed en vivo
+  .live-activity-feed-wrapper {
+    .feed-section-heading {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: $c-text-secondary;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin: 0 0 0.85rem 0;
+    }
+
+    .feed-items-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .feed-item-row {
+      display: flex;
+      align-items: center;
+      gap: 0.95rem;
+      padding: 0.85rem 1.1rem;
+      background-color: $c-white;
+      border: 1px solid $c-border;
+      border-radius: 12px;
+      transition: background 0.15s ease;
+
+      .feed-icon-cell {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+      }
+
+      .feed-content-cell {
+        flex: 1;
+        min-width: 0;
+
+        .feed-text-line {
+          font-size: 0.85rem;
+          color: $c-text-main;
+          line-height: 1.35;
+
+          .feed-student-name {
+            font-weight: 700;
+            color: $c-text-main;
+            margin-right: 0.3rem;
+          }
+
+          .feed-action-text {
+            color: $c-text-secondary;
+          }
+        }
+
+        .feed-highlight-line {
+          font-size: 0.76rem;
+          color: $c-green-dark;
+          margin-top: 0.15rem;
+        }
+      }
+
+      .feed-time-cell {
+        font-size: 0.74rem;
+        color: $c-text-secondary;
+        white-space: nowrap;
+      }
+
+      &.feed-success .feed-icon-cell {
+        background-color: $c-green-soft;
+        color: $c-green-primary;
+      }
+      &.feed-ai .feed-icon-cell {
+        background-color: $c-purple-soft;
+        color: $c-purple;
+      }
+      &.feed-warning .feed-icon-cell {
+        background-color: $c-orange-soft;
+        color: $c-orange;
+      }
+
+      &:hover {
+        background-color: $c-bg-general;
+      }
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// RENDIMIENTO POR GRUPOS Y MÓDULOS CURRICULARES
+// ------------------------------------------------------------
+.groups-performance-card {
+  .header-tools-cluster {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+
+    .group-search-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: $c-bg-general;
+      border: 1px solid $c-border;
+      border-radius: $radius-btn;
+      padding: 0.45rem 0.85rem;
+
+      i { color: $c-text-secondary; font-size: 0.95rem; }
+
+      .group-search-input {
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 0.82rem;
+        color: $c-text-main;
+        width: 170px;
+      }
+    }
+
+    .btn-filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.9rem;
+      background-color: $c-bg-general;
+      border: 1px solid $c-border;
+      border-radius: $radius-btn;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: $c-text-secondary;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $c-green-soft;
+        color: $c-green-dark;
+      }
+    }
+
+    .btn-export-grades {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      background-color: $c-white;
+      border: 1px solid $c-green-support;
+      border-radius: $radius-btn;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: $c-green-dark;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $c-green-soft;
+      }
+    }
+  }
+
+  .groups-list-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .group-item-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.1rem 1.4rem;
+    background-color: $c-bg-general;
+    border: 1px solid $c-border;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    .group-badge-cell {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: $c-white;
+      flex-shrink: 0;
+
+      &.badge-blue   { background: linear-gradient(135deg, #0284c7, #0369a1); }
+      &.badge-purple { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+      &.badge-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
+      &.badge-indigo { background: linear-gradient(135deg, #4f46e5, #3730a3); }
+    }
+
+    .group-info-cell {
+      flex: 1;
+      min-width: 0;
+
+      .group-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+
+        .group-name {
+          font-size: 0.98rem;
+          font-weight: 700;
+          color: $c-text-main;
+          margin: 0;
+        }
+
+        .group-status-chip {
+          font-size: 0.72rem;
+          font-weight: 700;
+          padding: 0.15rem 0.55rem;
+          border-radius: $radius-pill;
+
+          &.badge-success { background-color: $c-green-soft; color: $c-green-dark; }
+          &.badge-info    { background-color: $c-blue-soft; color: $c-blue-complement; }
+          &.badge-warning { background-color: $c-orange-soft; color: $c-orange; }
+          &.badge-teal    { background-color: #ccfbf1; color: #0f766e; }
+        }
+      }
+
+      .group-detail-text {
+        font-size: 0.8rem;
+        color: $c-text-secondary;
+        margin: 0.2rem 0 0 0;
+      }
+    }
+
+    .group-progress-cell {
+      width: 140px;
+
+      .progress-info-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.76rem;
+        color: $c-text-secondary;
+        margin-bottom: 0.35rem;
+
+        .progress-val-text {
+          color: $c-text-main;
+          font-weight: 700;
+        }
+      }
+
+      .progress-track-mini {
+        height: 6px;
+        background-color: #e2e8f0;
+        border-radius: $radius-pill;
+        overflow: hidden;
+
+        .progress-fill-mini {
+          height: 100%;
+          background: linear-gradient(90deg, $c-green-primary, $c-blue-complement);
+          border-radius: $radius-pill;
+        }
+      }
+    }
+
+    .group-grade-cell {
+      text-align: right;
+      min-width: 80px;
+
+      .grade-main-val {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: $c-text-main;
+        line-height: 1;
+      }
+
+      .grade-caption {
+        font-size: 0.72rem;
+        color: $c-text-secondary;
+        margin-top: 0.15rem;
+      }
+    }
+
+    .group-actions-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+
+      .btn-group-inspect {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid $c-border;
+        background-color: $c-white;
+        color: $c-text-secondary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+          background-color: $c-green-soft;
+          color: $c-green-dark;
+          border-color: $c-green-support;
+        }
+      }
+    }
+
+    &:hover {
+      background-color: $c-white;
+      box-shadow: $shadow-card;
+      border-color: $c-green-support;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// SIMULADORES 3D (FILA INFERIOR)
+// ------------------------------------------------------------
+.simulators-preview-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.sim-card-box {
+  background-color: $c-white;
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.35rem;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  .sim-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    .sim-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: $c-text-main;
+      margin: 0;
+    }
+
+    .sim-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: $radius-pill;
+
+      &.badge-cyan  { background-color: $c-blue-soft; color: $c-blue-complement; }
+      &.badge-green { background-color: $c-green-soft; color: $c-green-dark; }
+    }
+  }
+
+  .sim-visual-preview {
+    height: 100px;
+    background: linear-gradient(135deg, #f0fdf4, #e0f2fe);
+    border-radius: 12px;
+    border: 1px solid $c-border-subtle;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .svg-mol-hero, .svg-burette-hero {
+      width: 140px;
+      height: 70px;
+    }
+
+    .tag-formula-floating {
+      position: absolute;
+      bottom: 8px;
+      left: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background-color: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(4px);
+      padding: 0.2rem 0.6rem;
+      border-radius: $radius-pill;
+      color: $c-text-main;
+      border: 1px solid $c-border;
+    }
+  }
+
+  .sim-desc {
+    font-size: 0.8rem;
+    color: $c-text-secondary;
+    line-height: 1.45;
+    margin: 0;
+  }
+}
+
+// ============================================================
+// 6. WIDGETS DE LA COLUMNA DERECHA
+// ============================================================
+.widget-box {
+  background-color: $c-white;
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.4rem;
+  box-shadow: $shadow-card;
+
+  .widget-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+
+    &.justify-between {
+      justify-content: space-between;
+    }
+
+    .header-with-icon {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .widget-icon-pill {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background-color: $c-green-soft;
+      color: $c-green-primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .widget-yellow-icon {
+      color: $c-orange;
+      font-size: 1.25rem;
+    }
+
+    .widget-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: $c-text-main;
+      margin: 0;
+    }
+
+    .widget-subtitle {
+      font-size: 0.75rem;
+      color: $c-text-secondary;
+      margin: 0.15rem 0 0 0;
+    }
+
+    .ai-detected-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background-color: $c-orange-soft;
+      color: $c-orange;
+      padding: 0.2rem 0.6rem;
+      border-radius: $radius-pill;
+    }
+
+    .integration-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: $c-green-dark;
+      background-color: $c-green-soft;
+      padding: 0.2rem 0.6rem;
+      border-radius: $radius-pill;
+
+      .green-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: $c-green-primary;
+      }
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// WIDGET 1: GENERADOR RÁPIDO DE PIN
+// ------------------------------------------------------------
+.quick-pin-widget {
+  .pin-form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
+
+    .form-group-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+
+      label {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: $c-text-secondary;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .select-field-box {
+        .select-control {
+          width: 100%;
+          padding: 0.6rem 0.85rem;
+          background-color: $c-bg-general;
+          border: 1.5px solid $c-border;
+          border-radius: $radius-btn;
+          font-family: inherit;
+          font-size: 0.84rem;
+          font-weight: 600;
+          color: $c-text-main;
+          outline: none;
+          cursor: pointer;
+          transition: border-color 0.2s ease;
+
+          &:focus {
+            border-color: $c-green-primary;
+          }
+        }
+      }
+    }
+
+    .checkboxes-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      margin: 0.35rem 0;
+
+      .custom-check-item {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        cursor: pointer;
+        font-size: 0.78rem;
+        color: $c-text-main;
+        font-weight: 500;
+
+        input[type="checkbox"] {
+          accent-color: $c-green-primary;
+          width: 16px;
+          height: 16px;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .btn-generate-pin-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, $c-green-primary, $c-green-dark);
+      color: $c-white;
+      border: none;
+      border-radius: $radius-btn;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      i { font-size: 1.1rem; }
+
+      &:hover {
+        background: linear-gradient(135deg, $c-green-dark, #0d462b);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.25);
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// WIDGET 2: ESTUDIANTES EN REFUERZO
+// ------------------------------------------------------------
+.students-support-widget {
+  .support-students-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .support-student-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem;
+    background-color: $c-bg-general;
+    border: 1px solid $c-border;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+
+    .student-avatar-initials {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: $c-white;
+      border: 1.5px solid $c-border;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: $c-text-main;
+      flex-shrink: 0;
+    }
+
+    .student-alert-details {
+      flex: 1;
+      min-width: 0;
+
+      .student-top-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+
+        .st-name {
+          font-size: 0.86rem;
+          color: $c-text-main;
+        }
+
+        .st-issue-tag {
+          font-size: 0.68rem;
+          font-weight: 700;
+          padding: 0.15rem 0.5rem;
+          border-radius: $radius-pill;
+
+          &.badge-danger  { background-color: $c-danger-soft; color: $c-danger; }
+          &.badge-warning { background-color: $c-orange-soft; color: $c-orange; }
+          &.badge-muted   { background-color: #f1f5f9; color: $c-text-secondary; }
+        }
+      }
+
+      .st-group-tag {
+        display: block;
+        font-size: 0.72rem;
+        color: $c-text-secondary;
+        margin-top: 0.1rem;
+      }
+
+      .st-reason-text {
+        font-size: 0.76rem;
+        color: $c-text-secondary;
+        line-height: 1.35;
+        margin: 0.35rem 0 0.65rem 0;
+      }
+
+      .btn-support-action {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.75rem;
+        background-color: $c-white;
+        border: 1px solid $c-green-support;
+        border-radius: 8px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: $c-green-dark;
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        i { font-size: 0.9rem; }
+
+        &:hover {
+          background-color: $c-green-soft;
+        }
+      }
+    }
+
+    &.resolved {
+      opacity: 0.6;
+      border-color: $c-green-primary;
+    }
+  }
+
+  .btn-view-all-alerts {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem;
+    background: transparent;
+    border: 1px dashed $c-border;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $c-green-dark;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: $c-green-soft;
+      border-color: $c-green-support;
+    }
+  }
+}
+
+// ------------------------------------------------------------
+// WIDGET 3: INTEGRACIÓN ESCOLAR
+// ------------------------------------------------------------
+.integration-widget {
+  .classroom-sync-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    background: linear-gradient(135deg, $c-green-soft, #f0fdf4);
+    border: 1px solid $c-green-support;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 0.85rem;
+    transition: transform 0.15s ease;
+
+    .classroom-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .classroom-icon-wrap {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background-color: $c-white;
+        color: $c-green-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+      }
+
+      .classroom-meta {
+        display: flex;
+        flex-direction: column;
+
+        strong {
+          font-size: 0.84rem;
+          color: $c-text-main;
+        }
+        span {
+          font-size: 0.72rem;
+          color: $c-green-dark;
+        }
+      }
+    }
+
+    .btn-refresh-sync {
+      background: none;
+      border: none;
+      color: $c-green-dark;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  .integration-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+
+    .btn-int-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.6rem 0.75rem;
+      background-color: $c-bg-general;
+      border: 1px solid $c-border;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: $c-text-main;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      i { font-size: 0.95rem; color: $c-green-primary; }
+
+      &:hover {
+        background-color: $c-white;
+        border-color: $c-green-support;
+        color: $c-green-dark;
+      }
+    }
+  }
+}
+
+// ============================================================
+// 7. MODALES DE SUPERVISIÓN Y FORMULARIOS
+// ============================================================
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(20, 108, 67, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-box {
+  background-color: $c-white;
+  border-radius: $radius-card;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  box-shadow: $shadow-modal;
+  border: 1px solid $c-border;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.6rem;
+    border-bottom: 1px solid $c-border;
+    background-color: #fafdfb;
+
+    .modal-title-cluster {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+
+      .modal-title-icon {
+        font-size: 1.6rem;
+        &.green-icon { color: $c-green-primary; }
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: $c-text-main;
+      }
+
+      .modal-subtitle {
+        margin: 0.2rem 0 0 0;
+        font-size: 0.82rem;
+        color: $c-text-secondary;
+      }
+
+      .group-modal-pill {
+        padding: 0.35rem 0.75rem;
+        border-radius: 10px;
+        color: $c-white;
+        font-weight: 800;
+        font-size: 0.95rem;
+
+        &.badge-blue   { background-color: #0284c7; }
+        &.badge-purple { background-color: #7c3aed; }
+        &.badge-orange { background-color: #f97316; }
+        &.badge-indigo { background-color: #4f46e5; }
+      }
+    }
+
+    .btn-modal-close {
+      background: none;
+      border: none;
+      color: $c-text-secondary;
+      font-size: 1.35rem;
+      cursor: pointer;
+      padding: 0.2rem;
+      border-radius: 6px;
+
+      &:hover {
+        color: $c-text-main;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem 1.6rem;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.1rem 1.6rem;
+    background-color: #fafdfb;
+    border-top: 1px solid $c-border;
+  }
+}
+
+// Botones en Modales
+.btn-cancel-modal {
+  padding: 0.65rem 1.2rem;
+  background-color: transparent;
+  color: $c-text-secondary;
+  border: 1px solid $c-border;
+  border-radius: $radius-btn;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $c-bg-general;
+    color: $c-text-main;
+  }
+}
+
+.btn-solid-green {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.35rem;
+  background: linear-gradient(135deg, $c-green-primary, $c-green-dark);
+  color: $c-white;
+  border: none;
+  border-radius: $radius-btn;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, $c-green-dark, #0d462b);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+// Monitor de Pantallas (Supervisión)
+.monitor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.15rem;
+
+  .student-screen-card {
+    border: 1px solid $c-border;
+    border-radius: 12px;
+    padding: 0.85rem;
+    background-color: #0b130f;
+    color: #e2e8f0;
+
+    .screen-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+
+      .screen-tag-green  { color: #4ade80; }
+      .screen-tag-orange { color: #fb923c; }
+      .screen-tag-purple { color: #c084fc; }
+      .screen-tag-blue   { color: #38bdf8; }
+    }
+
+    .screen-canvas-preview {
+      height: 90px;
+      background-color: #17251d;
+      border-radius: 8px;
+      border: 1px dashed #2d4a3b;
+      position: relative;
+      overflow: hidden;
+
+      .screen-wireframe {
+        width: 100%;
+        height: 100%;
+        opacity: 0.4;
+
+        &.wireframe-1 { background: radial-gradient(circle, #22c55e 10%, transparent 70%); }
+        &.wireframe-2 { background: radial-gradient(circle, #f97316 10%, transparent 70%); }
+        &.wireframe-3 { background: radial-gradient(circle, #a855f7 10%, transparent 70%); }
+        &.wireframe-4 { background: radial-gradient(circle, #0284c7 10%, transparent 70%); }
+      }
+    }
+  }
+}
+
+// Tabla de Estudiantes en Detalle
+.students-table-wrapper {
+  overflow-x: auto;
+
+  .students-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+
+    th, td {
+      padding: 0.75rem 0.85rem;
+      text-align: left;
+      border-bottom: 1px solid $c-border;
+    }
+
+    th {
+      background-color: #fafdfb;
+      color: $c-text-secondary;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+    }
+
+    .st-status-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: $radius-pill;
+
+      &.tag-done     { background-color: $c-green-soft; color: $c-green-dark; }
+      &.tag-progress { background-color: $c-blue-soft; color: $c-blue-complement; }
+      &.tag-alert    { background-color: $c-danger-soft; color: $c-danger; }
+    }
+
+    .grade-bold {
+      font-size: 0.95rem;
+      color: $c-green-dark;
+    }
+
+    .text-muted-col {
+      color: $c-text-secondary;
+      font-size: 0.78rem;
+    }
+  }
+}
+
+// Proyección de PIN Modal
+.text-center-modal {
+  text-align: center;
+  padding: 2.2rem 1.6rem !important;
+
+  .join-instruction {
+    font-size: 0.95rem;
+    color: $c-text-secondary;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .mega-pin-display {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: $c-green-dark;
+    background: linear-gradient(135deg, $c-green-soft, #d1fae5);
+    border: 2px dashed $c-green-primary;
+    border-radius: 20px;
+    padding: 1.2rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.4rem;
+  }
+
+  .qr-mock-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: $c-text-secondary;
+    font-size: 0.82rem;
+
+    .qr-large-icon {
+      font-size: 4rem;
+      color: $c-text-main;
+    }
+  }
+}
+
+// Formulario de Asignación en Modal
+.form-field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.95rem;
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $c-text-main;
+  }
+
+  .text-input-styled, .select-input-styled, .textarea-input-styled {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid $c-border;
+    border-radius: $radius-btn;
+    background-color: #ffffff;
+    font-family: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: $c-green-primary;
+    }
+  }
+}
+
+.form-fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+// Toast Notificación Docente
+.toast-teacher-alert {
+  position: fixed;
+  top: 86px;
+  right: 2rem;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.35rem;
+  border-radius: 12px;
+  background-color: #172b20;
+  color: #ffffff;
+  font-size: 0.86rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  i { font-size: 1.25rem; }
+
+  &.toast-success {
+    border-left: 4px solid $c-green-primary;
+    i { color: #4ade80; }
+  }
+  &.toast-warning {
+    border-left: 4px solid $c-orange;
+    i { color: #fb923c; }
+  }
+  &.toast-info {
+    border-left: 4px solid $c-blue-complement;
+    i { color: #38bdf8; }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateY(-15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ============================================================
+// 8. MEDIA QUERIES / RESPONSIVE DESIGN
+// ============================================================
+@media (max-width: 1200px) {
+  .kpi-metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .two-columns-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .dashboard-body-container {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-sidebar {
+    display: none; // o drawer colapsable
+  }
+
+  .teacher-hero-banner {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .active-pin-card {
+      width: 100%;
+    }
+  }
+
+  .simulators-preview-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar-header {
+    padding: 0 1rem;
+
+    .institution-dropdown-pill,
+    .cycle-indicator-pill {
+      display: none;
+    }
+  }
+
+  .dashboard-main-content {
+    padding: 1.2rem 1rem 3rem 1rem;
+  }
+
+  .kpi-metrics-row {
+    grid-template-columns: 1fr;
+  }
+
+  .monitor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-fields-row {
+    grid-template-columns: 1fr;
+  }
+}
+

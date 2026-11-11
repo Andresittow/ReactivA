@@ -1,0 +1,919 @@
+<!-- ============================================================
+     DASHBOARD DEL PROFESOR – REACTIVA LAB
+     Panel de Gestión Docente e Intervención Pedagógica
+     ============================================================ -->
+
+<div class="teacher-dashboard-layout">
+
+  <!-- ============================================================
+       1. TOPBAR / HEADER SUPERIOR INSTITUCIONAL
+       ============================================================ -->
+  <header class="topbar-header">
+    <div class="topbar-left">
+      <div class="brand-cluster">
+        <div class="brand-flask-icon">
+          <i class="ph ph-flask"></i>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">ChemLab Pro</span>
+          <span class="brand-role">Docente / Lab Admin</span>
+        </div>
+      </div>
+
+      <!-- Selector Institucional -->
+      <div class="institution-dropdown-pill">
+        <div class="inst-icon">
+          <i class="ph ph-buildings"></i>
+        </div>
+        <div class="inst-info">
+          <strong class="inst-name">Colegio San Ignacio</strong>
+          <span class="inst-dept">Dpto. Ciencias Naturales</span>
+        </div>
+        <i class="ph ph-caret-down inst-caret"></i>
+      </div>
+
+      <!-- Ciclo Académico -->
+      <div class="cycle-indicator-pill">
+        <i class="ph ph-calendar-check"></i>
+        <span>Ciclo Académico 2024 - Semestre 2</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Botón Crear Práctica / Asignación -->
+      <button type="button" class="btn-top-assignment" (click)="openCreateAssignmentModal()">
+        <i class="ph ph-plus-circle"></i>
+        <span>Crear Práctica / Asignación</span>
+      </button>
+
+      <!-- Campana de Notificaciones -->
+      <button type="button" class="btn-top-notif" (click)="openAlertsModal()" title="Alertas de laboratorio">
+        <i class="ph ph-bell"></i>
+        <span class="notif-badge-dot"></span>
+      </button>
+
+      <!-- Perfil Docente -->
+      <div class="teacher-user-badge">
+        <div class="teacher-text-block">
+          <span class="teacher-name">{{ teacherProfile.name }}</span>
+          <span class="teacher-role">{{ teacherProfile.title }}</span>
+        </div>
+        <div class="teacher-avatar-circle">
+          <img [src]="teacherProfile.avatarUrl" [alt]="teacherProfile.name" class="teacher-avatar-img" />
+          <span class="teacher-online-dot" title="Docente en línea"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       2. CONTENEDOR PRINCIPAL: SIDEBAR + DASHBOARD WORKSPACE
+       ============================================================ -->
+  <div class="dashboard-body-container">
+
+    <!-- Sidebar Lateral del Docente -->
+    <aside class="teacher-sidebar">
+      <nav class="teacher-nav-menu">
+        <ul class="nav-items-list">
+          <li>
+            <button 
+              type="button" 
+              class="sidebar-nav-btn" 
+              [class.active]="activeSidebarTab === 'general'"
+              (click)="activeSidebarTab = 'general'">
+              <i class="ph ph-squares-four"></i>
+              <span>Panel General</span>
+            </button>
+          </li>
+          <li>
+            <button 
+              type="button" 
+              class="sidebar-nav-btn" 
+              [class.active]="activeSidebarTab === 'groups'"
+              (click)="activeSidebarTab = 'groups'">
+              <i class="ph ph-users-three"></i>
+              <span>Mis Aulas y Grupos</span>
+            </button>
+          </li>
+          <li>
+            <button 
+              type="button" 
+              class="sidebar-nav-btn" 
+              [class.active]="activeSidebarTab === 'practices'"
+              (click)="activeSidebarTab = 'practices'">
+              <i class="ph ph-test-tube"></i>
+              <span>Laboratorios y Prácticas</span>
+            </button>
+          </li>
+          <li>
+            <button 
+              type="button" 
+              class="sidebar-nav-btn" 
+              [class.active]="activeSidebarTab === 'students'"
+              (click)="activeSidebarTab = 'students'">
+              <i class="ph ph-chart-line-up"></i>
+              <span>Estudiantes y Métricas</span>
+            </button>
+          </li>
+          <li>
+            <button 
+              type="button" 
+              class="sidebar-nav-btn" 
+              [class.active]="activeSidebarTab === 'pin-generator'"
+              (click)="activeSidebarTab = 'pin-generator'">
+              <i class="ph ph-key"></i>
+              <span>Generador de PIN y Tareas</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-bottom-actions">
+        <button type="button" class="sidebar-help-link" routerLink="/settings">
+          <i class="ph ph-gear"></i>
+          <span>Configuración & Ayuda</span>
+        </button>
+
+        <div class="server-status-pill">
+          <span class="status-pulse-dot"></span>
+          <span class="server-text">Servidor Lab Activo</span>
+          <span class="server-version">v2.4</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Workspace Principal del Docente -->
+    <main class="dashboard-main-content">
+
+      <!-- ============================================================
+           BANNER SUPERIOR DE GESTIÓN DOCENTE + PIN ACTIVO
+           ============================================================ -->
+      <section class="teacher-hero-banner">
+        <div class="hero-text-side">
+          <div class="hero-badges-row">
+            <span class="period-chip">SEMESTRE 2 • PERÍODO ACTIVO</span>
+            <span class="live-connected-chip">
+              <span class="live-pulse"></span>
+              En vivo: 32 alumnos conectados
+            </span>
+          </div>
+
+          <h1 class="hero-heading">Panel de Gestión Docente — Prof. Roberto Méndez</h1>
+          <p class="hero-subheading">
+            Supervisión de prácticas de química, laboratorios interactivos en 3D y progreso de destrezas analíticas en bachillerato.
+          </p>
+        </div>
+
+        <!-- Tarjeta de PIN de Clase Activo -->
+        <div class="active-pin-card">
+          <div class="pin-card-top">
+            <div class="pin-lead">
+              <span class="pin-caption">PIN de Clase Activo:</span>
+              <div class="pin-code-wrap">
+                <i class="ph ph-key-return pin-key-icon"></i>
+                <span class="pin-digits">{{ activePin }}</span>
+              </div>
+            </div>
+
+            <div class="pin-action-icons">
+              <button type="button" class="pin-icon-btn" (click)="copyPinToClipboard()" title="Copiar código PIN">
+                <i class="ph ph-copy"></i>
+              </button>
+              <button type="button" class="pin-icon-btn" (click)="openPinProjectionModal()" title="Proyectar PIN en el aula">
+                <i class="ph ph-presentation"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="btn-new-virtual-task" (click)="openCreateAssignmentModal()">
+            <i class="ph ph-user-plus"></i>
+            <span>+ Nueva Asignación Virtual</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           FILA DE 4 TARJETAS DE KPIS / MÉTRICAS GENERALES
+           ============================================================ -->
+      <section class="kpi-metrics-row">
+        <!-- KPI 1: Estudiantes Activos -->
+        <div class="kpi-card theme-students">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Estudiantes Activos</span>
+            <div class="kpi-icon-bubble">
+              <i class="ph ph-users"></i>
+            </div>
+          </div>
+          <div class="kpi-main-number-row">
+            <span class="kpi-big-number">{{ kpis.activeStudents }}</span>
+            <span class="kpi-delta-tag delta-positive">{{ kpis.activeStudentsDelta }}</span>
+          </div>
+          <p class="kpi-footer-note">{{ kpis.activeStudentsDetail }}</p>
+        </div>
+
+        <!-- KPI 2: Prácticas Completadas -->
+        <div class="kpi-card theme-practices">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Prácticas Completadas</span>
+            <div class="kpi-icon-bubble">
+              <i class="ph ph-flask"></i>
+            </div>
+          </div>
+          <div class="kpi-main-number-row">
+            <span class="kpi-big-number">{{ kpis.completedPractices }}</span>
+            <span class="kpi-timeline-label">este mes</span>
+          </div>
+          <p class="kpi-footer-note">{{ kpis.completedPracticesDetail }}</p>
+        </div>
+
+        <!-- KPI 3: Precisión Media en Lab -->
+        <div class="kpi-card theme-accuracy">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Precisión Media en Lab</span>
+            <div class="kpi-icon-bubble">
+              <i class="ph ph-atom"></i>
+            </div>
+          </div>
+          <div class="kpi-main-number-row">
+            <span class="kpi-big-number">{{ kpis.labAverageAccuracy }}%</span>
+            <span class="kpi-status-badge badge-optimal">Óptimo</span>
+          </div>
+          <p class="kpi-footer-note">{{ kpis.labAccuracyDelta }}</p>
+        </div>
+
+        <!-- KPI 4: Alertas de Apoyo -->
+        <div class="kpi-card theme-alerts">
+          <div class="kpi-top-row">
+            <span class="kpi-label">Alertas de Apoyo</span>
+            <div class="kpi-icon-bubble">
+              <i class="ph ph-warning"></i>
+            </div>
+          </div>
+          <div class="kpi-main-number-row">
+            <span class="kpi-big-number">{{ kpis.supportAlertsCount }}</span>
+            <span class="kpi-students-label">estudiantes</span>
+          </div>
+          <div class="kpi-alert-sub-row">
+            <span class="kpi-alert-topic">{{ kpis.supportAlertsTopic }}</span>
+            <button type="button" class="btn-link-alerts" (click)="openAlertsModal()">
+              Ver alertas detalladas <i class="ph ph-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECCIÓN EN DOS COLUMNAS (CONTENIDO PRINCIPAL Y WIDGETS)
+           ============================================================ -->
+      <div class="two-columns-layout">
+
+        <!-- ========================================================
+             COLUMNA IZQUIERDA (ANCHO COMPLETO DE SEGUIMIENTO)
+             ======================================================== -->
+        <div class="left-main-column">
+
+          <!-- 1. Tarjeta: Sesión en Curso / Laboratorio en Vivo -->
+          <article class="dashboard-card live-session-card">
+            <div class="card-header-bar">
+              <div class="session-title-cluster">
+                <div class="session-wifi-icon">
+                  <i class="ph ph-broadcast"></i>
+                </div>
+                <div>
+                  <div class="session-heading-line">
+                    <h2 class="session-title">{{ liveSession.groupCode }} — {{ liveSession.title }}</h2>
+                    <span class="status-pill-badge" [ngClass]="liveSession.status === 'EN CURSO' ? 'badge-running' : 'badge-paused'">
+                      {{ liveSession.status }}
+                    </span>
+                  </div>
+                  <p class="session-subtitle">{{ liveSession.description }}</p>
+                </div>
+              </div>
+
+              <div class="session-header-actions">
+                <button 
+                  type="button" 
+                  class="btn-control-pause" 
+                  (click)="toggleLiveSession()">
+                  <i class="ph" [ngClass]="liveSession.status === 'EN CURSO' ? 'ph-pause' : 'ph-play'"></i>
+                  <span>{{ liveSession.status === 'EN CURSO' ? 'Pausar Simulación' : 'Reanudar Simulación' }}</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  class="btn-control-screens" 
+                  (click)="openScreensModal()">
+                  <i class="ph ph-monitor"></i>
+                  <span>Supervisar Pantallas</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Progreso temporal de la sesión -->
+            <div class="session-timing-section">
+              <div class="timing-labels-line">
+                <div class="timing-left">
+                  <i class="ph ph-clock"></i>
+                  <span>Tiempo Transcurrido: <strong>{{ liveSession.elapsedMinutes }}m / {{ liveSession.totalMinutes }}m</strong></span>
+                </div>
+                <div class="timing-right">
+                  <span><strong>{{ liveSession.progressPercent }}%</strong> de la sesión completado</span>
+                </div>
+              </div>
+
+              <div class="session-progress-rail">
+                <div class="session-progress-bar" [style.width.%]="liveSession.progressPercent"></div>
+              </div>
+
+              <!-- Fases de la sesión -->
+              <div class="session-phases-chips">
+                @for (phase of liveSession.phases; track phase.name) {
+                  <div class="phase-chip">
+                    <span class="phase-name">{{ phase.name }}</span>
+                    <strong class="phase-percent">({{ phase.percent }}%)</strong>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Registro de Actividad en Vivo (Feed) -->
+            <div class="live-activity-feed-wrapper">
+              <h3 class="feed-section-heading">REGISTRO DE ACTIVIDAD EN VIVO</h3>
+
+              <div class="feed-items-stack">
+                @for (item of activityFeed; track item.id) {
+                  <div class="feed-item-row" [ngClass]="'feed-' + item.type">
+                    <div class="feed-icon-cell">
+                      <i class="ph" [ngClass]="item.icon"></i>
+                    </div>
+                    <div class="feed-content-cell">
+                      <div class="feed-text-line">
+                        <strong class="feed-student-name">{{ item.studentName }}</strong>
+                        <span class="feed-action-text">{{ item.actionText }}</span>
+                      </div>
+                      <div class="feed-highlight-line">
+                        <span>{{ item.highlightText }}</span>
+                      </div>
+                    </div>
+                    <div class="feed-time-cell">
+                      <span>{{ item.timeAgo }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+
+          <!-- 2. Tarjeta: Rendimiento por Grupos y Módulos Curriculares -->
+          <article class="dashboard-card groups-performance-card">
+            <div class="card-header-bar flex-wrap-mobile">
+              <div>
+                <h2 class="card-section-title">Rendimiento por Grupos y Módulos Curriculares</h2>
+                <p class="card-section-subtitle">Seguimiento comparativo del progreso académico y entregas de laboratorio.</p>
+              </div>
+
+              <div class="header-tools-cluster">
+                <!-- Buscador rápido -->
+                <div class="group-search-box">
+                  <i class="ph ph-magnifying-glass"></i>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="searchTerm" 
+                    (ngModelChange)="onSearchChange()" 
+                    placeholder="Buscar grupo o módulo..." 
+                    class="group-search-input" />
+                </div>
+
+                <!-- Botón de filtros -->
+                <div class="dropdown-filter-wrap">
+                  <button type="button" class="btn-filter-pill" (click)="setFilterStatus(selectedFilterStatus === 'todos' ? 'excelente' : 'todos')">
+                    <i class="ph ph-funnel"></i>
+                    <span>{{ selectedFilterStatus === 'todos' ? 'Filtrar' : 'Filtro: Activo' }}</span>
+                  </button>
+                </div>
+
+                <!-- Exportar Calificaciones -->
+                <button type="button" class="btn-export-grades" (click)="exportGrades()">
+                  <i class="ph ph-download-simple"></i>
+                  <span>Exportar Calificaciones</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Lista de Grupos Curriculares -->
+            <div class="groups-list-stack">
+              @for (group of filteredGroups; track group.id) {
+                <div class="group-item-card" (click)="openGroupDetailModal(group)">
+                  <!-- Identificador del Grado -->
+                  <div class="group-badge-cell" [ngClass]="group.codeColorClass">
+                    <span>{{ group.code }}</span>
+                  </div>
+
+                  <!-- Información del Módulo y Práctica -->
+                  <div class="group-info-cell">
+                    <div class="group-title-row">
+                      <h3 class="group-name">{{ group.gradeName }} — {{ group.subjectModule }}</h3>
+                      <span class="group-status-chip" [ngClass]="group.statusBadgeClass">
+                        {{ group.statusBadge }}
+                      </span>
+                    </div>
+                    <p class="group-detail-text">
+                      {{ group.studentsCount }} estudiantes • Práctica: {{ group.currentPractice }}
+                    </p>
+                  </div>
+
+                  <!-- Barra de Avance -->
+                  <div class="group-progress-cell">
+                    <div class="progress-info-row">
+                      <span class="progress-label-text">Avance</span>
+                      <strong class="progress-val-text">{{ group.progressPercent }}%</strong>
+                    </div>
+                    <div class="progress-track-mini">
+                      <div class="progress-fill-mini" [style.width.%]="group.progressPercent"></div>
+                    </div>
+                  </div>
+
+                  <!-- Promedio de Nota -->
+                  <div class="group-grade-cell">
+                    <div class="grade-main-val">{{ group.averageGrade }}</div>
+                    <div class="grade-caption">Promedio /10</div>
+                  </div>
+
+                  <!-- Acciones de Inspección -->
+                  <div class="group-actions-cell">
+                    <button type="button" class="btn-group-inspect" title="Inspeccionar rúbrica del grupo">
+                      <i class="ph ph-chart-bar"></i>
+                    </button>
+                    <button type="button" class="btn-group-inspect" title="Ver estudiantes">
+                      <i class="ph ph-caret-right"></i>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </article>
+
+          <!-- 3. Fila Inferior: Simuladores 3D Listos para Clase -->
+          <section class="simulators-preview-row">
+            @for (sim of simulatorCards; track sim.id) {
+              <div class="sim-card-box">
+                <div class="sim-card-header">
+                  <h3 class="sim-title">{{ sim.title }}</h3>
+                  <span class="sim-badge" [ngClass]="sim.badgeClass">{{ sim.badgeText }}</span>
+                </div>
+
+                <!-- Preview Gráfica del Simulador -->
+                <div class="sim-visual-preview" [ngClass]="sim.thumbnailType">
+                  @if (sim.thumbnailType === 'molecule-3d') {
+                    <div class="mol-3d-canvas-mock">
+                      <svg viewBox="0 0 160 80" class="svg-mol-hero">
+                        <circle cx="80" cy="40" r="16" fill="#0284c7" opacity="0.9"/>
+                        <circle cx="35" cy="22" r="11" fill="#10b981" opacity="0.85"/>
+                        <circle cx="125" cy="22" r="11" fill="#635bfc" opacity="0.85"/>
+                        <circle cx="80" cy="70" r="9" fill="#f59e0b" opacity="0.85"/>
+                        <line x1="80" y1="40" x2="35" y2="22" stroke="#0284c7" stroke-width="3"/>
+                        <line x1="80" y1="40" x2="125" y2="22" stroke="#0284c7" stroke-width="3"/>
+                        <line x1="80" y1="40" x2="80" y2="70" stroke="#0284c7" stroke-width="3"/>
+                      </svg>
+                      <span class="tag-formula-floating">{{ sim.formulaTag }}</span>
+                    </div>
+                  } @else {
+                    <div class="burette-canvas-mock">
+                      <svg viewBox="0 0 160 80" class="svg-burette-hero">
+                        <rect x="75" y="8" width="10" height="48" fill="#e0f2fe" stroke="#0284c7" stroke-width="2" rx="2"/>
+                        <polygon points="70,56 90,56 80,72" fill="#10b981" opacity="0.75"/>
+                        <circle cx="80" cy="74" r="3" fill="#10b981"/>
+                        <path d="M60,65 Q80,75 100,65" stroke="#635bfc" stroke-width="2" fill="none"/>
+                      </svg>
+                      <span class="tag-formula-floating">{{ sim.formulaTag }}</span>
+                    </div>
+                  }
+                </div>
+
+                <p class="sim-desc">{{ sim.description }}</p>
+              </div>
+            }
+          </section>
+
+        </div>
+
+        <!-- ========================================================
+             COLUMNA DERECHA (WIDGETS RÁPIDOS Y ACOMPAÑAMIENTO)
+             ======================================================== -->
+        <aside class="right-widgets-column">
+
+          <!-- WIDGET 1: Generador Rápido de PIN -->
+          <article class="widget-box quick-pin-widget">
+            <div class="widget-header-row">
+              <div class="widget-icon-pill">
+                <i class="ph ph-lightning"></i>
+              </div>
+              <div>
+                <h3 class="widget-title">Generador Rápido de PIN</h3>
+                <p class="widget-subtitle">Inicia una sala sincrónica en segundos</p>
+              </div>
+            </div>
+
+            <form [formGroup]="pinForm" (ngSubmit)="onGeneratePin()" class="pin-form-body">
+              <div class="form-group-field">
+                <label for="modInteractive">Elegir Módulo Interactivo</label>
+                <div class="select-field-box">
+                  <select id="modInteractive" formControlName="interactiveModule" class="select-control">
+                    <option value="Balanceador de Reacciones Químicas">Balanceador de Reacciones</option>
+                    <option value="Química Orgánica (Misión Orgánica)">Misión Orgánica (Domina el Carbono)</option>
+                    <option value="Simulador 3D: Estructura Molecular">Estructura Molecular 3D</option>
+                    <option value="Bureta Digital y Titulación Ácido - Base">Titulación Ácido-Base</option>
+                    <option value="Laboratorio de Tabla Periódica">Laboratorio Tabla Periódica</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group-field">
+                <label for="assignGroup">Asignar a Grupo</label>
+                <div class="select-field-box">
+                  <select id="assignGroup" formControlName="assignedGroup" class="select-control">
+                    <option value="11° Grado A (Química Orgánica)">11° Grado A (Química Orgánica)</option>
+                    <option value="10° Grado B (Reacciones)">10° Grado B (Reacciones)</option>
+                    <option value="9° Grado C (Tabla Periódica)">9° Grado C (Tabla Periódica)</option>
+                    <option value="8° Grado A (Materia)">8° Grado A (Materia)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Opciones de Configuración -->
+              <div class="checkboxes-stack">
+                <label class="custom-check-item">
+                  <input type="checkbox" formControlName="allowAtomTutorHints" />
+                  <span class="check-box-shape"></span>
+                  <span class="check-label-text">Permitir pistas del Tutor Átomo</span>
+                </label>
+
+                <label class="custom-check-item">
+                  <input type="checkbox" formControlName="timeLimit30Min" />
+                  <span class="check-box-shape"></span>
+                  <span class="check-label-text">Tiempo límite: 30 minutos de sesión</span>
+                </label>
+
+                <label class="custom-check-item">
+                  <input type="checkbox" formControlName="examModeStrict" />
+                  <span class="check-box-shape"></span>
+                  <span class="check-label-text">Modo examen: sin consultas a TP de laboratorio</span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn-generate-pin-action">
+                <i class="ph ph-key"></i>
+                <span>Generar Nuevo Código PIN de Sala</span>
+              </button>
+            </form>
+          </article>
+
+          <!-- WIDGET 2: Estudiantes en Refuerzo -->
+          <article class="widget-box students-support-widget">
+            <div class="widget-header-row justify-between">
+              <div class="header-with-icon">
+                <i class="ph ph-sparkle widget-yellow-icon"></i>
+                <h3 class="widget-title">Estudiantes en Refuerzo</h3>
+              </div>
+              <span class="ai-detected-pill">6 detectados por IA</span>
+            </div>
+
+            <div class="support-students-stack">
+              @for (alert of supportAlerts; track alert.id) {
+                <div class="support-student-item" [class.resolved]="alert.status === 'resolved'">
+                  <div class="student-avatar-initials">
+                    {{ alert.initials }}
+                  </div>
+
+                  <div class="student-alert-details">
+                    <div class="student-top-line">
+                      <strong class="st-name">{{ alert.name }}</strong>
+                      <span class="st-issue-tag" [ngClass]="alert.issueBadgeClass">{{ alert.issueBadge }}</span>
+                    </div>
+                    <span class="st-group-tag">{{ alert.gradeGroup }}</span>
+                    <p class="st-reason-text">{{ alert.description }}</p>
+
+                    <button 
+                      type="button" 
+                      class="btn-support-action" 
+                      (click)="handleAlertAction(alert)">
+                      <i class="ph ph-paper-plane-tilt"></i>
+                      <span>{{ alert.actionButtonLabel }}</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <button type="button" class="btn-view-all-alerts" (click)="openAlertsModal()">
+              <span>Ver todas las alertas de acompañamiento (6)</span>
+              <i class="ph ph-arrow-right"></i>
+            </button>
+          </article>
+
+          <!-- WIDGET 3: Integración Escolar -->
+          <article class="widget-box integration-widget">
+            <div class="widget-header-row justify-between">
+              <h3 class="widget-title">Integración Escolar</h3>
+              <span class="integration-status-pill">
+                <span class="green-dot"></span> Conectado
+              </span>
+            </div>
+
+            <!-- Google Classroom Card -->
+            <div class="classroom-sync-card" (click)="syncGoogleClassroom()" title="Clic para sincronizar con Google Classroom">
+              <div class="classroom-left">
+                <div class="classroom-icon-wrap">
+                  <i class="ph ph-chalkboard-teacher"></i>
+                </div>
+                <div class="classroom-meta">
+                  <strong>Google Classroom</strong>
+                  <span>Sincronizado hace 15m</span>
+                </div>
+              </div>
+              <button type="button" class="btn-refresh-sync" aria-label="Sincronizar ahora">
+                <i class="ph ph-arrows-clockwise"></i>
+              </button>
+            </div>
+
+            <!-- Botones de Reporte y Dirección -->
+            <div class="integration-buttons-row">
+              <button type="button" class="btn-int-action" (click)="exportGrades()">
+                <i class="ph ph-file-csv"></i>
+                <span>CSV / Excel</span>
+              </button>
+              <button type="button" class="btn-int-action" (click)="generateDirectionReport()">
+                <i class="ph ph-file-pdf"></i>
+                <span>Informe Dirección</span>
+              </button>
+            </div>
+          </article>
+
+        </aside>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ============================================================
+       3. MODALES DE GESTIÓN Y SUPERVISIÓN
+       ============================================================ -->
+
+  <!-- MODAL 1: Supervisar Pantallas en Vivo -->
+  @if (isScreensModalOpen) {
+    <div class="modal-overlay" (click)="closeScreensModal()">
+      <div class="modal-box screens-monitor-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster">
+            <i class="ph ph-monitor modal-title-icon green-icon"></i>
+            <div>
+              <h3>Supervisión en Vivo de Pantallas — 10° Grado B</h3>
+              <p class="modal-subtitle">Monitoreo de 32 escritorios virtuales conectados al servidor Lab ReactivA</p>
+            </div>
+          </div>
+          <button type="button" class="btn-modal-close" (click)="closeScreensModal()" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="monitor-grid">
+            <div class="student-screen-card">
+              <div class="screen-meta">
+                <span>Valentina R. (Mesa 01)</span>
+                <span class="screen-tag-green">Balance Redox: 100%</span>
+              </div>
+              <div class="screen-canvas-preview">
+                <div class="screen-wireframe wireframe-1"></div>
+              </div>
+            </div>
+
+            <div class="student-screen-card">
+              <div class="screen-meta">
+                <span>Lucas Silva (Mesa 02)</span>
+                <span class="screen-tag-orange">Moles: Calculando</span>
+              </div>
+              <div class="screen-canvas-preview">
+                <div class="screen-wireframe wireframe-2"></div>
+              </div>
+            </div>
+
+            <div class="student-screen-card">
+              <div class="screen-meta">
+                <span>Mateo Gómez (Mesa 03)</span>
+                <span class="screen-tag-purple">Tutor Átomo: Activo</span>
+              </div>
+              <div class="screen-canvas-preview">
+                <div class="screen-wireframe wireframe-3"></div>
+              </div>
+            </div>
+
+            <div class="student-screen-card">
+              <div class="screen-meta">
+                <span>Alex Morales (Mesa 04)</span>
+                <span class="screen-tag-blue">Alcanos 3D: Listo</span>
+              </div>
+              <div class="screen-canvas-preview">
+                <div class="screen-wireframe wireframe-4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel-modal" (click)="closeScreensModal()">Cerrar Supervisión</button>
+          <button type="button" class="btn-solid-green" (click)="showToast('Captura de pantallas enviada a la bitácora escolar.', 'success')">
+            <i class="ph ph-camera"></i>
+            <span>Tomar Captura General</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL 2: Crear Práctica / Asignación -->
+  @if (isCreateAssignmentModalOpen) {
+    <div class="modal-overlay" (click)="closeCreateAssignmentModal()">
+      <div class="modal-box form-assignment-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster">
+            <i class="ph ph-plus-circle modal-title-icon green-icon"></i>
+            <div>
+              <h3>Crear Nueva Práctica / Asignación</h3>
+              <p class="modal-subtitle">Asigna una experiencia de laboratorio virtual a tus estudiantes</p>
+            </div>
+          </div>
+          <button type="button" class="btn-modal-close" (click)="closeCreateAssignmentModal()" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <form [formGroup]="assignmentForm" (ngSubmit)="saveAssignment()" class="modal-form">
+          <div class="modal-body">
+            <div class="form-field-item">
+              <label for="asgTitle">Título de la Práctica *</label>
+              <input id="asgTitle" type="text" formControlName="title" class="text-input-styled" placeholder="ej. Laboratorio de Hidrocarburos y Enlaces Covalentes" />
+            </div>
+
+            <div class="form-fields-row">
+              <div class="form-field-item">
+                <label for="asgModule">Módulo Curricular</label>
+                <select id="asgModule" formControlName="module" class="select-input-styled">
+                  <option value="Química Orgánica (Misión Orgánica)">Química Orgánica (Misión Orgánica)</option>
+                  <option value="Reacciones y Estequiometría">Reacciones y Estequiometría</option>
+                  <option value="Tabla Periódica & Enlaces">Tabla Periódica & Enlaces</option>
+                  <option value="Introducción a la Materia">Introducción a la Materia</option>
+                </select>
+              </div>
+
+              <div class="form-field-item">
+                <label for="asgGroup">Grupo Asignado</label>
+                <select id="asgGroup" formControlName="targetGroup" class="select-input-styled">
+                  <option value="11° Grado A">11° Grado A</option>
+                  <option value="10° Grado B">10° Grado B</option>
+                  <option value="9° Grado C">9° Grado C</option>
+                  <option value="8° Grado A">8° Grado A</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-fields-row">
+              <div class="form-field-item">
+                <label for="asgDueDate">Fecha Límite de Entrega</label>
+                <input id="asgDueDate" type="date" formControlName="dueDate" class="text-input-styled" />
+              </div>
+
+              <div class="form-field-item">
+                <label for="asgMaxScore">Calificación Máxima</label>
+                <input id="asgMaxScore" type="number" formControlName="maxScore" class="text-input-styled" />
+              </div>
+            </div>
+
+            <div class="form-field-item">
+              <label for="asgDesc">Instrucciones o Criterios de Evaluación</label>
+              <textarea id="asgDesc" rows="3" formControlName="description" class="textarea-input-styled" placeholder="Pautas para la entrega del informe y uso del simulador..."></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel-modal" (click)="closeCreateAssignmentModal()">Cancelar</button>
+            <button type="submit" class="btn-solid-green" [disabled]="assignmentForm.invalid">
+              <i class="ph ph-check"></i>
+              <span>Publicar Asignación</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL 3: Detalle de Grupo Académico -->
+  @if (isGroupDetailModalOpen && selectedGroupForDetail) {
+    <div class="modal-overlay" (click)="closeGroupDetailModal()">
+      <div class="modal-box group-detail-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster">
+            <span class="group-modal-pill" [ngClass]="selectedGroupForDetail.codeColorClass">{{ selectedGroupForDetail.code }}</span>
+            <div>
+              <h3>{{ selectedGroupForDetail.gradeName }} — {{ selectedGroupForDetail.subjectModule }}</h3>
+              <p class="modal-subtitle">{{ selectedGroupForDetail.studentsCount }} alumnos matriculados • Promedio: {{ selectedGroupForDetail.averageGrade }} / 10</p>
+            </div>
+          </div>
+          <button type="button" class="btn-modal-close" (click)="closeGroupDetailModal()" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="students-table-wrapper">
+            <table class="students-table">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Práctica Actual</th>
+                  <th>Estado</th>
+                  <th>Calificación</th>
+                  <th>Última Actividad</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (st of selectedGroupForDetail.students; track st.id) {
+                  <tr>
+                    <td><strong>{{ st.name }}</strong></td>
+                    <td>{{ st.practiceTitle }}</td>
+                    <td>
+                      <span class="st-status-tag" [class.tag-done]="st.status === 'Completado'" [class.tag-progress]="st.status === 'En progreso'" [class.tag-alert]="st.status === 'Requiere apoyo'">
+                        {{ st.status }}
+                      </span>
+                    </td>
+                    <td><strong class="grade-bold">{{ st.grade }} / 10</strong></td>
+                    <td class="text-muted-col">{{ st.lastActive }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel-modal" (click)="closeGroupDetailModal()">Cerrar</button>
+          <button type="button" class="btn-solid-green" (click)="exportGrades()">
+            <i class="ph ph-file-csv"></i>
+            <span>Descargar Lista CSV</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL 4: Proyección de PIN de Aula -->
+  @if (isPinProjectionModalOpen) {
+    <div class="modal-overlay" (click)="closePinProjectionModal()">
+      <div class="modal-box pin-projection-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-cluster">
+            <i class="ph ph-presentation modal-title-icon green-icon"></i>
+            <div>
+              <h3>Proyección de PIN para Estudiantes</h3>
+              <p class="modal-subtitle">Muestra este código a tus estudiantes en el proyector de la sala</p>
+            </div>
+          </div>
+          <button type="button" class="btn-modal-close" (click)="closePinProjectionModal()" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body text-center-modal">
+          <p class="join-instruction">Ingresar en <strong>reactiva.edu.co/login</strong> con este código:</p>
+          <div class="mega-pin-display">
+            {{ activePin }}
+          </div>
+          <div class="qr-mock-box">
+            <i class="ph ph-qr-code qr-large-icon"></i>
+            <span>Escanea para unirte automáticamente a la mesa de laboratorio</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel-modal" (click)="closePinProjectionModal()">Cerrar</button>
+          <button type="button" class="btn-solid-green" (click)="copyPinToClipboard()">
+            <i class="ph ph-copy"></i>
+            <span>Copiar PIN</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Toast Notification Feedback -->
+  @if (toastMessage) {
+    <div class="toast-teacher-alert" [ngClass]="'toast-' + toastType" role="status">
+      <i class="ph" [ngClass]="toastType === 'success' ? 'ph-check-circle' : (toastType === 'warning' ? 'ph-warning' : 'ph-info')"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+  }
+
+</div>
+
