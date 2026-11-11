@@ -154,7 +154,8 @@ $amber-text: #b45309;
         }
       }
 
-      &.btn-register {
+      &.btn-register,
+      &.btn-dashboard {
         background: $blue-primary;
         color: #ffffff;
         border: none;
@@ -165,6 +166,33 @@ $amber-text: #b45309;
           transform: translateY(-1px);
           box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
         }
+      }
+    }
+
+    .nav-user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: $text-main;
+      font-size: 0.85rem;
+      font-weight: 700;
+
+      i {
+        font-size: 1.15rem;
+        color: $blue-primary;
+      }
+
+      .nav-level-tag {
+        font-size: 0.7rem;
+        color: #635bfc;
+        background: #ede9fe;
+        padding: 0.15rem 0.45rem;
+        border-radius: 9999px;
+        font-weight: 800;
       }
     }
   }

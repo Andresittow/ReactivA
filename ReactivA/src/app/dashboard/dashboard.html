@@ -1,19 +1,33 @@
 <div class="dashboard-container">
+  <!-- Toast Notificación de Logros y XP -->
+  @if (toastMessage) {
+    <div class="dashboard-toast-box" role="status">
+      <i class="ph ph-sparkle"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+  }
+
   <!-- Encabezado del Dashboard -->
   <header class="dashboard-header">
     <div class="greeting">
-      <h1>Hola, Científico! 👋</h1>
-      <p>Ready for your next experiment?</p>
+      <h1>Hola, {{ studentProfile.name }}! 👋</h1>
+      <p>Listo para tu siguiente sesión de laboratorio y experimentos?</p>
     </div>
     <div class="header-widgets">
-      <select class="grade-select">
-        <option>10th Grade</option>
+      <select
+        class="grade-select"
+        [value]="studentProfile.grade"
+        (change)="onGradeChange($any($event.target).value)"
+        aria-label="Seleccionar grado académico"
+      >
+        <option value="10th Grade">10th Grade</option>
+        <option value="11th Grade">11th Grade</option>
       </select>
-      <div class="streak-badge">
+      <div class="streak-badge" title="Racha activa de estudio consecutivo">
         <span class="fire-icon">🔥</span>
         <div class="streak-info">
-          <strong>5 Days</strong>
-          <small>Active Streak</small>
+          <strong>{{ gamification.streakDays }} Días</strong>
+          <small>Racha Activa</small>
         </div>
       </div>
     </div>
@@ -22,13 +36,13 @@
   <!-- Card Principal / Banner -->
   <section class="banner-card">
     <div class="banner-info">
-      <span class="badge"><i class="ph ph-flask"></i> Virtual Lab</span>
-      <h2>Molecular Bonding 3D Simulator</h2>
-      <p>Step into the virtual lab and interactively build complex molecules. Your current setup is waiting.</p>
+      <span class="badge"><i class="ph ph-flask"></i> Laboratorio Virtual 3D</span>
+      <h2>Simulador Molecular 3D y Enlaces Químicos</h2>
+      <p>Ingresa a la mesa de trabajo virtual, combina reactivos y construye estructuras moleculares sin riesgos.</p>
     </div>
-    <button class="btn-enter">
-      Enter Lab <i class="ph ph-arrow-right"></i>
-    </button>
+    <a routerLink="/virtual-lab" class="btn-enter" title="Ir al simulador de laboratorio">
+      Entrar al Lab <i class="ph ph-arrow-right"></i>
+    </a>
   </section>
 
   <!-- Buscador Dinámico con FormControl Individual (Clase 5a) -->
@@ -61,7 +75,7 @@
     }
   </section>
 
-  <!-- Sección: Misiones/Retos Diarios (Clases 4a y 4b) -->
+  <!-- Sección: Misiones/Retos Diarios con Persistencia y XP (Clases 4a y 4b) -->
   <section class="daily-missions">
     <div class="section-header">
       <div class="header-title-group">
@@ -70,7 +84,10 @@
           {{ completedTasksCount }}/{{ allTasks.length }} completadas
         </span>
       </div>
-      <span class="missions-reward"><i class="ph ph-trophy"></i> +150 XP hoy</span>
+      <span class="missions-reward" title="Nivel y experiencia acumulada">
+        <i class="ph ph-trophy"></i>
+        <span>Nivel {{ gamification.level }} ({{ gamification.xp }} XP)</span>
+      </span>
     </div>
 
     <div class="tasks-grid">
@@ -85,9 +102,12 @@
             />
             <span class="task-title">{{ task.title }}</span>
           </label>
-          <span class="task-status-badge">
-            {{ task.completed ? 'Completado' : 'Pendiente' }}
-          </span>
+          <div class="task-badges-group">
+            <span class="task-xp-pill">+{{ task.xpReward }} XP</span>
+            <span class="task-status-badge">
+              {{ task.completed ? 'Completado' : 'Pendiente' }}
+            </span>
+          </div>
         </div>
       } @empty {
         <div class="empty-state">
@@ -102,7 +122,7 @@
   <section class="knowledge-route">
     <div class="section-header">
       <h3>Ruta del Conocimiento</h3>
-      <a href="#" class="view-all">View All &rarr;</a>
+      <a routerLink="/challenges" class="view-all">Ver Arena de Desafíos &rarr;</a>
     </div>
 
     <div class="cards-grid">
