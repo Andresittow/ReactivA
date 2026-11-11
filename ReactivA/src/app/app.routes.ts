@@ -52,6 +52,12 @@ export const routes: Routes = [
     loadComponent: () => import('./settings/settings').then(m => m.SettingsComponent)
   },
 
+  // Ruta del Dashboard del Profesor (Gestión y Supervisión Docente)
+  {
+    path: 'teacher-dashboard',
+    loadComponent: () => import('./teacher-dashboard/teacher-dashboard').then(m => m.TeacherDashboardComponent)
+  },
+
   // Ruta del Centro de Ayuda y Soporte
   {
     path: 'help',
