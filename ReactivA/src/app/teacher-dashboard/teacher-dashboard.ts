@@ -1,30 +1,23 @@
 // ============================================================
 // COMPONENTE PRINCIPAL – Dashboard del Profesor (ReactivA)
-// Arquitectura Standalone Components • Angular 21
+// Enfoque: Seguimiento, Supervisión y Análisis del Aprendizaje
 // ============================================================
 
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { TeacherDashboardService } from './services/teacher-dashboard.service';
 import {
   TeacherProfile,
-  TeacherKpi,
-  LiveSessionState,
-  LiveActivityFeedItem,
-  AcademicGroupPerformance,
-  SupportStudentAlert,
-  SimulatorPreviewCard
+  AcademicOverviewKPIs,
+  RecentLearningEvent,
+  ModuleSectionProgress,
+  StudentLearningDetail
 } from './models/teacher-dashboard.models';
 
-export type TeacherSidebarTab =
-  | 'general'
-  | 'groups'
-  | 'practices'
-  | 'students'
-  | 'pin-generator';
+export type SupervisionViewFilter = 'all' | 'periodic-table' | 'virtual-lab' | 'organic-mission' | 'challenges';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -33,292 +26,181 @@ export type TeacherSidebarTab =
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.scss'
 })
-export class TeacherDashboardComponent implements OnInit, OnDestroy {
+export class TeacherDashboardComponent implements OnInit {
   private teacherService = inject(TeacherDashboardService);
   private cdr = inject(ChangeDetectorRef);
-  private fb = inject(FormBuilder);
 
-  private liveTimerInterval: ReturnType<typeof setInterval> | null = null;
-  liveElapsedSeconds: number = 35 * 60; // 35m iniciales en segundos
-
-  // Tab lateral del docente activo
-  activeSidebarTab: TeacherSidebarTab = 'general';
-
-  // Datos del docente
+  // Perfil del Docente
   teacherProfile!: TeacherProfile;
-  kpis!: TeacherKpi;
   activePin: string = 'CHEM-8420';
-  liveSession!: LiveSessionState;
-  activityFeed: LiveActivityFeedItem[] = [];
-  allGroups: AcademicGroupPerformance[] = [];
-  filteredGroups: AcademicGroupPerformance[] = [];
-  supportAlerts: SupportStudentAlert[] = [];
-  simulatorCards: SimulatorPreviewCard[] = [];
 
-  // Filtros y búsqueda
-  searchTerm: string = '';
-  selectedFilterStatus: string = 'todos';
+  // KPIs de la Vista General
+  kpis!: AcademicOverviewKPIs;
 
-  // Formulario reactivo para Generador Rápido de PIN
-  pinForm: FormGroup = this.fb.group({
-    interactiveModule: ['Balanceador de Reacciones Químicas', Validators.required],
-    assignedGroup: ['11° Grado A (Química Orgánica)', Validators.required],
-    allowAtomTutorHints: [true],
-    timeLimit30Min: [true],
-    examModeStrict: [false]
-  });
+  // Actividad Reciente del Estudiantado
+  recentActivities: RecentLearningEvent[] = [];
 
-  // Formulario para Crear Práctica / Asignación
-  assignmentForm: FormGroup = this.fb.group({
-    title: ['', [Validators.required, Validators.minLength(4)]],
-    module: ['Química Orgánica (Misión Orgánica)', Validators.required],
-    targetGroup: ['11° Grado A', Validators.required],
-    dueDate: ['2024-11-20', Validators.required],
-    maxScore: [10, [Validators.required, Validators.min(1), Validators.max(10)]],
-    description: ['']
-  });
+  // Supervisión de las Cuatro Secciones Educativas
+  sectionsProgress: ModuleSectionProgress[] = [];
 
-  // Estados de Modales y Drawer Flotante
-  isStudentDrawerOpen: boolean = false;
-  isScreensModalOpen: boolean = false;
-  isCreateAssignmentModalOpen: boolean = false;
-  isGroupDetailModalOpen: boolean = false;
-  isAlertsModalOpen: boolean = false;
-  isPinProjectionModalOpen: boolean = false;
-  isClassroomSyncModalOpen: boolean = false;
-  selectedGroupForDetail: AcademicGroupPerformance | null = null;
+  // Listado de Estudiantes y Filtro
+  allStudents: StudentLearningDetail[] = [];
+  filteredStudents: StudentLearningDetail[] = [];
+  studentSearchTerm: string = '';
+  selectedSectionFilter: SupervisionViewFilter = 'all';
 
-  // Notificaciones y Toast
+  // Seguimiento Individual (Estudiante Seleccionado)
+  selectedStudent: StudentLearningDetail | null = null;
+
+  // Pestaña activa en la ficha del estudiante ('resumen' | 'secciones' | 'rachas' | 'historial')
+  studentDetailTab: 'resumen' | 'secciones' | 'rachas' | 'historial' = 'resumen';
+
+  // Modal para Enviar Orientación Pedagógica
+  isGuidanceModalOpen: boolean = false;
+  guidanceMessageText: string = '';
+
+  // Toast Feedback
   toastMessage: string | null = null;
   toastType: 'success' | 'info' | 'warning' = 'success';
-  notificationsCount: number = 3;
+  private toastTimer?: ReturnType<typeof setTimeout>;
 
   ngOnInit(): void {
     this.loadDashboardData();
-    this.startLiveSessionTimer();
   }
 
-  ngOnDestroy(): void {
-    if (this.liveTimerInterval) {
-      clearInterval(this.liveTimerInterval);
-    }
-  }
-
-  /**
-   * Cronómetro en vivo de la sesión de laboratorio (avanza segundo a segundo)
-   */
-  startLiveSessionTimer(): void {
-    if (typeof window === 'undefined') return;
-    this.liveTimerInterval = setInterval(() => {
-      if (this.liveSession && this.liveSession.status === 'EN CURSO') {
-        this.liveElapsedSeconds++;
-        const mins = Math.floor(this.liveElapsedSeconds / 60);
-        this.liveSession.elapsedMinutes = mins;
-        this.liveSession.progressPercent = Math.min(100, Math.round((this.liveElapsedSeconds / (this.liveSession.totalMinutes * 60)) * 100));
-        this.cdr.markForCheck();
-      }
-    }, 1000);
-  }
-
-  get liveFormattedTime(): string {
-    const mins = Math.floor(this.liveElapsedSeconds / 60);
-    const secs = this.liveElapsedSeconds % 60;
-    return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
-  }
-
-  // -------------------------------------------------------------
-  // Carga y sincronización de datos
-  // -------------------------------------------------------------
   loadDashboardData(): void {
     this.teacherProfile = this.teacherService.getTeacherProfile();
-    this.kpis = this.teacherService.getTeacherKpis();
     this.activePin = this.teacherService.getActivePin();
-    this.liveSession = this.teacherService.getLiveSession();
-    this.activityFeed = this.teacherService.getLiveActivityFeed();
-    this.allGroups = this.teacherService.getAcademicGroups();
-    this.filteredGroups = [...this.allGroups];
-    this.supportAlerts = this.teacherService.getSupportAlerts();
-    this.simulatorCards = this.teacherService.getSimulatorCards();
+    this.kpis = this.teacherService.getAcademicOverviewKPIs();
+    this.recentActivities = this.teacherService.getRecentLearningActivities();
+    this.sectionsProgress = this.teacherService.getSectionsOverview();
+    this.allStudents = this.teacherService.getStudentsList();
+    this.filteredStudents = [...this.allStudents];
+
+    // Seleccionar por defecto al primer estudiante (Valeria Góngora) para ver su recorrido de inmediato
+    if (this.allStudents.length > 0 && !this.selectedStudent) {
+      this.selectedStudent = this.allStudents[0];
+    }
+
     this.cdr.markForCheck();
   }
 
   // -------------------------------------------------------------
-  // Generador de PIN Rápido
+  // Selección y Seguimiento Individual del Estudiante
   // -------------------------------------------------------------
-  onGeneratePin(): void {
-    if (this.pinForm.invalid) return;
+  selectStudent(student: StudentLearningDetail): void {
+    this.selectedStudent = student;
+    this.studentDetailTab = 'resumen';
+    this.cdr.markForCheck();
 
-    const val = this.pinForm.value;
-    this.activePin = this.teacherService.generateNewPin(val);
-    this.showToast(`¡Nuevo código PIN generado con éxito: ${this.activePin}!`, 'success');
+    // Scroll suave hacia la ficha de detalle en escritorio
+    if (typeof document !== 'undefined') {
+      const detailElem = document.getElementById('student-individual-view');
+      if (detailElem) {
+        detailElem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
   }
 
-  copyPinToClipboard(): void {
+  // -------------------------------------------------------------
+  // Filtros y Búsqueda en el Listado de Estudiantes
+  // -------------------------------------------------------------
+  onSearchChange(): void {
+    this.applyStudentFilters();
+  }
+
+  setSectionFilter(filter: SupervisionViewFilter): void {
+    this.selectedSectionFilter = filter;
+    this.applyStudentFilters();
+  }
+
+  private applyStudentFilters(): void {
+    const term = this.studentSearchTerm.trim().toLowerCase();
+
+    this.filteredStudents = this.allStudents.filter(student => {
+      const matchesSearch =
+        !term ||
+        student.name.toLowerCase().includes(term) ||
+        student.email.toLowerCase().includes(term) ||
+        student.grade.toLowerCase().includes(term);
+
+      let matchesSection = true;
+      if (this.selectedSectionFilter === 'periodic-table') {
+        matchesSection = student.periodicTable.visited;
+      } else if (this.selectedSectionFilter === 'virtual-lab') {
+        matchesSection = student.virtualLab.experimentsCompleted > 0;
+      } else if (this.selectedSectionFilter === 'organic-mission') {
+        matchesSection = student.organicMission.levelsCompleted > 0;
+      } else if (this.selectedSectionFilter === 'challenges') {
+        matchesSection = student.challenges.challengesCompleted > 0;
+      }
+
+      return matchesSearch && matchesSection;
+    });
+
+    this.cdr.markForCheck();
+  }
+
+  // -------------------------------------------------------------
+  // Generación y Copia de PIN de Clase
+  // -------------------------------------------------------------
+  generateNewPin(): void {
+    this.activePin = this.teacherService.generateNewPin();
+    this.showToast(`¡Nuevo PIN de aula generado: ${this.activePin}!`, 'success');
+  }
+
+  copyPin(): void {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(this.activePin).then(() => {
         this.showToast(`PIN ${this.activePin} copiado al portapapeles.`, 'info');
       }).catch(() => {
-        this.showToast(`PIN: ${this.activePin}`, 'info');
+        this.showToast(`PIN de Clase: ${this.activePin}`, 'info');
       });
     } else {
-      this.showToast(`PIN: ${this.activePin}`, 'info');
+      this.showToast(`PIN de Clase: ${this.activePin}`, 'info');
     }
   }
 
-  openPinProjectionModal(): void {
-    this.isPinProjectionModalOpen = true;
-  }
-
-  closePinProjectionModal(): void {
-    this.isPinProjectionModalOpen = false;
-  }
-
   // -------------------------------------------------------------
-  // Sesión en Vivo (Control de Aula)
+  // Orientación Pedagógica Directa al Estudiante
   // -------------------------------------------------------------
-  toggleLiveSession(): void {
-    this.liveSession = this.teacherService.toggleLiveSessionStatus();
-    if (this.liveSession.status === 'PAUSADA') {
-      this.showToast('Simulación 3D pausada para todos los estudiantes.', 'warning');
-    } else {
-      this.showToast('Simulación 3D reanudada en los escritorios virtuales.', 'success');
-    }
-  }
-
-  openScreensModal(): void {
-    this.isScreensModalOpen = true;
-  }
-
-  closeScreensModal(): void {
-    this.isScreensModalOpen = false;
-  }
-
-  // -------------------------------------------------------------
-  // Búsqueda y Filtros de Grupos
-  // -------------------------------------------------------------
-  onSearchChange(): void {
-    const term = this.searchTerm.trim().toLowerCase();
-    this.filteredGroups = this.allGroups.filter(g => {
-      const matchText = g.gradeName.toLowerCase().includes(term) ||
-                        g.subjectModule.toLowerCase().includes(term) ||
-                        g.currentPractice.toLowerCase().includes(term);
-
-      if (this.selectedFilterStatus === 'todos') {
-        return matchText;
-      }
-      return matchText && g.statusBadge.toLowerCase().includes(this.selectedFilterStatus.toLowerCase());
-    });
+  openGuidanceModal(): void {
+    if (!this.selectedStudent) return;
+    this.guidanceMessageText = `Hola ${this.selectedStudent.name.split(' ')[0]}, revisando tu avance en ReactivA, te recomiendo reforzar la identificación de grupos funcionales en Misión Orgánica antes de continuar al siguiente nivel.`;
+    this.isGuidanceModalOpen = true;
     this.cdr.markForCheck();
   }
 
-  setFilterStatus(status: string): void {
-    this.selectedFilterStatus = status;
-    this.onSearchChange();
-  }
-
-  openGroupDetailModal(group: AcademicGroupPerformance): void {
-    this.selectedGroupForDetail = group;
-    this.isGroupDetailModalOpen = true;
-  }
-
-  closeGroupDetailModal(): void {
-    this.isGroupDetailModalOpen = false;
-    this.selectedGroupForDetail = null;
-  }
-
-  exportGrades(): void {
-    this.teacherService.exportGradesCsv();
-    this.showToast('Planilla de calificaciones descargada en CSV.', 'success');
-  }
-
-  // -------------------------------------------------------------
-  // Drawer Lateral de Navegación ReactivA
-  // -------------------------------------------------------------
-  toggleStudentDrawer(): void {
-    this.isStudentDrawerOpen = !this.isStudentDrawerOpen;
+  closeGuidanceModal(): void {
+    this.isGuidanceModalOpen = false;
     this.cdr.markForCheck();
   }
 
-  // -------------------------------------------------------------
-  // Gestión de Alertas de Refuerzo
-  // -------------------------------------------------------------
-  handleAlertAction(alert: SupportStudentAlert): void {
-    if (alert.actionType === 'guide') {
-      this.showToast(`Guía de refuerzo en Moles enviada al casillero virtual de ${alert.name}.`, 'success');
-    } else if (alert.actionType === 'minireto') {
-      this.showToast(`Minireto 3D de Números de Oxidación asignado a ${alert.name}.`, 'info');
-    } else if (alert.actionType === 'notify') {
-      this.showToast(`Aviso de inactividad enviado al acudiente y a ${alert.name}.`, 'warning');
-    }
-    this.supportAlerts = this.teacherService.resolveAlert(alert.id);
-    this.cdr.markForCheck();
-  }
+  sendGuidance(): void {
+    if (!this.selectedStudent || !this.guidanceMessageText.trim()) return;
 
-  openAlertsModal(): void {
-    this.isAlertsModalOpen = true;
-  }
+    this.teacherService.sendPedagogicGuidance(
+      this.selectedStudent.id,
+      this.selectedStudent.name,
+      this.guidanceMessageText
+    );
 
-  closeAlertsModal(): void {
-    this.isAlertsModalOpen = false;
+    this.showToast(`Pauta pedagógica enviada a ${this.selectedStudent.name}.`, 'success');
+    this.closeGuidanceModal();
   }
 
   // -------------------------------------------------------------
-  // Asignaciones y Classroom
+  // Notificación Toast
   // -------------------------------------------------------------
-  openCreateAssignmentModal(): void {
-    this.isCreateAssignmentModalOpen = true;
-  }
-
-  closeCreateAssignmentModal(): void {
-    this.isCreateAssignmentModalOpen = false;
-    this.assignmentForm.reset({
-      module: 'Química Orgánica (Misión Orgánica)',
-      targetGroup: '11° Grado A',
-      dueDate: '2024-11-20',
-      maxScore: 10
-    });
-  }
-
-  saveAssignment(): void {
-    if (this.assignmentForm.invalid) {
-      this.assignmentForm.markAllAsTouched();
-      return;
-    }
-    const val = this.assignmentForm.value;
-    this.showToast(`Práctica "${val.title}" asignada correctamente a ${val.targetGroup}.`, 'success');
-    this.closeCreateAssignmentModal();
-  }
-
-  syncGoogleClassroom(): void {
-    this.isClassroomSyncModalOpen = true;
-    setTimeout(() => {
-      this.isClassroomSyncModalOpen = false;
-      this.showToast('Sincronización completada con Google Classroom: 148 alumnos y 5 rúbricas actualizadas.', 'success');
-      this.cdr.markForCheck();
-    }, 1200);
-  }
-
-  generateDirectionReport(): void {
-    this.showToast('Generando Informe Oficial de Rendimiento para Dirección Académica...', 'info');
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        window.print();
-      }
-    }, 600);
-  }
-
-  // -------------------------------------------------------------
-  // Feedback visual (Toast)
-  // -------------------------------------------------------------
-  showToast(message: string, type: 'success' | 'info' | 'warning' = 'success'): void {
+  private showToast(message: string, type: 'success' | 'info' | 'warning' = 'success'): void {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastMessage = message;
     this.toastType = type;
     this.cdr.markForCheck();
 
-    setTimeout(() => {
+    this.toastTimer = setTimeout(() => {
       this.toastMessage = null;
       this.cdr.markForCheck();
     }, 3800);
   }
 }
-

@@ -1,5 +1,6 @@
 // ============================================================
 // MODELOS E INTERFACES – Dashboard del Profesor (ReactivA)
+// Enfoque: Seguimiento, Supervisión y Análisis del Aprendizaje
 // ============================================================
 
 export interface TeacherProfile {
@@ -11,100 +12,105 @@ export interface TeacherProfile {
   avatarUrl: string;
 }
 
-export interface TeacherKpi {
-  activeStudents: number;
-  activeStudentsDelta: string;
-  activeStudentsDetail: string;
-  completedPractices: number;
-  completedPracticesDetail: string;
-  labAverageAccuracy: number;
-  labAccuracyDelta: string;
-  supportAlertsCount: number;
-  supportAlertsTopic: string;
-}
-
-export interface LiveSessionPhase {
-  name: string;
-  percent: number;
-}
-
-export interface LiveSessionState {
-  groupCode: string;
-  title: string;
-  status: 'EN CURSO' | 'PAUSADA' | 'FINALIZADA';
-  connectedStudents: number;
+export interface AcademicOverviewKPIs {
   totalStudents: number;
-  description: string;
-  elapsedMinutes: number;
-  totalMinutes: number;
-  progressPercent: number;
-  phases: LiveSessionPhase[];
+  activeStudents: number;
+  completedTasksStudents: number;
+  pendingTasksStudents: number;
+  averageProgressPercent: number;
+  engagementLevel: 'Alto' | 'Medio' | 'En Riesgo';
 }
 
-export interface LiveActivityFeedItem {
+export interface RecentLearningEvent {
   id: string;
   studentName: string;
   actionText: string;
+  section?: 'Periodic Table' | 'Virtual Lab' | 'Organic Mission' | 'Challenges';
+  moduleName?: string;
+  sectionColor?: string;
   highlightText: string;
-  moduleName: string;
   timeAgo: string;
-  type: 'success' | 'ai' | 'warning' | 'info';
   icon: string;
+  type: 'success' | 'progress' | 'streak' | 'start' | 'warning';
 }
 
-export interface StudentInGroup {
-  id: string;
-  name: string;
-  status: 'Completado' | 'En progreso' | 'Sin iniciar' | 'Requiere apoyo';
-  grade: number;
-  practiceTitle: string;
-  lastActive: string;
-}
-
-export interface AcademicGroupPerformance {
-  id: string;
-  code: string; // ej. "11A", "10B", "9C", "8A"
-  codeColorClass: string; // "badge-blue", "badge-purple", "badge-orange", "badge-indigo"
-  gradeName: string; // ej. "11° Grado A"
-  subjectModule: string; // ej. "Química Orgánica"
-  studentsCount: number;
-  currentPractice: string;
-  statusBadge: string; // "Excelente", "En curso", "Requiere atención", "Buen ritmo"
-  statusBadgeClass: 'badge-success' | 'badge-info' | 'badge-warning' | 'badge-teal';
-  progressPercent: number;
-  averageGrade: number; // sobre 10
-  students: StudentInGroup[];
-}
-
-export interface SupportStudentAlert {
-  id: string;
-  initials: string;
-  name: string;
-  gradeGroup: string;
-  issueBadge: string;
-  issueBadgeClass: 'badge-danger' | 'badge-warning' | 'badge-muted';
-  description: string;
-  actionButtonLabel: string;
-  actionType: 'guide' | 'minireto' | 'notify';
-  status: 'pending' | 'resolved';
-}
-
-export interface SimulatorPreviewCard {
-  id: string;
+export interface ModuleSectionProgress {
   title: string;
-  badgeText: string;
-  badgeClass: 'badge-cyan' | 'badge-green';
-  formulaTag: string;
-  description: string;
-  thumbnailType: 'molecule-3d' | 'burette-titration';
-  routeLink?: string;
+  subtitle: string;
+  icon: string;
+  colorTheme: 'blue' | 'teal' | 'purple' | 'amber';
+  studentsActiveCount: number;
+  totalActivitiesCompleted: number;
+  averageMasteryScore: number;
+  keyMetricLabel: string;
+  keyMetricValue: string;
+  statusBadge: string;
 }
 
-export interface QuickPinConfig {
-  interactiveModule: string;
-  assignedGroup: string;
-  allowAtomTutorHints: boolean;
-  timeLimit30Min: boolean;
-  examModeStrict: boolean;
-}
+export interface StudentLearningDetail {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string;
+  grade: string;
+  rank: string;
+  overallProgress: number;
+  lastActiveFormatted: string;
+  
+  // Continuidad y Rachas
+  currentStreakDays: number;
+  bestStreakDays: number;
+  weeklyActiveDaysCount: number;
+  activityContinuityStatus: 'Excelente' | 'Constante' | 'Intermitente' | 'En Riesgo';
+  activityCalendar: { day: string; date: string; active: boolean; completedCount: number }[];
+  
+  // Cumplimiento
+  completedTasksCount: number;
+  inProgressTasksCount: number;
+  pendingTasksCount: number;
+  compliancePercentage: number;
+  
+  // Desglose por las 4 Secciones Educativas
+  periodicTable: {
+    visited: boolean;
+    elementsInspectedCount: number;
+    memoryPairsPlayed: number;
+    progressPercent: number;
+    lastAccessed: string;
+  };
+  virtualLab: {
+    experimentsStarted: number;
+    experimentsCompleted: number;
+    conductedPracticeTitle: string;
+    scoreObtained: number; // sobre 5.0 o 10
+    progressPercent: number;
+    lastAccessed: string;
+  };
+  organicMission: {
+    levelsCompleted: number;
+    totalLevels: number;
+    totalPoints: number;
+    livesRemaining: number;
+    badgesUnlockedCount: number;
+    progressPercent: number;
+    lastAccessed: string;
+  };
+  challenges: {
+    challengesCompleted: number;
+    totalChallenges: number;
+    claimedXP: number;
+    currentRankPosition: number;
+    trophiesCount: number;
+    progressPercent: number;
+    lastAccessed: string;
+  };
 
+  // Historial cronológico de actividades del estudiante
+  activityHistory: {
+    date: string;
+    section: 'Periodic Table' | 'Virtual Lab' | 'Organic Mission' | 'Challenges';
+    description: string;
+    resultBadge: string;
+    resultClass: 'badge-success' | 'badge-info' | 'badge-warning';
+  }[];
+}
