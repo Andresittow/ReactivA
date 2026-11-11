@@ -199,6 +199,16 @@
                 <i class="ph ph-check-circle"></i>
                 <span>{{ challenge.buttonLabel }}</span>
               </button>
+            } @else if (challenge.buttonActionType === 'claim') {
+              <button
+                type="button"
+                class="btn-challenge-action btn-claim"
+                (click)="onChallengeAction(challenge)"
+                [attr.aria-label]="challenge.buttonLabel"
+              >
+                <i class="ph ph-gift"></i>
+                <span>{{ challenge.buttonLabel }}</span>
+              </button>
             } @else if (challenge.buttonActionType === 'continue') {
               <button
                 type="button"

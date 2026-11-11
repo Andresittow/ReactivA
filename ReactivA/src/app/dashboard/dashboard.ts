@@ -1,13 +1,9 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-
-export interface DailyTask {
-  id: number;
-  title: string;
-  completed: boolean;
-}
+import { StudentProgressService, StudentProfile, GamificationState, StoredDashboardTask } from './student-progress.service';
 
 export interface Topic {
   id: number;
@@ -22,28 +18,45 @@ export interface Topic {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
+  private progressService = inject(StudentProgressService);
 
-  // 1. Buscador reactivo dinámico individual (Clase 5a)
+  // 1. Perfil del Estudiante y Gamificación Centralizada
+  studentProfile: StudentProfile = {
+    name: 'Científico',
+    grade: '10th Grade',
+    email: 'estudiante@reactiva.edu.co'
+  };
+
+  gamification: GamificationState = {
+    xp: 4850,
+    level: 14,
+    levelTitle: 'Alquimista Experto',
+    streakDays: 5,
+    lastActiveDate: '',
+    nextLevelXp: 5000,
+    levelProgressPercent: 97
+  };
+
+  // 2. Buscador reactivo dinámico individual (Clase 5a)
   searchControl = new FormControl('');
   searchTerm: string = '';
   private searchSubscription?: Subscription;
 
-  // 2. Arreglo de tareas/misiones diarias (Clases 4a y 4b)
-  allTasks: DailyTask[] = [
-    { id: 1, title: 'Completar test de enlace atómico', completed: false },
-    { id: 2, title: 'Calibrar simulador de temperatura en gases', completed: true },
-    { id: 3, title: 'Identificar 3 compuestos orgánicos', completed: false },
-    { id: 4, title: 'Balancear ecuación de combustión del metano', completed: false }
-  ];
-  dailyTasks: DailyTask[] = [];
+  // 3. Misiones y Tareas Diarias con Persistencia Real (Clases 4a y 4b)
+  allTasks: StoredDashboardTask[] = [];
+  dailyTasks: StoredDashboardTask[] = [];
 
-  // 3. Unidades de la Ruta del Conocimiento (Clase 3)
+  // Feedback y Notificaciones
+  toastMessage: string | null = null;
+  private toastTimer?: ReturnType<typeof setTimeout>;
+
+  // 4. Unidades de la Ruta del Conocimiento (Clase 3)
   topics: Topic[] = [
     {
       id: 1,
@@ -76,9 +89,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   filteredTopics: Topic[] = [];
 
   ngOnInit(): void {
-    // Inicialización de colecciones visibles
-    this.dailyTasks = [...this.allTasks];
-    this.filteredTopics = [...this.topics];
+    // Carga de estado sincronizado desde localStorage mediante StudentProgressService
+    this.loadState();
 
     // Escucha en tiempo real de valueChanges sin recargar la página (Clase 5a)
     this.searchSubscription = this.searchControl.valueChanges.subscribe(searchTerm => {
@@ -90,22 +102,55 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.searchSubscription?.unsubscribe();
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
   }
 
-  // Alternar estado completado de una tarea/misión (Clases 4a y 4b)
-  toggleTask(id: number): void {
-    const task = this.allTasks.find(t => t.id === id);
-    if (task) {
-      task.completed = !task.completed;
-    }
-    const visibleTask = this.dailyTasks.find(t => t.id === id);
-    if (visibleTask && visibleTask !== task) {
-      visibleTask.completed = task ? task.completed : !visibleTask.completed;
-    }
+  /**
+   * Carga y sincroniza el perfil del usuario, progreso y misiones
+   */
+  loadState(): void {
+    this.studentProfile = this.progressService.getProfile();
+    this.gamification = this.progressService.getGamificationState();
+    this.allTasks = this.progressService.getDashboardTasks();
+    this.dailyTasks = [...this.allTasks];
+    this.filteredTopics = [...this.topics];
+    this.filterItems(this.searchTerm);
     this.cdr.markForCheck();
   }
 
-  // Filtrado en tiempo real de unidades y misiones
+  /**
+   * Actualiza el grado del estudiante en el perfil sincronizado
+   */
+  onGradeChange(newGrade: string): void {
+    this.progressService.setProfileGrade(newGrade);
+    this.studentProfile.grade = newGrade;
+    this.showToast(`Grado actualizado a ${newGrade}`);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Alternar estado completado de una tarea/misión diaria con recompensa de XP en tiempo real
+   */
+  toggleTask(id: number): void {
+    const result = this.progressService.toggleDashboardTask(id);
+    this.allTasks = result.tasks;
+    this.filterItems(this.searchTerm);
+    this.gamification = this.progressService.getGamificationState();
+
+    if (result.xpGained > 0) {
+      this.showToast(`¡Misión cumplida! Ganaste +${result.xpGained} XP ⚡`);
+    } else if (result.xpGained < 0) {
+      this.showToast(`Misión desmarcada (${result.xpGained} XP)`);
+    }
+
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Filtrado en tiempo real de unidades y misiones
+   */
   filterItems(term: string): void {
     const cleanTerm = term.trim().toLowerCase();
 
@@ -128,14 +173,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Limpiar input de búsqueda
+  /**
+   * Limpiar input de búsqueda
+   */
   clearSearch(): void {
     this.searchTerm = '';
     this.searchControl.setValue('');
     this.cdr.markForCheck();
   }
 
-  // Conteo dinámico de misiones completadas
+  /**
+   * Muestra notificación flotante dinámica en el dashboard
+   */
+  private showToast(message: string): void {
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+    }
+    this.toastMessage = message;
+    this.cdr.markForCheck();
+
+    this.toastTimer = setTimeout(() => {
+      this.toastMessage = null;
+      this.cdr.markForCheck();
+    }, 3500);
+  }
+
+  /**
+   * Conteo dinámico de misiones completadas
+   */
   get completedTasksCount(): number {
     return this.allTasks.filter(t => t.completed).length;
   }

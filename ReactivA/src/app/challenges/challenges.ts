@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { StudentProgressService } from '../dashboard/student-progress.service';
 
 /**
  * Estructura de un Desafío / Misión Activa
@@ -17,7 +18,7 @@ export interface ChallengeCard {
   progressPercent: number;
   isClaimed: boolean;
   buttonLabel: string;
-  buttonActionType: 'claimed' | 'continue' | 'view' | 'enter';
+  buttonActionType: 'claimed' | 'continue' | 'view' | 'enter' | 'claim';
   icon: string;
   badgeReward?: string;
   competencyTrack: string;
@@ -75,20 +76,22 @@ export interface CurricularCompetencyMetric {
 })
 export class ChallengesComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
+  private progressService = inject(StudentProgressService);
 
   // --------------------------------------------------------
-  // Datos del Encabezado y Progreso del Usuario
+  // Datos del Encabezado y Progreso del Usuario Sincronizado
   // --------------------------------------------------------
   readonly seasonTag = 'Temporada 3: Enlaces Iónicos';
   readonly isLiveSeason = true;
   readonly seasonEndsInDays = 14;
 
-  readonly userLevel = 14;
-  readonly userTitle = 'Alquimista Experto';
-  readonly userStreakDays = 5;
-  readonly currentXP = 4850;
-  readonly nextLevelXP = 5000;
-  readonly xpProgressPercent = Math.round((4850 / 5000) * 100); // 97%
+  studentName = 'Científico';
+  userLevel = 14;
+  userTitle = 'Alquimista Experto';
+  userStreakDays = 5;
+  currentXP = 4850;
+  nextLevelXP = 5000;
+  xpProgressPercent = 97;
 
   // Widget de Torneo Activo
   readonly activeTournament = {
@@ -265,9 +268,9 @@ export class ChallengesComponent implements OnInit, OnDestroy {
   // Vitrina de Trofeos & Insignias
   // --------------------------------------------------------
   readonly collectorLevel = 'Nivel Coleccionista II';
-  readonly unlockedBadgesCount = 7;
+  unlockedBadgesCount = 7;
   readonly totalBadgesCount = 18;
-  readonly badgesProgressPercent = Math.round((7 / 18) * 100); // 39%
+  badgesProgressPercent = 39;
 
   trophyBadges: TrophyBadge[] = [
     {
@@ -407,6 +410,7 @@ export class ChallengesComponent implements OnInit, OnDestroy {
   private toastTimeout?: ReturnType<typeof setTimeout>;
 
   ngOnInit(): void {
+    this.syncState();
     this.startCountdownTimer();
   }
 
@@ -420,7 +424,77 @@ export class ChallengesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cronómetro en tiempo real para la actualización de misiones
+   * Sincroniza el estado con el StudentProgressService central
+   */
+  syncState(): void {
+    const profile = this.progressService.getProfile();
+    this.studentName = profile.name || 'Científico';
+
+    const gamification = this.progressService.getGamificationState();
+    this.userLevel = gamification.level;
+    this.userTitle = gamification.levelTitle;
+    this.userStreakDays = gamification.streakDays;
+    this.currentXP = gamification.xp;
+    this.nextLevelXP = gamification.nextLevelXp;
+    this.xpProgressPercent = gamification.levelProgressPercent;
+
+    // Sincronizar tarjetas de misiones y botones
+    const storedChallenges = this.progressService.getChallengesState();
+    for (const challenge of this.activeChallenges) {
+      const match = storedChallenges.find(s => s.id === challenge.id);
+      if (match) {
+        challenge.currentProgress = match.currentProgress;
+        challenge.totalProgress = match.totalProgress;
+        challenge.progressPercent = match.progressPercent;
+        challenge.isClaimed = match.isClaimed;
+        challenge.buttonLabel = match.buttonLabel;
+        challenge.buttonActionType = match.buttonActionType;
+      }
+    }
+
+    // Sincronizar vitrina de trofeos / insignias
+    const unlockedIds = this.progressService.getUnlockedBadges();
+    for (const badge of this.trophyBadges) {
+      badge.unlocked = unlockedIds.includes(badge.id);
+      if (badge.unlocked && badge.icon === 'ph-lock') {
+        badge.icon = 'ph-sparkle';
+      }
+    }
+    this.unlockedBadgesCount = this.trophyBadges.filter(b => b.unlocked).length;
+    this.badgesProgressPercent = Math.round((this.unlockedBadgesCount / this.totalBadgesCount) * 100);
+
+    // Actualizar Leaderboards con el usuario en vivo
+    this.updateUserInLeaderboards(profile.grade);
+
+    this.cdr.markForCheck();
+  }
+
+  private updateUserInLeaderboards(schoolGrade: string): void {
+    const updateEntry = (list: LeaderboardEntry[]) => {
+      const userEntry = list.find(e => e.isCurrentUser);
+      if (userEntry) {
+        userEntry.name = `Tú (${this.studentName})`;
+        userEntry.level = this.userLevel;
+        userEntry.xp = this.currentXP;
+        userEntry.streakDays = this.userStreakDays;
+        userEntry.schoolGrade = schoolGrade || '10° B';
+      }
+    };
+
+    updateEntry(this.classLeaderboard);
+    updateEntry(this.schoolLeaderboard);
+    updateEntry(this.nationalLeaderboard);
+
+    // Reordenar dinámicamente la clasificación del salón según el XP acumulado
+    this.classLeaderboard.sort((a, b) => b.xp - a.xp);
+    this.classLeaderboard.forEach((entry, idx) => {
+      entry.rank = idx + 1;
+      entry.isLeader = idx === 0;
+    });
+  }
+
+  /**
+   * Cronómetro en tiempo real para la renovación de misiones
    */
   private startCountdownTimer(): void {
     this.timerInterval = setInterval(() => {
@@ -463,7 +537,7 @@ export class ChallengesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Acción al interactuar con una tarjeta de desafío
+   * Acción reactiva e interactiva al presionar el botón de un desafío
    */
   onChallengeAction(challenge: ChallengeCard): void {
     if (challenge.isClaimed) {
@@ -471,12 +545,29 @@ export class ChallengesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (challenge.buttonActionType === 'continue') {
-      this.showToast(`Iniciando sesión práctica: "${challenge.title}" (+${challenge.xpReward} XP)...`, 'success');
-    } else if (challenge.buttonActionType === 'view') {
-      this.showToast(`Abriendo módulo de síntesis: "${challenge.title}"...`, 'info');
-    } else if (challenge.buttonActionType === 'enter') {
-      this.showToast(`Preparando mesa de laboratorio virtual para el desafío épico...`, 'success');
+    // Caso 1: Reclamar recompensa (cuando ya alcanzó el 100% de progreso)
+    if (challenge.buttonActionType === 'claim' || challenge.currentProgress >= challenge.totalProgress) {
+      const res = this.progressService.claimChallenge(challenge.id, challenge.xpReward);
+      this.syncState();
+
+      if (res.leveledUp) {
+        this.showToast(`🎉 ¡SUBISTE DE NIVEL! Ahora eres Nivel ${this.userLevel}: ${this.userTitle} (+${challenge.xpReward} XP)`, 'success');
+      } else {
+        this.showToast(`¡Reclamaste +${challenge.xpReward} XP! Has subido en la tabla de clasificación 🏆`, 'success');
+      }
+      return;
+    }
+
+    // Caso 2: Avanzar progreso en la misión activa
+    const progressResult = this.progressService.progressChallenge(challenge.id);
+    this.syncState();
+
+    if (progressResult.justCompleted) {
+      this.showToast(`🎯 ¡Objetivo completado en "${challenge.title}"! Haz clic en "¡Reclamar Recompensa!" para obtener +${challenge.xpReward} XP`, 'success');
+    } else {
+      const current = progressResult.item?.currentProgress ?? challenge.currentProgress;
+      const total = progressResult.item?.totalProgress ?? challenge.totalProgress;
+      this.showToast(`¡Avanzaste en "${challenge.title}"! Progreso actual: ${current}/${total} ${challenge.unit}`, 'info');
     }
   }
 
@@ -509,7 +600,6 @@ export class ChallengesComponent implements OnInit, OnDestroy {
     this.toastTimeout = setTimeout(() => {
       this.toastNotification.visible = false;
       this.cdr.markForCheck();
-    }, 3500);
+    }, 4000);
   }
 }
-

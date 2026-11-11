@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { StudentProgressService, StudentProfile, GamificationState } from '../dashboard/student-progress.service';
 
 /**
  * Tarjeta Informativa de Módulo para el Home (Solo presentación informativa)
@@ -35,7 +36,38 @@ export interface PedagogicMetric {
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+  private progressService = inject(StudentProgressService);
+
+  // Estado sincronizado del estudiante
+  profile: StudentProfile = {
+    name: 'Científico',
+    grade: '10th Grade',
+    email: 'estudiante@reactiva.edu.co'
+  };
+
+  gamification: GamificationState = {
+    xp: 4850,
+    level: 14,
+    levelTitle: 'Alquimista Experto',
+    streakDays: 5,
+    lastActiveDate: '',
+    nextLevelXp: 5000,
+    levelProgressPercent: 97
+  };
+
+  hasActiveSession = false;
+
+  ngOnInit(): void {
+    this.profile = this.progressService.getProfile();
+    this.gamification = this.progressService.getGamificationState();
+
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      const storedUser = localStorage.getItem('currentUser') || localStorage.getItem('reactiva_user');
+      this.hasActiveSession = !!storedUser || (this.profile && this.profile.name !== 'Científico');
+    }
+  }
+
   /**
    * Colección de módulos informativos de ReactivA.
    * Nota: Las tarjetas son puramente informativas; para acceder se requiere iniciar sesión.
@@ -147,9 +179,11 @@ export class HomeComponent {
    * Desplazamiento suave hacia la sección de módulos informativos
    */
   scrollToModules(): void {
-    const el = document.getElementById('modules-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (typeof document !== 'undefined') {
+      const el = document.getElementById('modules-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 }

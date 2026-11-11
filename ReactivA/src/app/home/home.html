@@ -21,16 +21,28 @@
       <a href="#benefits-section" class="nav-item">Metodología</a>
     </nav>
 
-    <!-- Acciones de Autenticación (Login & Registro) -->
+    <!-- Acciones de Autenticación / Acceso al Dashboard -->
     <div class="nav-actions">
-      <a routerLink="/login" class="btn-nav btn-login" title="Acceder con tu cuenta">
-        <i class="ph ph-sign-in"></i>
-        <span>Iniciar Sesión</span>
-      </a>
-      <a routerLink="/register" class="btn-nav btn-register" title="Crear una cuenta nueva">
-        <i class="ph ph-user-plus"></i>
-        <span>Registrarse</span>
-      </a>
+      @if (hasActiveSession) {
+        <div class="nav-user-chip" title="Sesión activa del estudiante">
+          <i class="ph ph-user-circle"></i>
+          <span>{{ profile.name }}</span>
+          <span class="nav-level-tag">Nv. {{ gamification.level }}</span>
+        </div>
+        <a routerLink="/dashboard" class="btn-nav btn-dashboard" title="Ir a mi Dashboard">
+          <i class="ph ph-squares-four"></i>
+          <span>Mi Dashboard</span>
+        </a>
+      } @else {
+        <a routerLink="/login" class="btn-nav btn-login" title="Acceder con tu cuenta">
+          <i class="ph ph-sign-in"></i>
+          <span>Iniciar Sesión</span>
+        </a>
+        <a routerLink="/register" class="btn-nav btn-register" title="Crear una cuenta nueva">
+          <i class="ph ph-user-plus"></i>
+          <span>Registrarse</span>
+        </a>
+      }
     </div>
   </header>
 
@@ -59,10 +71,17 @@
 
         <!-- Botones de Acción (Call To Action) -->
         <div class="hero-actions-row">
-          <a routerLink="/register" class="btn-hero btn-adventure">
-            <i class="ph ph-rocket-launch"></i>
-            <span>Comenzar Aventura</span>
-          </a>
+          @if (hasActiveSession) {
+            <a routerLink="/dashboard" class="btn-hero btn-adventure">
+              <i class="ph ph-squares-four"></i>
+              <span>Ir a mi Dashboard</span>
+            </a>
+          } @else {
+            <a routerLink="/register" class="btn-hero btn-adventure">
+              <i class="ph ph-rocket-launch"></i>
+              <span>Comenzar Aventura</span>
+            </a>
+          }
           <button type="button" (click)="scrollToModules()" class="btn-hero btn-explore">
             <i class="ph ph-squares-four"></i>
             <span>Explorar Módulos</span>
@@ -71,10 +90,14 @@
 
         <!-- Acceso para Usuarios Registrados -->
         <div class="hero-account-note">
-          <span>¿Ya tienes una cuenta escolar?</span>
-          <a routerLink="/login" class="link-inline-login">
-            Inicia sesión aquí <i class="ph ph-arrow-right"></i>
-          </a>
+          @if (hasActiveSession) {
+            <span>Conectado como <strong>{{ profile.name }}</strong> ({{ profile.grade }})</span>
+          } @else {
+            <span>¿Ya tienes una cuenta escolar?</span>
+            <a routerLink="/login" class="link-inline-login">
+              Inicia sesión aquí <i class="ph ph-arrow-right"></i>
+            </a>
+          }
         </div>
       </div>
 
@@ -103,7 +126,7 @@
           <!-- Chips Informativos Flotantes -->
           <div class="floating-chip chip-streak">
             <span class="fire-icon">🔥</span>
-            <span>Racha de 5 Días</span>
+            <span>Racha de {{ gamification.streakDays }} Días</span>
           </div>
           <div class="floating-chip chip-table">
             <i class="ph ph-table"></i>
