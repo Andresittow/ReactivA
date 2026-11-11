@@ -22,6 +22,8 @@ export class AppComponent {
       currentUrl.startsWith('/register') ||
       currentUrl === '/home' ||
       currentUrl.startsWith('/home') ||
+      currentUrl === '/teacher-dashboard' ||
+      currentUrl.startsWith('/teacher-dashboard') ||
       currentUrl === '/' ||
       currentUrl === ''
     );
