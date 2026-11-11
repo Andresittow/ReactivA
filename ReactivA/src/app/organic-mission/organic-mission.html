@@ -15,6 +15,28 @@
         <span class="ph ph-arrow-left"></span> Volver al Dashboard
       </a>
 
+      <!-- Conexión en vivo con el Dashboard del Profesor -->
+      <div class="teacher-live-badge" title="Sesión supervisada por el docente">
+        <span class="status-dot-pulse"></span>
+        <span class="ph ph-chalkboard-teacher"></span>
+        <span>Supervisión Docente Activa &bull; PIN: <strong>{{ activeTeacherPin() }}</strong></span>
+      </div>
+
+      <!-- Guía Pedagógica enviada desde el Panel del Profesor -->
+      @if (teacherGuidance()) {
+        <div class="teacher-guidance-card animate-fade">
+          <div class="guidance-icon"><i class="ph ph-lightbulb"></i></div>
+          <div class="guidance-content">
+            <h4>{{ teacherGuidance()?.title }}</h4>
+            <p>{{ teacherGuidance()?.message }}</p>
+          </div>
+          <button type="button" class="btn-guidance-close" (click)="dismissGuidance()" aria-label="Entendido">
+            <i class="ph ph-check"></i>
+            <span>Entendido</span>
+          </button>
+        </div>
+      }
+
       <!-- Moléculas decorativas SVG -->
       <div class="molecule-bg">
         <svg class="mol mol-1" viewBox="0 0 120 120" fill="none">

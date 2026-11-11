@@ -3,9 +3,11 @@
 // Gestiona puntaje, vidas, progreso y persistencia localStorage
 // ============================================================
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Badge, GameProgress, LevelProgress } from '../models/game.models';
 import { LEVELS, POINTS_BY_DIFFICULTY } from '../data/questions.data';
+import { StudentProgressService } from '../../dashboard/student-progress.service';
+import { TeacherDashboardService } from '../../teacher-dashboard/services/teacher-dashboard.service';
 
 const STORAGE_KEY = 'reactiva_mision_organica_progress';
 
@@ -54,6 +56,8 @@ const DEFAULT_BADGES: Badge[] = [
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
+  private studentProgressService = inject(StudentProgressService);
+  private teacherDashboardService = inject(TeacherDashboardService);
 
   // ── Estado en memoria ──────────────────────────────────
   private progress!: GameProgress;
@@ -149,11 +153,42 @@ export class GameService {
       lp.score += pts;
       this.progress.totalScore += pts;
       this.saveProgress();
+
+      // Sincronizar XP global del estudiante en ReactivA
+      this.studentProgressService.addXp(pts);
+
+      // Reportar evento en vivo al Panel del Docente
+      const studentName = this.studentProgressService.getProfile().name || 'Valeria G.';
+      if (pts >= 15 || lp.correctAnswers === 1) {
+        this.teacherDashboardService.recordLiveEvent({
+          studentName,
+          actionText: `respondió correctamente pregunta de ${difficulty} en Misión Orgánica`,
+          highlightText: `+${pts} pts • Identificación de compuestos orgánicos`,
+          moduleName: 'Misión Orgánica',
+          type: 'success',
+          icon: 'ph-check-circle'
+        });
+      }
+
       return pts;
     } else {
       lp.wrongAnswers++;
       lp.lives = Math.max(0, lp.lives - 1);
       this.saveProgress();
+
+      // Si le quedan pocas vidas o comete errores consecutivos, alertar al Dashboard del Profesor
+      if (lp.lives <= 2) {
+        const studentName = this.studentProgressService.getProfile().name || 'Valeria G.';
+        this.teacherDashboardService.recordLiveEvent({
+          studentName,
+          actionText: `presenta dificultad en preguntas de ${difficulty} en Misión Orgánica`,
+          highlightText: `Le restan ${lp.lives} vidas en el simulador interactivo`,
+          moduleName: 'Misión Orgánica',
+          type: 'warning',
+          icon: 'ph-warning-circle'
+        });
+      }
+
       return 0;
     }
   }
@@ -174,6 +209,7 @@ export class GameService {
     lp.score += levelBonus;
     this.progress.totalScore += levelBonus;
     bonuses.push({ label: 'Nivel completado', points: levelBonus });
+    this.studentProgressService.addXp(levelBonus);
 
     // Bonus por nivel perfecto (sin errores)
     if (lp.wrongAnswers === 0) {
@@ -182,10 +218,30 @@ export class GameService {
       lp.score += perfectBonus;
       this.progress.totalScore += perfectBonus;
       bonuses.push({ label: 'Nivel sin errores', points: perfectBonus });
+      this.studentProgressService.addXp(perfectBonus);
     }
 
     // Desbloquear insignia del nivel
     this.unlockLevelBadge(levelId);
+
+    // Sincronizar insignias curriculares en la vitrina del estudiante
+    this.studentProgressService.unlockBadge('detective-organico');
+    if (levelId === 1) this.studentProgressService.unlockBadge('explorador-carbono');
+    if (levelId === 2) this.studentProgressService.unlockBadge('experto-hidrocarburos');
+    if (levelId === 3) this.studentProgressService.unlockBadge('maestro-iupac');
+    if (levelId === 4) this.studentProgressService.unlockBadge('genio-organico');
+
+    // Reportar hito completado al Dashboard del Profesor
+    const studentName = this.studentProgressService.getProfile().name || 'Valeria G.';
+    const levelTitle = LEVELS.find(l => l.id === levelId)?.title || `Nivel ${levelId}`;
+    this.teacherDashboardService.recordLiveEvent({
+      studentName,
+      actionText: `completó "${levelTitle}" en Misión Orgánica`,
+      highlightText: `${lp.perfectLevel ? '⭐ Nivel Perfecto (Sin fallos)' : '100% completado'} • Puntaje: ${lp.score} pts`,
+      moduleName: 'Misión Orgánica',
+      type: 'success',
+      icon: 'ph-trophy'
+    });
 
     // ¿Todos los niveles completados?
     const allDone = this.progress.levels.every(l => l.completed);
@@ -196,6 +252,17 @@ export class GameService {
       const finalBonus = 100;
       this.progress.totalScore += finalBonus;
       bonuses.push({ label: '¡Todos los niveles!', points: finalBonus });
+      this.studentProgressService.addXp(finalBonus);
+
+      // Notificar al profesor que el estudiante culminó toda la misión
+      this.teacherDashboardService.recordLiveEvent({
+        studentName,
+        actionText: '¡Completó todos los niveles de Misión Orgánica!',
+        highlightText: `Graduación del módulo • Puntaje total: ${this.progress.totalScore} pts`,
+        moduleName: 'Misión Orgánica',
+        type: 'success',
+        icon: 'ph-seal-check'
+      });
 
       // Insignia Mente Química: completar todos sin perder vidas
       const noLivesLost = this.progress.levels.every(l => l.perfectLevel);
@@ -205,6 +272,7 @@ export class GameService {
           badge.unlocked = true;
           badge.unlockedAt = new Date().toISOString();
         }
+        this.studentProgressService.unlockBadge('mente-quimica');
       }
 
       this.progress.misionCumplida = true;

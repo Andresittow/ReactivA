@@ -19,6 +19,8 @@ import {
 const STORAGE_ACTIVE_PIN_KEY = 'reactiva_active_class_pin';
 const STORAGE_TEACHER_ALERTS_KEY = 'reactiva_teacher_alerts';
 const STORAGE_LIVE_SESSION_KEY = 'reactiva_teacher_live_session';
+const STORAGE_TEACHER_LIVE_EVENTS_KEY = 'reactiva_teacher_live_events';
+const STORAGE_STUDENT_GUIDANCE_KEY = 'reactiva_teacher_student_guidance';
 
 @Injectable({
   providedIn: 'root'
@@ -142,6 +144,30 @@ export class TeacherDashboardService {
   // -------------------------------------------------------------
   // 5. Feed de Actividad en Vivo (Tiempo Real)
   // -------------------------------------------------------------
+  recordLiveEvent(event: Omit<LiveActivityFeedItem, 'id' | 'timeAgo'>): void {
+    if (!this.isBrowser()) return;
+    const events = this.getRecordedLiveEvents();
+    const newEvent: LiveActivityFeedItem = {
+      ...event,
+      id: `live-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      timeAgo: 'hace unos momentos'
+    };
+    events.unshift(newEvent);
+    try {
+      localStorage.setItem(STORAGE_TEACHER_LIVE_EVENTS_KEY, JSON.stringify(events.slice(0, 15)));
+    } catch {}
+  }
+
+  getRecordedLiveEvents(): LiveActivityFeedItem[] {
+    if (!this.isBrowser()) return [];
+    try {
+      const stored = localStorage.getItem(STORAGE_TEACHER_LIVE_EVENTS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
   getLiveActivityFeed(): LiveActivityFeedItem[] {
     const currentStudent = this.studentProgressService.getProfile();
     const studentTasks = this.studentProgressService.getDashboardTasks();
@@ -180,8 +206,14 @@ export class TeacherDashboardService {
       }
     ];
 
+    // Integrar eventos grabados en vivo de Misión Orgánica y módulos del estudiante
+    const recordedEvents = this.getRecordedLiveEvents();
+    if (recordedEvents.length > 0) {
+      baseFeed.unshift(...recordedEvents);
+    }
+
     // Si el estudiante activo tiene tareas completadas, integrarlo al feed en tiempo real
-    if (lastDone && currentStudent.name) {
+    if (lastDone && currentStudent.name && !recordedEvents.some(e => e.studentName === currentStudent.name)) {
       baseFeed.unshift({
         id: 'feed-student',
         studentName: currentStudent.name,
@@ -203,6 +235,28 @@ export class TeacherDashboardService {
   getAcademicGroups(): AcademicGroupPerformance[] {
     const studentProfile = this.studentProgressService.getProfile();
 
+    // Sincronizar datos del estudiante en vivo con su progreso en Misión Orgánica si existe
+    const savedOrganic = this.isBrowser() ? localStorage.getItem('reactiva_mision_organica_progress') : null;
+    let organicScore = 9.8;
+    let organicStatus: 'Completado' | 'En progreso' = 'Completado';
+    let practiceName = 'Alcanos y Alquenos (Misión Orgánica)';
+
+    if (savedOrganic) {
+      try {
+        const parsed = JSON.parse(savedOrganic);
+        const completedLevels = parsed.levels?.filter((l: any) => l.completed)?.length ?? 0;
+        if (completedLevels > 0) {
+          organicScore = +(Math.min(10.0, 8.5 + (completedLevels * 0.35))).toFixed(1);
+          organicStatus = completedLevels >= 2 ? 'Completado' : 'En progreso';
+          practiceName = `Misión Orgánica (Nivel ${completedLevels} completado)`;
+        } else if (parsed.totalScore > 0) {
+          organicScore = +(Math.min(9.5, 7.5 + (parsed.totalScore / 100))).toFixed(1);
+          organicStatus = 'En progreso';
+          practiceName = 'Misión Orgánica: Detectives del Carbono';
+        }
+      } catch {}
+    }
+
     return [
       {
         id: 'grp-11a',
@@ -217,7 +271,7 @@ export class TeacherDashboardService {
         progressPercent: 92,
         averageGrade: 9.1,
         students: [
-          { id: 'st-1', name: studentProfile.name || 'Alex Morales', status: 'Completado', grade: 9.8, practiceTitle: 'Alcanos y Alquenos', lastActive: 'Hoy, 10:15 AM' },
+          { id: 'st-1', name: studentProfile.name || 'Valeria Góngora', status: organicStatus, grade: organicScore, practiceTitle: practiceName, lastActive: 'Hoy, 10:15 AM' },
           { id: 'st-2', name: 'Valentina Restrepo', status: 'Completado', grade: 9.5, practiceTitle: 'Alcanos y Alquenos', lastActive: 'Hoy, 10:20 AM' },
           { id: 'st-3', name: 'Diego Navarro', status: 'Requiere apoyo', grade: 6.4, practiceTitle: 'Isomería Cis-Trans', lastActive: 'Hace 4 días' },
           { id: 'st-4', name: 'Camila Morales', status: 'En progreso', grade: 8.9, practiceTitle: 'Nomenclatura IUPAC', lastActive: 'Hoy, 09:45 AM' },
@@ -286,6 +340,7 @@ export class TeacherDashboardService {
   // 7. Estudiantes en Refuerzo (Alertas Tempranas)
   // -------------------------------------------------------------
   getSupportAlerts(): SupportStudentAlert[] {
+    const studentProfile = this.studentProgressService.getProfile();
     const defaultAlerts: SupportStudentAlert[] = [
       {
         id: 'alt-1',
@@ -325,6 +380,31 @@ export class TeacherDashboardService {
       }
     ];
 
+    // Detectar alertas reales en vivo desde Misión Orgánica si un estudiante perdió vidas o tiene errores
+    if (this.isBrowser()) {
+      try {
+        const savedOrganic = localStorage.getItem('reactiva_mision_organica_progress');
+        if (savedOrganic) {
+          const parsed = JSON.parse(savedOrganic);
+          const strugglingLevel = parsed.levels?.find((l: any) => l.lives <= 2 || (l.wrongAnswers >= 2 && !l.completed));
+          if (strugglingLevel) {
+            defaultAlerts.unshift({
+              id: 'alt-organic',
+              initials: (studentProfile.name ? studentProfile.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : 'VG').toUpperCase(),
+              name: studentProfile.name || 'Valeria Góngora',
+              gradeGroup: '11° Grado A',
+              issueBadge: `${strugglingLevel.lives} vidas rest.`,
+              issueBadgeClass: 'badge-danger',
+              description: `Dificultad en Misión Orgánica (Nivel ${strugglingLevel.levelId}): ${strugglingLevel.wrongAnswers} intentos erróneos en hidrocarburos.`,
+              actionButtonLabel: 'Enviar Guía de Apoyo',
+              actionType: 'guide',
+              status: 'pending'
+            });
+          }
+        }
+      } catch {}
+    }
+
     if (!this.isBrowser()) return defaultAlerts;
 
     try {
@@ -344,11 +424,49 @@ export class TeacherDashboardService {
     const item = alerts.find(a => a.id === alertId);
     if (item) {
       item.status = 'resolved';
+
+      // Si la alerta corresponde a Misión Orgánica, emitir la guía de apoyo pedagógico al estudiante
+      if (alertId === 'alt-organic' || alertId === 'alt-3') {
+        this.sendGuidanceToStudent(
+          'Guía Pedagógica del Prof. Dr. Roberto Méndez',
+          'Recuerda: En alcanos todos los enlaces C-C son simples sp³; en alquenos dobles sp² y en alquinos triples sp. Revisa la tabla de prefijos IUPAC antes de tu próximo intento.'
+        );
+      }
+
       if (this.isBrowser()) {
         localStorage.setItem(STORAGE_TEACHER_ALERTS_KEY, JSON.stringify(alerts));
       }
     }
     return alerts;
+  }
+
+  sendGuidanceToStudent(title: string, message: string): void {
+    if (!this.isBrowser()) return;
+    const guidance = {
+      title,
+      message,
+      timestamp: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem(STORAGE_STUDENT_GUIDANCE_KEY, JSON.stringify(guidance));
+    } catch {}
+  }
+
+  getStudentGuidance(): { title: string; message: string; timestamp: string } | null {
+    if (!this.isBrowser()) return null;
+    try {
+      const stored = localStorage.getItem(STORAGE_STUDENT_GUIDANCE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  clearStudentGuidance(): void {
+    if (!this.isBrowser()) return;
+    try {
+      localStorage.removeItem(STORAGE_STUDENT_GUIDANCE_KEY);
+    } catch {}
   }
 
   // -------------------------------------------------------------

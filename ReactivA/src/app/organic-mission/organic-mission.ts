@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { GameService } from './services/game.service';
+import { TeacherDashboardService } from '../teacher-dashboard/services/teacher-dashboard.service';
 import { LEVELS } from './data/questions.data';
 import {
   GameScreen,
@@ -79,9 +80,34 @@ export class MisionOrganicaComponent implements OnInit, OnDestroy {
   /** Índice del corazón recién perdido para disparar animación (-1 = ninguno) */
   lostLifeIndex = signal<number>(-1);
 
-  constructor(public gameService: GameService) {}
+  // ── Conexión con el Dashboard del Profesor ──────────────
+  activeTeacherPin = signal<string>('CHEM-8420');
+  teacherGuidance = signal<{ title: string; message: string } | null>(null);
 
-  ngOnInit(): void {}
+  constructor(
+    public gameService: GameService,
+    private teacherService: TeacherDashboardService
+  ) {}
+
+  ngOnInit(): void {
+    this.syncTeacherConnection();
+  }
+
+  /**
+   * Lee la configuración activa de la clase del docente y mensajes pedagógicos
+   */
+  syncTeacherConnection(): void {
+    this.activeTeacherPin.set(this.teacherService.getActivePin());
+    const guidance = this.teacherService.getStudentGuidance();
+    if (guidance) {
+      this.teacherGuidance.set(guidance);
+    }
+  }
+
+  dismissGuidance(): void {
+    this.teacherGuidance.set(null);
+    this.teacherService.clearStudentGuidance();
+  }
 
   ngOnDestroy(): void {
     this.clearTimer();
