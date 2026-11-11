@@ -1,0 +1,360 @@
+<div class="misaulas-page">
+
+  <!-- Floating Toast -->
+  @if (toastMessage) {
+    <div class="toast-banner" role="status" aria-live="polite">
+      <i class="ph ph-check-circle"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+  }
+
+  <!-- ① Institutional Topbar -->
+  <header class="inst-topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon"><i class="ph ph-flask"></i></div>
+      <div class="brand-labels">
+        <span class="brand-name">ReactivA</span>
+        <span class="brand-sub">San Ignacio School</span>
+      </div>
+    </div>
+    <div class="topbar-meta">
+      <span class="cycle-badge">
+        <i class="ph ph-calendar-blank"></i>
+        Academic Year 2026
+      </span>
+      <div class="topbar-avatar">
+        <i class="ph ph-user-circle"></i>
+        <span>Prof. Roberto Méndez</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ② Section Header + Create Button -->
+  <section class="section-header-block">
+    <div class="section-eyebrow">
+      <span class="dot-green"></span>
+      ACADEMIC MANAGEMENT &nbsp;·&nbsp; TERM B-2026
+    </div>
+    <div class="section-title-row">
+      <div class="section-title-text">
+        <h1 class="section-title">My Classrooms &amp; Groups</h1>
+        <p class="section-subtitle">
+          Manage your assigned classrooms, students and 2026 curriculum progress in interactive simulators.
+        </p>
+      </div>
+      <button type="button" class="btn-create" (click)="abrirCrearModal()">
+        <i class="ph ph-plus"></i>
+        <span>Create New Group</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ③ Search Bar and Filters -->
+  <div class="search-filter-bar">
+    <div class="search-box">
+      <i class="ph ph-magnifying-glass"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Search by classroom, subject or grade..."
+        class="search-input"
+        aria-label="Search group"
+      />
+    </div>
+    <div class="filter-pills">
+      <button type="button" class="pill" [class.active]="filtroActivo === 'all'" (click)="setFiltro('all')">
+        All <span class="pill-count">{{ contarPorFiltro('all') }}</span>
+      </button>
+      <button type="button" class="pill" [class.active]="filtroActivo === '10'" (click)="setFiltro('10')">
+        10th Grade <span class="pill-count">{{ contarPorFiltro('10') }}</span>
+      </button>
+      <button type="button" class="pill" [class.active]="filtroActivo === '11'" (click)="setFiltro('11')">
+        11th Grade <span class="pill-count">{{ contarPorFiltro('11') }}</span>
+      </button>
+      <button type="button" class="pill" [class.active]="filtroActivo === 'stem'" (click)="setFiltro('stem')">
+        STEM Program <span class="pill-count">{{ contarPorFiltro('stem') }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ④ Classroom Cards Grid -->
+  <div class="aulas-grid">
+    @for (aula of aulasFiltradas; track aula.id) {
+      <article class="aula-card">
+
+        <!-- Card Header -->
+        <div class="card-top">
+          <span class="aula-tag" [ngClass]="aula.tagClass">{{ aula.tag }}</span>
+          <div class="card-meta-row">
+            <span class="meta-item"><i class="ph ph-map-pin"></i> {{ aula.ubicacion }}</span>
+            <span class="meta-item"><i class="ph ph-clock"></i> {{ aula.horario }}</span>
+          </div>
+          <h2 class="aula-nombre">{{ aula.nombre }}</h2>
+        </div>
+
+        <!-- KPIs -->
+        <div class="card-kpis">
+          <div class="kpi-cell">
+            <i class="ph ph-users"></i>
+            <div>
+              <strong>{{ aula.totalEstudiantes }}</strong>
+              <span>Students</span>
+            </div>
+          </div>
+          <div class="kpi-cell kpi-green">
+            <i class="ph ph-star"></i>
+            <div>
+              <strong>{{ aula.promedio.toFixed(1) }} / 5.0</strong>
+              <span>Average</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module and Progress -->
+        <div class="card-progress-block">
+          <div class="progress-labels">
+            <span class="module-label">
+              <i class="ph ph-flask"></i>
+              Active Module: <strong>{{ aula.moduloActivo }}</strong>
+            </span>
+            <span class="week-label">Week {{ aula.semanaActual }} of {{ aula.semanasTotal }}</span>
+          </div>
+          <div class="progress-rail">
+            <div
+              class="progress-fill"
+              [style.width.%]="aula.progreso"
+              [style.background-color]="progresoColor(aula.progreso)">
+            </div>
+          </div>
+          <span class="progress-pct">{{ aula.progreso }}%</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button type="button" class="btn-ver" (click)="verEstudiantes(aula)">
+            <i class="ph ph-users"></i>
+            <span>View Students</span>
+          </button>
+          <button type="button" class="btn-asignar" (click)="abrirAsignarTaller(aula)">
+            <i class="ph ph-clipboard-text"></i>
+            <span>Assign Workshop</span>
+          </button>
+        </div>
+
+      </article>
+    }
+
+    @if (aulasFiltradas.length === 0) {
+      <div class="empty-state">
+        <i class="ph ph-magnifying-glass"></i>
+        <p>No classrooms found matching that criteria.</p>
+        <button type="button" class="btn-create sm" (click)="setFiltro('all'); searchQuery = ''">
+          View all groups
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- ⑤ Sync Banner -->
+  <div class="sync-banner">
+    <div class="sync-info">
+      <div class="sync-icon-wrap">
+        <i class="ph ph-arrows-clockwise"></i>
+      </div>
+      <div class="sync-text">
+        <h3>Institutional Course Sync</h3>
+        <p>Link your groups with institutional platforms to import rosters and assignments.</p>
+      </div>
+      <span class="sync-badge">
+        <span class="sync-dot"></span>
+        Sync Active
+      </span>
+    </div>
+    <div class="sync-buttons">
+      <button type="button" class="btn-sync btn-classroom">
+        <i class="ph ph-google-logo"></i>
+        <span>Google Classroom</span>
+      </button>
+      <button type="button" class="btn-sync btn-teams">
+        <i class="ph ph-microsoft-teams-logo"></i>
+        <span>Microsoft Teams</span>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- MODAL: Create New Group -->
+  @if (isCrearModalOpen) {
+    <div class="modal-overlay" (click)="cerrarCrearModal()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon green"><i class="ph ph-plus-circle"></i></div>
+            <div>
+              <h2>Create New Group</h2>
+              <span>Academic Term B-2026</span>
+            </div>
+          </div>
+          <button type="button" class="btn-dismiss" (click)="cerrarCrearModal()"><i class="ph ph-x"></i></button>
+        </div>
+        <form class="modal-form" (ngSubmit)="crearGrupo()">
+          <div class="form-field">
+            <label>Group Name *</label>
+            <input type="text" [(ngModel)]="nuevoGrupo.nombre" name="nombre"
+              placeholder="e.g. Grade 10° C — General Chemistry" class="input-text" />
+          </div>
+          <div class="form-row-2">
+            <div class="form-field">
+              <label>Location / Classroom *</label>
+              <input type="text" [(ngModel)]="nuevoGrupo.ubicacion" name="ubicacion"
+                placeholder="e.g. Room 205" class="input-text" />
+            </div>
+            <div class="form-field">
+              <label>Schedule</label>
+              <input type="text" [(ngModel)]="nuevoGrupo.horario" name="horario"
+                placeholder="e.g. Mon &amp; Wed 07:00 – 08:40" class="input-text" />
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-field">
+              <label>Level / Tag</label>
+              <select [(ngModel)]="nuevoGrupo.tag" name="tag" class="input-select">
+                <option>INTERMEDIATE</option>
+                <option>LAB PRACTICE</option>
+                <option>ADVANCED</option>
+                <option>HIGH PERFORMANCE</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Grade Filter</label>
+              <select [(ngModel)]="nuevoGrupo.filtro" name="filtro" class="input-select">
+                <option value="all">General</option>
+                <option value="10">10th Grade</option>
+                <option value="11">11th Grade</option>
+                <option value="stem">STEM Program</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Total Students</label>
+            <input type="number" [(ngModel)]="nuevoGrupo.totalEstudiantes" name="total"
+              min="1" max="50" class="input-text" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="cerrarCrearModal()">Cancel</button>
+            <button type="submit" class="btn-submit-green">
+              <i class="ph ph-plus"></i> Create Group
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+
+  <!-- MODAL: View Students -->
+  @if (isEstudiantesOpen && aulaSeleccionada) {
+    <div class="modal-overlay" (click)="cerrarEstudiantes()">
+      <div class="modal-box modal-wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon blue"><i class="ph ph-users"></i></div>
+            <div>
+              <h2>Student List</h2>
+              <span>{{ aulaSeleccionada.nombre }}</span>
+            </div>
+          </div>
+          <button type="button" class="btn-dismiss" (click)="cerrarEstudiantes()"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="student-list">
+          @if (aulaSeleccionada.estudiantes.length > 0) {
+            <table class="student-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student</th>
+                  <th>Grade (1.0 – 5.0)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (est of aulaSeleccionada.estudiantes; track est.nombre; let i = $index) {
+                  <tr>
+                    <td class="td-num">{{ i + 1 }}</td>
+                    <td class="td-name">
+                      <i class="ph ph-user-circle"></i>
+                      {{ est.nombre }}
+                    </td>
+                    <td class="td-nota">
+                      <strong [class.nota-high]="est.nota >= 4.5" [class.nota-risk]="est.nota < 3.0">
+                        {{ est.nota.toFixed(1) }}
+                      </strong>
+                    </td>
+                    <td>
+                      <span class="estado-badge"
+                        [class.estado-green]="est.estado === 'Outstanding'"
+                        [class.estado-blue]="est.estado === 'Passing'"
+                        [class.estado-red]="est.estado === 'At risk'">
+                        {{ est.estado }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="empty-students">This group has no registered students yet.</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-submit-green" (click)="cerrarEstudiantes()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+  <!-- MODAL: Assign Workshop -->
+  @if (isAsignarModalOpen && aulaSeleccionada) {
+    <div class="modal-overlay" (click)="cerrarAsignarTaller()">
+      <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon green"><i class="ph ph-clipboard-text"></i></div>
+            <div>
+              <h2>Assign ReactivA Workshop</h2>
+              <span>{{ aulaSeleccionada.nombre }}</span>
+            </div>
+          </div>
+          <button type="button" class="btn-dismiss" (click)="cerrarAsignarTaller()"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-form">
+          <div class="form-field">
+            <label>Select the practice to assign</label>
+            <select [(ngModel)]="tallerSeleccionado" name="taller" class="input-select">
+              @for (t of talleresDisponibles; track t) {
+                <option [value]="t">{{ t }}</option>
+              }
+            </select>
+          </div>
+          <div class="taller-preview">
+            <i class="ph ph-flask taller-icon"></i>
+            <div>
+              <strong>{{ tallerSeleccionado }}</strong>
+              <span>ReactivA · Term B-2026 · Scale 1.0 to 5.0</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="cerrarAsignarTaller()">Cancel</button>
+          <button type="button" class="btn-submit-green" (click)="confirmarAsignacion()">
+            <i class="ph ph-check"></i> Confirm Assignment
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+</div>
+
