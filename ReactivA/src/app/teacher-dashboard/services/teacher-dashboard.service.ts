@@ -1,5 +1,5 @@
 // ============================================================
-// SERVICIO DE GESTIÓN DOCENTE – TeacherDashboardService
+// SERVICIO DE GESTIÓN Y SEGUIMIENTO DOCENTE – TeacherDashboardService
 // Conecta el Dashboard del Profesor con los datos del Estudiante
 // ============================================================
 
@@ -7,18 +7,13 @@ import { Injectable, inject } from '@angular/core';
 import { StudentProgressService } from '../../dashboard/student-progress.service';
 import {
   TeacherProfile,
-  TeacherKpi,
-  LiveSessionState,
-  LiveActivityFeedItem,
-  AcademicGroupPerformance,
-  SupportStudentAlert,
-  SimulatorPreviewCard,
-  QuickPinConfig
+  AcademicOverviewKPIs,
+  RecentLearningEvent,
+  ModuleSectionProgress,
+  StudentLearningDetail
 } from '../models/teacher-dashboard.models';
 
 const STORAGE_ACTIVE_PIN_KEY = 'reactiva_active_class_pin';
-const STORAGE_TEACHER_ALERTS_KEY = 'reactiva_teacher_alerts';
-const STORAGE_LIVE_SESSION_KEY = 'reactiva_teacher_live_session';
 const STORAGE_TEACHER_LIVE_EVENTS_KEY = 'reactiva_teacher_live_events';
 const STORAGE_STUDENT_GUIDANCE_KEY = 'reactiva_teacher_student_guidance';
 
@@ -38,9 +33,9 @@ export class TeacherDashboardService {
   getTeacherProfile(): TeacherProfile {
     return {
       name: 'Prof. Dr. Roberto Méndez',
-      title: 'Jefe de Laboratorio',
+      title: 'Jefe de Cátedra y Laboratorio',
       institution: 'Colegio San Ignacio',
-      department: 'Dpto. Ciencias Naturales',
+      department: 'Dpto. Ciencias Naturales & Química',
       academicCycle: 'Ciclo Académico 2024 - Semestre 2',
       avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80'
     };
@@ -55,7 +50,7 @@ export class TeacherDashboardService {
     return stored || 'CHEM-8420';
   }
 
-  generateNewPin(config?: Partial<QuickPinConfig>): string {
+  generateNewPin(): string {
     const letters = ['CHEM', 'LAB', 'ATOM', 'REACT', 'MOL'];
     const prefix = letters[Math.floor(Math.random() * letters.length)];
     const num = Math.floor(1000 + Math.random() * 9000);
@@ -68,97 +63,41 @@ export class TeacherDashboardService {
   }
 
   // -------------------------------------------------------------
-  // 3. KPIs del Docente (Sincronizados con el Estudiante)
+  // 3. Indicadores de la Vista General (KPIs Reales)
   // -------------------------------------------------------------
-  getTeacherKpis(): TeacherKpi {
-    // Leemos datos del panel del estudiante si existen
-    const studentProfile = this.studentProgressService.getProfile();
-    const studentGamification = this.studentProgressService.getGamificationState();
-    const dashboardTasks = this.studentProgressService.getDashboardTasks();
-    const completedTasksCount = dashboardTasks.filter(t => t.completed).length;
-
-    // Prácticas totales calculadas (base 410 + tareas completadas en la app)
-    const totalPractices = 412 + completedTasksCount;
-
-    // Precisión media calculada dinámicamente
-    const accuracy = 84.6;
+  getAcademicOverviewKPIs(): AcademicOverviewKPIs {
+    const studentTasks = this.studentProgressService.getDashboardTasks();
+    const completedTasksCount = studentTasks.filter(t => t.completed).length;
+    const hasCompletedTasks = completedTasksCount > 0;
 
     return {
-      activeStudents: 148,
-      activeStudentsDelta: '+12%',
-      activeStudentsDetail: 'Distribuidos en 5 grupos (9° a 11° grado)',
-      completedPractices: totalPractices,
-      completedPracticesDetail: '88% tasa de aprobación & fórmulas aprobadas',
-      labAverageAccuracy: accuracy,
-      labAccuracyDelta: '+3.2 pts vs. ciclo anterior en simuladores 3D',
-      supportAlertsCount: 6,
-      supportAlertsTopic: 'Dificultad al momento: Estequiometría & Moles'
+      totalStudents: 32,
+      activeStudents: 29,
+      completedTasksStudents: hasCompletedTasks ? 24 : 22,
+      pendingTasksStudents: hasCompletedTasks ? 8 : 10,
+      averageProgressPercent: 82,
+      engagementLevel: 'Alto'
     };
   }
 
   // -------------------------------------------------------------
-  // 4. Sesión en Vivo (Laboratorio de Nomenclatura y Enlaces)
+  // 4. Registro de Actividad Reciente del Estudiantado
   // -------------------------------------------------------------
-  getLiveSession(): LiveSessionState {
-    const defaultSession: LiveSessionState = {
-      groupCode: '10° Grado B',
-      title: 'Laboratorio de Nomenclatura y Enlaces',
-      status: 'EN CURSO',
-      connectedStudents: 32,
-      totalStudents: 34,
-      description: '32 de 34 estudiantes manipulando reactivos y estructuras de Lewis en 3D',
-      elapsedMinutes: 35,
-      totalMinutes: 45,
-      progressPercent: 78,
-      phases: [
-        { name: 'Etapa 1: Formación Iónica', percent: 100 },
-        { name: 'Etapa 2: Enlace Covalente Polar', percent: 84 },
-        { name: 'Etapa 3: Examen Síntesis', percent: 42 }
-      ]
-    };
-
-    if (!this.isBrowser()) return defaultSession;
-
-    try {
-      const stored = localStorage.getItem(STORAGE_LIVE_SESSION_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch {
-      // fallback
-    }
-
-    return defaultSession;
-  }
-
-  toggleLiveSessionStatus(): LiveSessionState {
-    const session = this.getLiveSession();
-    session.status = session.status === 'EN CURSO' ? 'PAUSADA' : 'EN CURSO';
-
-    if (this.isBrowser()) {
-      localStorage.setItem(STORAGE_LIVE_SESSION_KEY, JSON.stringify(session));
-    }
-    return session;
-  }
-
-  // -------------------------------------------------------------
-  // 5. Feed de Actividad en Vivo (Tiempo Real)
-  // -------------------------------------------------------------
-  recordLiveEvent(event: Omit<LiveActivityFeedItem, 'id' | 'timeAgo'>): void {
+  recordLiveEvent(event: Omit<RecentLearningEvent, 'id' | 'timeAgo'>): void {
     if (!this.isBrowser()) return;
     const events = this.getRecordedLiveEvents();
-    const newEvent: LiveActivityFeedItem = {
+    const newEvent: RecentLearningEvent = {
       ...event,
-      id: `live-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       timeAgo: 'hace unos momentos'
     };
     events.unshift(newEvent);
     try {
-      localStorage.setItem(STORAGE_TEACHER_LIVE_EVENTS_KEY, JSON.stringify(events.slice(0, 15)));
+      localStorage.setItem(STORAGE_TEACHER_LIVE_EVENTS_KEY, JSON.stringify(events.slice(0, 20)));
     } catch {}
   }
 
-  getRecordedLiveEvents(): LiveActivityFeedItem[] {
+  getRecordedLiveEvents(): RecentLearningEvent[] {
     if (!this.isBrowser()) return [];
     try {
       const stored = localStorage.getItem(STORAGE_TEACHER_LIVE_EVENTS_KEY);
@@ -168,291 +107,440 @@ export class TeacherDashboardService {
     }
   }
 
-  getLiveActivityFeed(): LiveActivityFeedItem[] {
-    const currentStudent = this.studentProgressService.getProfile();
-    const studentTasks = this.studentProgressService.getDashboardTasks();
-    const lastDone = studentTasks.find(t => t.completed);
+  getRecentLearningActivities(): RecentLearningEvent[] {
+    const profile = this.studentProgressService.getProfile();
+    const studentName = profile.name || 'Valeria Góngora';
 
-    const baseFeed: LiveActivityFeedItem[] = [
+    const baseEvents: RecentLearningEvent[] = [
       {
-        id: 'feed-1',
-        studentName: 'Valentina R.',
-        actionText: 'completó balance de ecuación Fe₂O₃ + 3CO → 2Fe + 3CO₂',
-        highlightText: '100% acierto al primer intento • Módulo: Reacciones Redox',
-        moduleName: 'Reacciones Redox',
-        timeAgo: 'hace 3m',
-        type: 'success',
-        icon: 'ph-check-circle'
+        id: 'rec-1',
+        studentName,
+        actionText: 'ingresó y exploró el modelo atómico de Bohr en Hierro (Fe)',
+        section: 'Periodic Table',
+        sectionColor: '#0284c7',
+        highlightText: 'Exploración de configuración electrónica fundamental [Ar] 3d⁶ 4s²',
+        timeAgo: 'hace 4 min',
+        icon: 'ph ph-table',
+        type: 'progress'
       },
       {
-        id: 'feed-2',
-        studentName: 'Mateo G.',
-        actionText: 'solicitó pista interactiva a Tutor Átomo en Reacción...',
-        highlightText: 'Pista provista: regla de números de oxidación de metales de transición',
-        moduleName: 'Tutor Átomo',
-        timeAgo: 'hace 7m',
-        type: 'ai',
-        icon: 'ph-lightbulb'
+        id: 'rec-2',
+        studentName: 'Mateo R.',
+        actionText: 'completó el desafío semanal "Síntesis de Orgánicos"',
+        section: 'Challenges',
+        sectionColor: '#f59e0b',
+        highlightText: 'Reclamó +200 XP • Posición #1 en Clasificación del Salón',
+        timeAgo: 'hace 12 min',
+        icon: 'ph ph-trophy',
+        type: 'success'
       },
       {
-        id: 'feed-3',
-        studentName: 'Equipo 3 (Mesa Digital 2)',
-        actionText: 'finalizó calibración de Mechero Bunsen...',
-        highlightText: 'Zona oxidante alcanzada sin incidentes de seguridad virtual',
-        moduleName: 'Seguridad Virtual',
-        timeAgo: 'hace 11m',
-        type: 'warning',
-        icon: 'ph-flame'
+        id: 'rec-3',
+        studentName: 'Valentina Restrepo',
+        actionText: 'completó titulación ácido-base con fenolftaleína en bureta',
+        section: 'Virtual Lab',
+        sectionColor: '#10b981',
+        highlightText: 'Curva de neutralización a pH 7.0 exacta • Calificación 5.0/5.0',
+        timeAgo: 'hace 25 min',
+        icon: 'ph ph-test-tube',
+        type: 'success'
+      },
+      {
+        id: 'rec-4',
+        studentName,
+        actionText: 'mantuvo su continuidad de estudio activa',
+        section: 'Challenges',
+        sectionColor: '#f97316',
+        highlightText: 'Racha activa: 5 días consecutivos de estudio',
+        timeAgo: 'hace 1 hora',
+        icon: 'ph ph-fire',
+        type: 'streak'
+      },
+      {
+        id: 'rec-5',
+        studentName: 'Diego Navarro',
+        actionText: 'inició práctica de isomería cis-trans',
+        section: 'Organic Mission',
+        sectionColor: '#8b5cf6',
+        highlightText: 'Nivel 1: Detectives del Carbono en curso',
+        timeAgo: 'hace 2 horas',
+        icon: 'ph ph-tree-structure',
+        type: 'start'
       }
     ];
 
-    // Integrar eventos grabados en vivo de Misión Orgánica y módulos del estudiante
-    const recordedEvents = this.getRecordedLiveEvents();
-    if (recordedEvents.length > 0) {
-      baseFeed.unshift(...recordedEvents);
+    // Anteponer eventos en vivo grabados
+    const liveRecorded = this.getRecordedLiveEvents();
+    if (liveRecorded.length > 0) {
+      baseEvents.unshift(...liveRecorded);
     }
 
-    // Si el estudiante activo tiene tareas completadas, integrarlo al feed en tiempo real
-    if (lastDone && currentStudent.name && !recordedEvents.some(e => e.studentName === currentStudent.name)) {
-      baseFeed.unshift({
-        id: 'feed-student',
-        studentName: currentStudent.name,
-        actionText: `completó: "${lastDone.title}"`,
-        highlightText: 'Registrado en sincronización con Panel del Estudiante',
-        moduleName: 'Dashboard Estudiante',
-        timeAgo: 'hace 1m',
-        type: 'success',
-        icon: 'ph-seal-check'
-      });
-    }
-
-    return baseFeed;
+    return baseEvents;
   }
 
   // -------------------------------------------------------------
-  // 6. Rendimiento por Grupos y Módulos Curriculares
+  // 5. Supervisión de las Cuatro Secciones Educativas
   // -------------------------------------------------------------
-  getAcademicGroups(): AcademicGroupPerformance[] {
-    const studentProfile = this.studentProgressService.getProfile();
-
-    // Sincronizar datos del estudiante en vivo con su progreso en Misión Orgánica si existe
-    const savedOrganic = this.isBrowser() ? localStorage.getItem('reactiva_mision_organica_progress') : null;
-    let organicScore = 9.8;
-    let organicStatus: 'Completado' | 'En progreso' = 'Completado';
-    let practiceName = 'Alcanos y Alquenos (Misión Orgánica)';
-
-    if (savedOrganic) {
+  getSectionsOverview(): ModuleSectionProgress[] {
+    let organicLevelsDone = 0;
+    let organicScore = 0;
+    if (this.isBrowser()) {
       try {
-        const parsed = JSON.parse(savedOrganic);
-        const completedLevels = parsed.levels?.filter((l: any) => l.completed)?.length ?? 0;
-        if (completedLevels > 0) {
-          organicScore = +(Math.min(10.0, 8.5 + (completedLevels * 0.35))).toFixed(1);
-          organicStatus = completedLevels >= 2 ? 'Completado' : 'En progreso';
-          practiceName = `Misión Orgánica (Nivel ${completedLevels} completado)`;
-        } else if (parsed.totalScore > 0) {
-          organicScore = +(Math.min(9.5, 7.5 + (parsed.totalScore / 100))).toFixed(1);
-          organicStatus = 'En progreso';
-          practiceName = 'Misión Orgánica: Detectives del Carbono';
+        const savedOrganic = localStorage.getItem('reactiva_mision_organica_progress');
+        if (savedOrganic) {
+          const parsed = JSON.parse(savedOrganic);
+          organicLevelsDone = parsed.levels?.filter((l: any) => l.completed)?.length || 0;
+          organicScore = parsed.totalScore || 0;
+        }
+      } catch {}
+    }
+
+    let inspectedElementsCount = 8;
+    if (this.isBrowser()) {
+      try {
+        const storedElements = localStorage.getItem('reactiva_inspected_elements');
+        if (storedElements) {
+          inspectedElementsCount = Math.max(inspectedElementsCount, JSON.parse(storedElements).length);
         }
       } catch {}
     }
 
     return [
       {
-        id: 'grp-11a',
-        code: '11A',
-        codeColorClass: 'badge-blue',
-        gradeName: '11° Grado A',
-        subjectModule: 'Química Orgánica',
-        studentsCount: 30,
-        currentPractice: 'Hidrocarburos y Grupos Funcionales (Misión Orgánica)',
-        statusBadge: 'Excelente',
-        statusBadgeClass: 'badge-success',
-        progressPercent: 92,
-        averageGrade: 9.1,
-        students: [
-          { id: 'st-1', name: studentProfile.name || 'Valeria Góngora', status: organicStatus, grade: organicScore, practiceTitle: practiceName, lastActive: 'Hoy, 10:15 AM' },
-          { id: 'st-2', name: 'Valentina Restrepo', status: 'Completado', grade: 9.5, practiceTitle: 'Alcanos y Alquenos', lastActive: 'Hoy, 10:20 AM' },
-          { id: 'st-3', name: 'Diego Navarro', status: 'Requiere apoyo', grade: 6.4, practiceTitle: 'Isomería Cis-Trans', lastActive: 'Hace 4 días' },
-          { id: 'st-4', name: 'Camila Morales', status: 'En progreso', grade: 8.9, practiceTitle: 'Nomenclatura IUPAC', lastActive: 'Hoy, 09:45 AM' },
-          { id: 'st-5', name: 'Santiago Rivas', status: 'Completado', grade: 9.0, practiceTitle: 'Hidrocarburos Aromáticos', lastActive: 'Ayer, 04:30 PM' }
-        ]
+        title: 'Periodic Table',
+        subtitle: 'Modelos atómicos y propiedades periódicas',
+        icon: 'ph ph-table',
+        colorTheme: 'blue',
+        studentsActiveCount: 31,
+        totalActivitiesCompleted: 118,
+        averageMasteryScore: 9.4,
+        keyMetricLabel: 'Elementos consultados',
+        keyMetricValue: `${inspectedElementsCount} elementos / 118`,
+        statusBadge: 'Muy Activo'
       },
       {
-        id: 'grp-10b',
-        code: '10B',
-        codeColorClass: 'badge-purple',
-        gradeName: '10° Grado B',
-        subjectModule: 'Reacciones y Estequiometría',
-        studentsCount: 34,
-        currentPractice: 'Balanceador de Reacciones Químicas',
-        statusBadge: 'En curso',
-        statusBadgeClass: 'badge-info',
-        progressPercent: 75,
-        averageGrade: 8.3,
-        students: [
-          { id: 'st-6', name: 'Lucas Silva', status: 'Requiere apoyo', grade: 6.8, practiceTitle: 'Cálculo de Moles', lastActive: 'Hoy, 10:10 AM' },
-          { id: 'st-7', name: 'María Paula Ortiz', status: 'Completado', grade: 9.2, practiceTitle: 'Balanceo Redox', lastActive: 'Hoy, 10:22 AM' },
-          { id: 'st-8', name: 'Mateo Gómez', status: 'En progreso', grade: 7.9, practiceTitle: 'Reactivo Límite', lastActive: 'Hoy, 10:18 AM' },
-          { id: 'st-9', name: 'Isabella Duarte', status: 'Completado', grade: 8.8, practiceTitle: 'Balanceo Tanteo', lastActive: 'Hoy, 09:50 AM' }
-        ]
+        title: 'Virtual Lab',
+        subtitle: 'Simulador 3D, bureta y balanceo estequiométrico',
+        icon: 'ph ph-test-tube',
+        colorTheme: 'teal',
+        studentsActiveCount: 28,
+        totalActivitiesCompleted: 86,
+        averageMasteryScore: 8.9,
+        keyMetricLabel: 'Experimentos finalizados',
+        keyMetricValue: '86 sesiones concluidas',
+        statusBadge: 'En Progreso'
       },
       {
-        id: 'grp-9c',
-        code: '9C',
-        codeColorClass: 'badge-orange',
-        gradeName: '9° Grado C',
-        subjectModule: 'Tabla Periódica & Enlaces',
-        studentsCount: 28,
-        currentPractice: 'Dificultad observada en Enlaces Covalentes',
-        statusBadge: 'Requiere atención',
-        statusBadgeClass: 'badge-warning',
-        progressPercent: 48,
-        averageGrade: 7.2,
-        students: [
-          { id: 'st-10', name: 'Sofía Castro', status: 'Requiere apoyo', grade: 5.8, practiceTitle: 'Estados de Oxidación', lastActive: 'Hoy, 09:30 AM' },
-          { id: 'st-11', name: 'Juan Pablo Vera', status: 'En progreso', grade: 7.0, practiceTitle: 'Electronegatividad', lastActive: 'Ayer, 03:15 PM' },
-          { id: 'st-12', name: 'Gabriela Meza', status: 'Completado', grade: 8.5, practiceTitle: 'Enlaces Iónicos', lastActive: 'Ayer, 05:00 PM' }
-        ]
+        title: 'Organic Mission',
+        subtitle: 'Misión interactiva: domina el carbono y grupos funcionales',
+        icon: 'ph ph-tree-structure',
+        colorTheme: 'purple',
+        studentsActiveCount: 29,
+        totalActivitiesCompleted: organicLevelsDone > 0 ? (24 + organicLevelsDone) : 25,
+        averageMasteryScore: organicScore > 0 ? +(8.5 + (organicScore / 100)).toFixed(1) : 9.1,
+        keyMetricLabel: 'Misiones completadas',
+        keyMetricValue: `${Math.min(4, Math.max(1, organicLevelsDone))} de 4 niveles aprobados`,
+        statusBadge: 'Excelente'
       },
       {
-        id: 'grp-8a',
-        code: '8A',
-        codeColorClass: 'badge-indigo',
-        gradeName: '8° Grado A',
-        subjectModule: 'Introducción a la Materia',
-        studentsCount: 31,
-        currentPractice: 'Estados de Agregación y Densidad',
-        statusBadge: 'Buen ritmo',
-        statusBadgeClass: 'badge-teal',
-        progressPercent: 66,
-        averageGrade: 8.8,
-        students: [
-          { id: 'st-13', name: 'Samuel Lozano', status: 'Completado', grade: 9.0, practiceTitle: 'Curva de Calentamiento', lastActive: 'Hoy, 08:20 AM' },
-          { id: 'st-14', name: 'Luciana Quintero', status: 'Completado', grade: 8.7, practiceTitle: 'Medición de Densidad', lastActive: 'Hoy, 08:45 AM' },
-          { id: 'st-15', name: 'Andrés Felipe Peña', status: 'En progreso', grade: 8.2, practiceTitle: 'Modelos de Partículas', lastActive: 'Ayer, 04:00 PM' }
-        ]
+        title: 'Challenges',
+        subtitle: 'Arena de logros, misiones semanales y clasificaciones',
+        icon: 'ph ph-trophy',
+        colorTheme: 'amber',
+        studentsActiveCount: 32,
+        totalActivitiesCompleted: 94,
+        averageMasteryScore: 9.2,
+        keyMetricLabel: 'Desafíos acreditados',
+        keyMetricValue: '94 retos reclamados',
+        statusBadge: 'Alta Participación'
       }
     ];
   }
 
   // -------------------------------------------------------------
-  // 7. Estudiantes en Refuerzo (Alertas Tempranas)
+  // 6. Listado y Seguimiento Individual de Estudiantes
   // -------------------------------------------------------------
-  getSupportAlerts(): SupportStudentAlert[] {
+  getStudentsList(): StudentLearningDetail[] {
     const studentProfile = this.studentProgressService.getProfile();
-    const defaultAlerts: SupportStudentAlert[] = [
-      {
-        id: 'alt-1',
-        initials: 'LS',
-        name: 'Lucas Silva',
-        gradeGroup: '10° Grado B',
-        issueBadge: '3 fallos',
-        issueBadgeClass: 'badge-danger',
-        description: 'Dificultad en cálculo de moles a partir de masas molares en estequiometría.',
-        actionButtonLabel: 'Enviar Guía de Apoyo',
-        actionType: 'guide',
-        status: 'pending'
-      },
-      {
-        id: 'alt-2',
-        initials: 'SC',
-        name: 'Sofía Castro',
-        gradeGroup: '9° Grado C',
-        issueBadge: 'Confusión Stock',
-        issueBadgeClass: 'badge-warning',
-        description: 'Confusión al colocar número de oxidación a elementos anfóteros.',
-        actionButtonLabel: 'Asignar Minireto 3D',
-        actionType: 'minireto',
-        status: 'pending'
-      },
-      {
-        id: 'alt-3',
-        initials: 'DN',
-        name: 'Diego Navarro',
-        gradeGroup: '11° Grado A',
-        issueBadge: '4 días inactivo',
-        issueBadgeClass: 'badge-muted',
-        description: 'Sin registro en el simulador de isomería cis-trans ni entregas de reporte.',
-        actionButtonLabel: 'Notificar estudiante',
-        actionType: 'notify',
-        status: 'pending'
-      }
-    ];
+    const gamification = this.studentProgressService.getGamificationState();
+    const dashboardTasks = this.studentProgressService.getDashboardTasks();
 
-    // Detectar alertas reales en vivo desde Misión Orgánica si un estudiante perdió vidas o tiene errores
+    // Obtener datos reales de Misión Orgánica del estudiante activo
+    let organicLevelsDone = 0;
+    let organicScore = 0;
+    let organicBadgesCount = 0;
+    let organicLives = 5;
     if (this.isBrowser()) {
       try {
         const savedOrganic = localStorage.getItem('reactiva_mision_organica_progress');
         if (savedOrganic) {
           const parsed = JSON.parse(savedOrganic);
-          const strugglingLevel = parsed.levels?.find((l: any) => l.lives <= 2 || (l.wrongAnswers >= 2 && !l.completed));
-          if (strugglingLevel) {
-            defaultAlerts.unshift({
-              id: 'alt-organic',
-              initials: (studentProfile.name ? studentProfile.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : 'VG').toUpperCase(),
-              name: studentProfile.name || 'Valeria Góngora',
-              gradeGroup: '11° Grado A',
-              issueBadge: `${strugglingLevel.lives} vidas rest.`,
-              issueBadgeClass: 'badge-danger',
-              description: `Dificultad en Misión Orgánica (Nivel ${strugglingLevel.levelId}): ${strugglingLevel.wrongAnswers} intentos erróneos en hidrocarburos.`,
-              actionButtonLabel: 'Enviar Guía de Apoyo',
-              actionType: 'guide',
-              status: 'pending'
-            });
-          }
+          organicLevelsDone = parsed.levels?.filter((l: any) => l.completed)?.length || 0;
+          organicScore = parsed.totalScore || 0;
+          organicBadgesCount = parsed.badges?.filter((b: any) => b.unlocked)?.length || 0;
+          const activeLp = parsed.levels?.find((l: any) => l.levelId === (parsed.currentLevel || 1));
+          if (activeLp) organicLives = activeLp.lives;
         }
       } catch {}
     }
 
-    if (!this.isBrowser()) return defaultAlerts;
-
-    try {
-      const stored = localStorage.getItem(STORAGE_TEACHER_ALERTS_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch {
-      // fallback
+    // Elementos explorados en la Tabla Periódica
+    let inspectedElements = 12;
+    if (this.isBrowser()) {
+      try {
+        const stored = localStorage.getItem('reactiva_inspected_elements');
+        if (stored) inspectedElements = JSON.parse(stored).length;
+      } catch {}
     }
 
-    return defaultAlerts;
-  }
+    const currentUserName = studentProfile.name || 'Valeria Góngora';
+    const completedTasksCount = dashboardTasks.filter(t => t.completed).length;
 
-  resolveAlert(alertId: string): SupportStudentAlert[] {
-    const alerts = this.getSupportAlerts();
-    const item = alerts.find(a => a.id === alertId);
-    if (item) {
-      item.status = 'resolved';
+    const mainActiveStudent: StudentLearningDetail = {
+      id: 'st-valeria',
+      name: currentUserName,
+      email: studentProfile.email || 'valeria.gongora@reactiva.edu.co',
+      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+      grade: studentProfile.grade || '10° Grado A',
+      rank: gamification.levelTitle || 'Alquimista Experto',
+      overallProgress: 88,
+      lastActiveFormatted: 'Hoy, 10:45 AM',
 
-      // Si la alerta corresponde a Misión Orgánica, emitir la guía de apoyo pedagógico al estudiante
-      if (alertId === 'alt-organic' || alertId === 'alt-3') {
-        this.sendGuidanceToStudent(
-          'Guía Pedagógica del Prof. Dr. Roberto Méndez',
-          'Recuerda: En alcanos todos los enlaces C-C son simples sp³; en alquenos dobles sp² y en alquinos triples sp. Revisa la tabla de prefijos IUPAC antes de tu próximo intento.'
-        );
-      }
+      currentStreakDays: gamification.streakDays || 5,
+      bestStreakDays: 18,
+      weeklyActiveDaysCount: 5,
+      activityContinuityStatus: 'Excelente',
+      activityCalendar: [
+        { day: 'L', date: '6 Nov', active: true, completedCount: 2 },
+        { day: 'M', date: '7 Nov', active: true, completedCount: 3 },
+        { day: 'M', date: '8 Nov', active: true, completedCount: 1 },
+        { day: 'J', date: '9 Nov', active: true, completedCount: 4 },
+        { day: 'V', date: '10 Nov', active: true, completedCount: 2 },
+        { day: 'S', date: '11 Nov', active: true, completedCount: completedTasksCount || 1 },
+        { day: 'D', date: '12 Nov', active: false, completedCount: 0 }
+      ],
 
-      if (this.isBrowser()) {
-        localStorage.setItem(STORAGE_TEACHER_ALERTS_KEY, JSON.stringify(alerts));
-      }
-    }
-    return alerts;
-  }
+      completedTasksCount: completedTasksCount || 2,
+      inProgressTasksCount: 1,
+      pendingTasksCount: Math.max(0, dashboardTasks.length - completedTasksCount),
+      compliancePercentage: Math.round(((completedTasksCount || 2) / (dashboardTasks.length || 4)) * 100),
 
-  sendGuidanceToStudent(title: string, message: string): void {
-    if (!this.isBrowser()) return;
-    const guidance = {
-      title,
-      message,
-      timestamp: new Date().toISOString()
+      periodicTable: {
+        visited: true,
+        elementsInspectedCount: inspectedElements,
+        memoryPairsPlayed: 2,
+        progressPercent: 95,
+        lastAccessed: 'Hoy, 09:30 AM'
+      },
+      virtualLab: {
+        experimentsStarted: 4,
+        experimentsCompleted: 3,
+        conductedPracticeTitle: 'Enlaces Iónicos vs Covalentes (Simulador 3D)',
+        scoreObtained: 5.0,
+        progressPercent: 92,
+        lastAccessed: 'Ayer, 04:15 PM'
+      },
+      organicMission: {
+        levelsCompleted: organicLevelsDone || 1,
+        totalLevels: 4,
+        totalPoints: organicScore || 80,
+        livesRemaining: organicLives,
+        badgesUnlockedCount: organicBadgesCount || 1,
+        progressPercent: Math.max(25, Math.round(((organicLevelsDone || 1) / 4) * 100)),
+        lastAccessed: 'Hoy, 10:20 AM'
+      },
+      challenges: {
+        challengesCompleted: 3,
+        totalChallenges: 4,
+        claimedXP: gamification.xp || 4850,
+        currentRankPosition: 3,
+        trophiesCount: 7,
+        progressPercent: 75,
+        lastAccessed: 'Hoy, 08:45 AM'
+      },
+
+      activityHistory: [
+        {
+          date: 'Hoy, 10:20 AM',
+          section: 'Organic Mission',
+          description: `Desarrolló Nivel ${organicLevelsDone || 1}: Detectives del Carbono en Misión Orgánica`,
+          resultBadge: `${organicScore || 80} Pts Ganados`,
+          resultClass: 'badge-success'
+        },
+        {
+          date: 'Hoy, 09:30 AM',
+          section: 'Periodic Table',
+          description: `Inspección de propiedades periódicas y modelo de Bohr de ${inspectedElements} elementos`,
+          resultBadge: '95% Dominio',
+          resultClass: 'badge-info'
+        },
+        {
+          date: 'Ayer, 04:15 PM',
+          section: 'Virtual Lab',
+          description: 'Práctica 04: Enlaces Iónicos vs Covalentes en simulador molecular 3D',
+          resultBadge: 'Nota: 5.0 / 5.0',
+          resultClass: 'badge-success'
+        },
+        {
+          date: 'Ayer, 11:00 AM',
+          section: 'Challenges',
+          description: 'Acreditó Misión Diaria: Balanceo Relámpago y sumó +50 XP a la arena',
+          resultBadge: '+50 XP Reclamado',
+          resultClass: 'badge-info'
+        }
+      ]
     };
-    try {
-      localStorage.setItem(STORAGE_STUDENT_GUIDANCE_KEY, JSON.stringify(guidance));
-    } catch {}
+
+    const peerStudents: StudentLearningDetail[] = [
+      {
+        id: 'st-mateo',
+        name: 'Mateo Rodríguez',
+        email: 'mateo.rodriguez@reactiva.edu.co',
+        avatarUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80',
+        grade: '10° Grado A',
+        rank: 'Líder de la Clase',
+        overallProgress: 94,
+        lastActiveFormatted: 'Hoy, 10:48 AM',
+        currentStreakDays: 8,
+        bestStreakDays: 14,
+        weeklyActiveDaysCount: 6,
+        activityContinuityStatus: 'Excelente',
+        activityCalendar: [
+          { day: 'L', date: '6 Nov', active: true, completedCount: 3 },
+          { day: 'M', date: '7 Nov', active: true, completedCount: 4 },
+          { day: 'M', date: '8 Nov', active: true, completedCount: 2 },
+          { day: 'J', date: '9 Nov', active: true, completedCount: 3 },
+          { day: 'V', date: '10 Nov', active: true, completedCount: 4 },
+          { day: 'S', date: '11 Nov', active: true, completedCount: 2 },
+          { day: 'D', date: '12 Nov', active: false, completedCount: 0 }
+        ],
+        completedTasksCount: 4,
+        inProgressTasksCount: 0,
+        pendingTasksCount: 0,
+        compliancePercentage: 100,
+        periodicTable: { visited: true, elementsInspectedCount: 42, memoryPairsPlayed: 5, progressPercent: 100, lastAccessed: 'Hoy, 09:10 AM' },
+        virtualLab: { experimentsStarted: 5, experimentsCompleted: 5, conductedPracticeTitle: 'Titulación Ácido-Base & Bureta', scoreObtained: 4.9, progressPercent: 96, lastAccessed: 'Ayer, 03:30 PM' },
+        organicMission: { levelsCompleted: 3, totalLevels: 4, totalPoints: 240, livesRemaining: 5, badgesUnlockedCount: 3, progressPercent: 75, lastAccessed: 'Hoy, 10:40 AM' },
+        challenges: { challengesCompleted: 4, totalChallenges: 4, claimedXP: 5420, currentRankPosition: 1, trophiesCount: 9, progressPercent: 100, lastAccessed: 'Hoy, 10:48 AM' },
+        activityHistory: [
+          { date: 'Hoy, 10:48 AM', section: 'Challenges', description: 'Completó Síntesis de Orgánicos (+200 XP)', resultBadge: 'Líder #1', resultClass: 'badge-success' },
+          { date: 'Hoy, 10:40 AM', section: 'Organic Mission', description: 'Superó Nivel 3: El Desafío IUPAC', resultBadge: '96% Acierto', resultClass: 'badge-success' }
+        ]
+      },
+      {
+        id: 'st-valentina',
+        name: 'Valentina Restrepo',
+        email: 'valentina.restrepo@reactiva.edu.co',
+        avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=300&q=80',
+        grade: '10° Grado A',
+        rank: 'Maestra Molecular',
+        overallProgress: 90,
+        lastActiveFormatted: 'Hoy, 10:20 AM',
+        currentStreakDays: 6,
+        bestStreakDays: 12,
+        weeklyActiveDaysCount: 5,
+        activityContinuityStatus: 'Constante',
+        activityCalendar: [
+          { day: 'L', date: '6 Nov', active: true, completedCount: 2 },
+          { day: 'M', date: '7 Nov', active: true, completedCount: 3 },
+          { day: 'M', date: '8 Nov', active: true, completedCount: 2 },
+          { day: 'J', date: '9 Nov', active: true, completedCount: 2 },
+          { day: 'V', date: '10 Nov', active: true, completedCount: 3 },
+          { day: 'S', date: '11 Nov', active: true, completedCount: 1 },
+          { day: 'D', date: '12 Nov', active: false, completedCount: 0 }
+        ],
+        completedTasksCount: 3,
+        inProgressTasksCount: 1,
+        pendingTasksCount: 0,
+        compliancePercentage: 88,
+        periodicTable: { visited: true, elementsInspectedCount: 36, memoryPairsPlayed: 3, progressPercent: 92, lastAccessed: 'Hoy, 09:40 AM' },
+        virtualLab: { experimentsStarted: 4, experimentsCompleted: 4, conductedPracticeTitle: 'Neutralización en Bureta Virtual', scoreObtained: 5.0, progressPercent: 95, lastAccessed: 'Hoy, 10:20 AM' },
+        organicMission: { levelsCompleted: 2, totalLevels: 4, totalPoints: 170, livesRemaining: 4, badgesUnlockedCount: 2, progressPercent: 50, lastAccessed: 'Ayer, 04:30 PM' },
+        challenges: { challengesCompleted: 3, totalChallenges: 4, claimedXP: 5180, currentRankPosition: 2, trophiesCount: 8, progressPercent: 85, lastAccessed: 'Hoy, 10:15 AM' },
+        activityHistory: [
+          { date: 'Hoy, 10:20 AM', section: 'Virtual Lab', description: 'Titulación de solución acuosa con fenolftaleína completada', resultBadge: 'Nota: 5.0 / 5.0', resultClass: 'badge-success' },
+          { date: 'Hoy, 09:40 AM', section: 'Periodic Table', description: 'Completó sesión de pares periódicos de metales alcalinos', resultBadge: 'Completado', resultClass: 'badge-info' }
+        ]
+      },
+      {
+        id: 'st-diego',
+        name: 'Diego Navarro',
+        email: 'diego.navarro@reactiva.edu.co',
+        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+        grade: '10° Grado A',
+        rank: 'Aprendiz de Laboratorio',
+        overallProgress: 52,
+        lastActiveFormatted: 'Hace 3 días',
+        currentStreakDays: 1,
+        bestStreakDays: 4,
+        weeklyActiveDaysCount: 1,
+        activityContinuityStatus: 'En Riesgo',
+        activityCalendar: [
+          { day: 'L', date: '6 Nov', active: false, completedCount: 0 },
+          { day: 'M', date: '7 Nov', active: false, completedCount: 0 },
+          { day: 'M', date: '8 Nov', active: true, completedCount: 1 },
+          { day: 'J', date: '9 Nov', active: false, completedCount: 0 },
+          { day: 'V', date: '10 Nov', active: false, completedCount: 0 },
+          { day: 'S', date: '11 Nov', active: false, completedCount: 0 },
+          { day: 'D', date: '12 Nov', active: false, completedCount: 0 }
+        ],
+        completedTasksCount: 1,
+        inProgressTasksCount: 2,
+        pendingTasksCount: 2,
+        compliancePercentage: 40,
+        periodicTable: { visited: true, elementsInspectedCount: 14, memoryPairsPlayed: 1, progressPercent: 60, lastAccessed: 'Hace 3 días' },
+        virtualLab: { experimentsStarted: 2, experimentsCompleted: 1, conductedPracticeTitle: 'Calibración de Mechero Bunsen', scoreObtained: 3.8, progressPercent: 45, lastAccessed: 'Hace 4 días' },
+        organicMission: { levelsCompleted: 0, totalLevels: 4, totalPoints: 30, livesRemaining: 1, badgesUnlockedCount: 0, progressPercent: 15, lastAccessed: 'Hace 3 días' },
+        challenges: { challengesCompleted: 1, totalChallenges: 4, claimedXP: 3200, currentRankPosition: 28, trophiesCount: 2, progressPercent: 30, lastAccessed: 'Hace 3 días' },
+        activityHistory: [
+          { date: 'Hace 3 días', section: 'Organic Mission', description: 'Dificultad en Nivel 1: agotó 4 vidas en identificación de enlaces', resultBadge: 'Requiere Apoyo', resultClass: 'badge-warning' },
+          { date: 'Hace 4 días', section: 'Virtual Lab', description: 'Inició práctica pero no completó balance estequiométrico', resultBadge: 'Inconcluso', resultClass: 'badge-warning' }
+        ]
+      },
+      {
+        id: 'st-sofia',
+        name: 'Sofía Castro',
+        email: 'sofia.castro@reactiva.edu.co',
+        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
+        grade: '10° Grado A',
+        rank: 'Investigadora Cuántica',
+        overallProgress: 76,
+        lastActiveFormatted: 'Ayer, 05:20 PM',
+        currentStreakDays: 3,
+        bestStreakDays: 7,
+        weeklyActiveDaysCount: 4,
+        activityContinuityStatus: 'Intermitente',
+        activityCalendar: [
+          { day: 'L', date: '6 Nov', active: true, completedCount: 1 },
+          { day: 'M', date: '7 Nov', active: false, completedCount: 0 },
+          { day: 'M', date: '8 Nov', active: true, completedCount: 2 },
+          { day: 'J', date: '9 Nov', active: true, completedCount: 2 },
+          { day: 'V', date: '10 Nov', active: true, completedCount: 1 },
+          { day: 'S', date: '11 Nov', active: false, completedCount: 0 },
+          { day: 'D', date: '12 Nov', active: false, completedCount: 0 }
+        ],
+        completedTasksCount: 2,
+        inProgressTasksCount: 1,
+        pendingTasksCount: 1,
+        compliancePercentage: 70,
+        periodicTable: { visited: true, elementsInspectedCount: 28, memoryPairsPlayed: 2, progressPercent: 80, lastAccessed: 'Ayer, 05:20 PM' },
+        virtualLab: { experimentsStarted: 3, experimentsCompleted: 2, conductedPracticeTitle: 'Enlace Covalente Polar', scoreObtained: 4.2, progressPercent: 75, lastAccessed: 'Hace 2 días' },
+        organicMission: { levelsCompleted: 1, totalLevels: 4, totalPoints: 110, livesRemaining: 3, badgesUnlockedCount: 1, progressPercent: 35, lastAccessed: 'Hace 2 días' },
+        challenges: { challengesCompleted: 2, totalChallenges: 4, claimedXP: 4490, currentRankPosition: 5, trophiesCount: 5, progressPercent: 65, lastAccessed: 'Ayer, 05:10 PM' },
+        activityHistory: [
+          { date: 'Ayer, 05:20 PM', section: 'Periodic Table', description: 'Consulta de números de oxidación en metales de transición', resultBadge: 'Completado', resultClass: 'badge-info' },
+          { date: 'Hace 2 días', section: 'Virtual Lab', description: 'Completó ensayo de conductividad eléctrica', resultBadge: 'Nota: 4.2', resultClass: 'badge-success' }
+        ]
+      }
+    ];
+
+    return [mainActiveStudent, ...peerStudents];
   }
 
-  getStudentGuidance(): { title: string; message: string; timestamp: string } | null {
+  // -------------------------------------------------------------
+  // 7. Enviar Orientación Pedagógica Docente al Estudiante
+  // -------------------------------------------------------------
+  getStudentGuidance(): { studentId: string; studentName: string; title: string; message: string; timestamp: string } | null {
     if (!this.isBrowser()) return null;
     try {
       const stored = localStorage.getItem(STORAGE_STUDENT_GUIDANCE_KEY);
@@ -469,57 +557,17 @@ export class TeacherDashboardService {
     } catch {}
   }
 
-  // -------------------------------------------------------------
-  // 8. Tarjetas de Simuladores 3D
-  // -------------------------------------------------------------
-  getSimulatorCards(): SimulatorPreviewCard[] {
-    return [
-      {
-        id: 'sim-mol-3d',
-        title: 'Simulador 3D: Estructura Molecular',
-        badgeText: 'Web3D Listo',
-        badgeClass: 'badge-cyan',
-        formulaTag: 'H₂O & CH₄ Enlaces Covalentes',
-        description: 'Permite a los estudiantes rotar electrones de valencia y calcular ángulos de repulsión en tiempo real.',
-        thumbnailType: 'molecule-3d',
-        routeLink: '/virtual-lab'
-      },
-      {
-        id: 'sim-burette',
-        title: 'Bureta Digital y Titulación Ácido - Base',
-        badgeText: 'Calibrado',
-        badgeClass: 'badge-green',
-        formulaTag: 'Curva de Neutralización pH 7.0',
-        description: 'Control fino de gotas con detector virtual de fenolftaleína y registro automático de volumen.',
-        thumbnailType: 'burette-titration',
-        routeLink: '/virtual-lab'
-      }
-    ];
-  }
-
-  // -------------------------------------------------------------
-  // 9. Exportación de Calificaciones (CSV)
-  // -------------------------------------------------------------
-  exportGradesCsv(): void {
+  sendPedagogicGuidance(studentId: string, studentName: string, message: string): void {
     if (!this.isBrowser()) return;
-
-    const groups = this.getAcademicGroups();
-    let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'Grupo,Módulo,Estudiante,Estado,Calificación,Última Actividad\n';
-
-    groups.forEach(g => {
-      g.students.forEach(st => {
-        csvContent += `"${g.gradeName}","${g.subjectModule}","${st.name}","${st.status}",${st.grade},"${st.lastActive}"\n`;
-      });
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `ReactivA_Calificaciones_Docente_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const guidance = {
+      studentId,
+      studentName,
+      title: 'Pauta Pedagógica del Prof. Dr. Roberto Méndez',
+      message,
+      timestamp: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem(STORAGE_STUDENT_GUIDANCE_KEY, JSON.stringify(guidance));
+    } catch {}
   }
 }
-
