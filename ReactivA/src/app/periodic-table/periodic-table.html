@@ -1,4 +1,12 @@
 <div class="periodic-page">
+  <!-- Toast Notificación de Descubrimientos y Gamificación -->
+  @if (toastNotification.visible) {
+    <div class="periodic-toast-notification" [ngClass]="toastNotification.type" role="alert">
+      <i class="ph" [ngClass]="toastNotification.type === 'success' ? 'ph-check-circle' : 'ph-info'"></i>
+      <span>{{ toastNotification.message }}</span>
+    </div>
+  }
+
   <!-- Área Principal: Barra Superior, Filtros y Matriz de 18 Columnas / Modo Memory -->
   <main class="table-workspace">
     <!-- Encabezado de la Sección -->
@@ -12,27 +20,41 @@
         <p>Explora propiedades atómicas, configuraciones electrónicas o desafía tu conocimiento con el Memory Game.</p>
       </div>
 
-      <!-- Selector de Modo: Tabla Periódica vs Memory Game -->
-      <div class="view-mode-tabs">
-        <button
-          type="button"
-          class="mode-pill-btn"
-          [class.active]="activeTab === 'table'"
-          (click)="switchTab('table')"
-        >
-          <i class="ph ph-table"></i>
-          <span>Tabla Periódica</span>
-        </button>
-        <button
-          type="button"
-          class="mode-pill-btn game-tab-btn"
-          [class.active]="activeTab === 'memory'"
-          (click)="switchTab('memory')"
-        >
-          <i class="ph ph-cards"></i>
-          <span>Memory: Parejas Periódicas</span>
-          <span class="game-badge">🎮 Mini-Juego</span>
-        </button>
+      <!-- Widgets Superiores: Racha y Nivel de Usuario + Selector de Modo -->
+      <div class="header-actions-group">
+        <div class="header-user-status">
+          <div class="user-status-pill streak-pill" title="Racha consecutiva de experimentos">
+            <span class="fire-icon">🔥</span>
+            <strong>{{ gamification.streakDays }} Días</strong>
+          </div>
+          <div class="user-status-pill xp-pill" title="Nivel y experiencia acumulada">
+            <i class="ph ph-trophy"></i>
+            <strong>Nv. {{ gamification.level }} · {{ gamification.xp }} XP</strong>
+          </div>
+        </div>
+
+        <!-- Selector de Modo: Tabla Periódica vs Memory Game -->
+        <div class="view-mode-tabs">
+          <button
+            type="button"
+            class="mode-pill-btn"
+            [class.active]="activeTab === 'table'"
+            (click)="switchTab('table')"
+          >
+            <i class="ph ph-table"></i>
+            <span>Tabla Periódica</span>
+          </button>
+          <button
+            type="button"
+            class="mode-pill-btn game-tab-btn"
+            [class.active]="activeTab === 'memory'"
+            (click)="switchTab('memory')"
+          >
+            <i class="ph ph-cards"></i>
+            <span>Memory: Parejas Periódicas</span>
+            <span class="game-badge">🎮 Mini-Juego</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -182,10 +204,15 @@
 
               <!-- Botón de Acción Integrado al Virtual Lab -->
               <div class="panel-actions">
-                <button type="button" class="btn-action-lab" title="Simular elemento en el Laboratorio Virtual">
+                <a
+                  routerLink="/virtual-lab"
+                  [queryParams]="{ element: selectedElement.symbol }"
+                  class="btn-action-lab"
+                  title="Simular elemento {{ selectedElement.symbol }} en el Laboratorio Virtual 3D"
+                >
                   <i class="ph ph-flask"></i>
                   <span>Experimentar con {{ selectedElement.symbol }} en 3D</span>
-                </button>
+                </a>
               </div>
             </div>
 
@@ -223,19 +250,21 @@
                     </defs>
 
                     <!-- Órbitas / Capas concéntricas -->
-                    @for (electrons of selectedElement.shells; track $index) {
+                    @for (electrons of selectedElement.shells; track $index; let shellIdx = $index) {
                       <!-- Anillo orbital -->
                       <circle
                         class="orbit-ring"
+                        [class.highlighted-orbit]="activeShellHighlight === shellIdx"
                         cx="100"
                         cy="100"
-                        [attr.r]="getShellRadius($index, selectedElement.shells.length)"
+                        [attr.r]="getShellRadius(shellIdx, selectedElement.shells.length)"
                       />
 
                       <!-- Electrones distribuidos en la órbita -->
-                      @for (electron of getShellElectrons(electrons, getShellRadius($index, selectedElement.shells.length)); track $index) {
+                      @for (electron of getShellElectrons(electrons, getShellRadius(shellIdx, selectedElement.shells.length)); track $index) {
                         <circle
                           class="bohr-electron"
+                          [class.highlighted-electron]="activeShellHighlight === shellIdx"
                           [attr.cx]="electron.cx"
                           [attr.cy]="electron.cy"
                           r="3.2"
@@ -252,13 +281,25 @@
 
                 <!-- Indicador de distribución de electrones por capa cuántica (K, L, M, N...) -->
                 <div class="shells-distribution">
-                  <span class="shells-label">Distribución de electrones:</span>
+                  <div class="shells-dist-header">
+                    <span class="shells-label">Distribución cuántica:</span>
+                    <span class="valence-meta-pill" title="Electrones en el nivel de energía más externo">
+                      <i class="ph ph-lightning"></i>
+                      <span>Valencia: <strong>{{ valenceElectrons }} e⁻</strong></span>
+                    </span>
+                  </div>
                   <div class="shells-chips">
                     @for (electrons of selectedElement.shells; track $index) {
-                      <span class="shell-pill">
+                      <button
+                        type="button"
+                        class="shell-pill"
+                        [class.active]="activeShellHighlight === $index"
+                        (click)="highlightShell($index)"
+                        title="Clic para resaltar u ocultar capa n={{ $index + 1 }}"
+                      >
                         <small>n={{ $index + 1 }}</small>
                         <strong>{{ electrons }}e⁻</strong>
-                      </span>
+                      </button>
                     }
                   </div>
                 </div>
@@ -278,9 +319,20 @@
                 </div>
                 <div class="config-display-card">
                   <code class="config-formula">{{ selectedElement.electronConfig }}</code>
-                  <span class="config-electrons-total">
-                    Total: <strong>{{ selectedElement.number }} e⁻</strong>
-                  </span>
+                  <div class="config-actions-wrap">
+                    <span class="config-electrons-total">
+                      Total: <strong>{{ selectedElement.number }} e⁻</strong>
+                    </span>
+                    <button
+                      type="button"
+                      class="btn-copy-config"
+                      (click)="copyElectronConfig()"
+                      title="Copiar configuración electrónica"
+                      aria-label="Copiar configuración electrónica"
+                    >
+                      <i class="ph ph-copy"></i>
+                    </button>
+                  </div>
                 </div>
               </section>
 
@@ -366,6 +418,12 @@
               <span class="hud-label"><i class="ph ph-timer"></i> Tiempo</span>
               <strong class="hud-val text-blue">{{ formattedTime }}</strong>
             </div>
+            @if (bestRecord) {
+              <div class="hud-card best-record-card" title="Mejor récord registrado en esta categoría">
+                <span class="hud-label"><i class="ph ph-trophy"></i> Récord</span>
+                <strong class="hud-val text-amber">{{ bestRecord.time }} ({{ bestRecord.moves }}m)</strong>
+              </div>
+            }
           </div>
 
           <div class="hud-actions">
@@ -472,6 +530,21 @@
               </div>
               <h2>¡Reto de Memoria Completado!</h2>
               <p>Has emparejado con éxito los Nombres de los elementos con sus Símbolos y Números Atómicos.</p>
+
+              @if (lastGameReward) {
+                <div class="victory-reward-box">
+                  <div class="reward-xp-pill">
+                    <i class="ph ph-sparkle"></i>
+                    <span>+{{ lastGameReward.xp }} XP Obtenidos</span>
+                  </div>
+                  @if (lastGameReward.bonus) {
+                    <span class="bonus-pill">⚡ ¡Bonificación de velocidad en menos de 60s (+50 XP)!</span>
+                  }
+                  <small class="reward-summary">
+                    Nivel {{ gamification.level }}: {{ gamification.levelTitle }} · <strong>{{ gamification.xp }} XP</strong> totales
+                  </small>
+                </div>
+              }
 
               <div class="victory-stats-grid">
                 <div class="v-stat">

@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { StudentProgressService, StudentProfile, GamificationState } from '../dashboard/student-progress.service';
 
 /**
  * Estructura de datos completa para un elemento químico
@@ -46,12 +48,46 @@ export interface ChemicalElement {
 @Component({
   selector: 'app-periodic-table',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DecimalPipe],
+  imports: [CommonModule, ReactiveFormsModule, DecimalPipe, RouterLink],
   templateUrl: './periodic-table.html',
   styleUrl: './periodic-table.scss'
 })
 export class PeriodicTableComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
+  private progressService = inject(StudentProgressService);
+
+  // Perfil del estudiante y Gamificación sincronizada
+  studentProfile: StudentProfile = {
+    name: 'Científico',
+    grade: '10th Grade',
+    email: 'estudiante@reactiva.edu.co'
+  };
+
+  gamification: GamificationState = {
+    xp: 4850,
+    level: 14,
+    levelTitle: 'Alquimista Experto',
+    streakDays: 5,
+    lastActiveDate: '',
+    nextLevelXp: 5000,
+    levelProgressPercent: 97
+  };
+
+  // Notificaciones flotantes (Toast)
+  toastNotification: { message: string; visible: boolean; type: 'success' | 'info' } = {
+    message: '',
+    visible: false,
+    type: 'success'
+  };
+  private toastTimeout?: ReturnType<typeof setTimeout>;
+
+  // Elementos explorados e interacción orbital del modelo de Bohr
+  inspectedElementsCount: number = 0;
+  activeShellHighlight: number | null = null;
+
+  // Récords y Recompensas del Memory Game
+  bestRecord: { moves: number; time: string; seconds: number } | null = null;
+  lastGameReward: { xp: number; bonus: boolean; leveledUp: boolean } | null = null;
 
   // 1. Buscador reactivo dinámico con FormControl individual
   searchElementControl = new FormControl('');
@@ -1092,14 +1128,19 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    // Inicializar con la lista completa de elementos
+    // 1. Cargar datos de gamificación y perfil escolar
+    this.loadGamificationData();
+    this.loadInspectedElements();
+    this.loadBestRecord();
+
+    // 2. Inicializar con la lista completa de elementos
     this.filteredElements = [...this.elements];
 
-    // Por defecto, preseleccionar Iron (Fe, número 26) para desplegar el panel derecho
+    // 3. Por defecto, preseleccionar Hierro (Fe, número 26) para desplegar el panel de detalle
     const iron = this.elements.find(el => el.number === 26);
     this.selectedElement = iron ?? this.elements[0];
 
-    // Escucha reactiva en tiempo real al FormControl individual (Clase 5a)
+    // 4. Escucha reactiva en tiempo real al FormControl individual (Clase 5a)
     this.searchSubscription = this.searchElementControl.valueChanges.subscribe(() => {
       this.filterElements();
       this.cdr.markForCheck();
@@ -1109,6 +1150,69 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.searchSubscription?.unsubscribe();
     this.stopTimer();
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+  }
+
+  /**
+   * Carga el perfil y gamificación centralizada
+   */
+  loadGamificationData(): void {
+    this.studentProfile = this.progressService.getProfile();
+    this.gamification = this.progressService.getGamificationState();
+  }
+
+  /**
+   * Carga los elementos químicos ya explorados desde localStorage
+   */
+  loadInspectedElements(): void {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
+    try {
+      const stored = localStorage.getItem('reactiva_inspected_elements');
+      if (stored) {
+        const list = JSON.parse(stored) as number[];
+        this.inspectedElementsCount = list.length;
+      }
+    } catch {
+      this.inspectedElementsCount = 0;
+    }
+  }
+
+  /**
+   * Carga el récord personal en el mini-juego de Memory
+   */
+  loadBestRecord(): void {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
+    try {
+      const key = `reactiva_memory_best_${this.selectedGameCategory}`;
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        this.bestRecord = JSON.parse(stored);
+      } else {
+        this.bestRecord = null;
+      }
+    } catch {
+      this.bestRecord = null;
+    }
+  }
+
+  /**
+   * Guarda nuevo récord personal en el Memory
+   */
+  saveBestRecord(moves: number, seconds: number): void {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
+    try {
+      const key = `reactiva_memory_best_${this.selectedGameCategory}`;
+      const isNewBest = !this.bestRecord || moves < this.bestRecord.moves || (moves === this.bestRecord.moves && seconds < this.bestRecord.seconds);
+      if (isNewBest) {
+        const record = { moves, seconds, time: this.formattedTime };
+        localStorage.setItem(key, JSON.stringify(record));
+        this.bestRecord = record;
+      }
+    } catch {
+      // Ignorar error de cuota de almacenamiento
+    }
   }
 
   /**
@@ -1155,11 +1259,80 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Selección de un elemento al hacer clic en su celda del grid
+   * Selección de un elemento al hacer clic en su celda del grid con registro interactivo
    */
   onSelectElement(element: ChemicalElement): void {
     this.selectedElement = element;
+    this.activeShellHighlight = null;
+
+    // Registro de exploración del elemento en localStorage
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('reactiva_inspected_elements');
+        const list: number[] = stored ? JSON.parse(stored) : [];
+        const isNew = !list.includes(element.number);
+
+        if (isNew) {
+          list.push(element.number);
+          localStorage.setItem('reactiva_inspected_elements', JSON.stringify(list));
+          this.inspectedElementsCount = list.length;
+
+          // Sincronizar con Desafío #2 ("Caza en la Tabla Periódica")
+          const challenges = this.progressService.getChallengesState();
+          const challenge2 = challenges.find(c => c.id === 2);
+          if (challenge2 && !challenge2.isClaimed && challenge2.currentProgress < challenge2.totalProgress) {
+            const prog = this.progressService.progressChallenge(2);
+            if (prog.justCompleted) {
+              this.showToast(`🎯 ¡Completaste el objetivo "Caza en la Tabla Periódica" (2/2)! Ve a Desafíos para reclamar +40 XP`, 'success');
+            } else {
+              this.showToast(`Descubriste ${element.name} (${element.symbol}) · Progreso Caza: ${prog.item?.currentProgress}/${prog.item?.totalProgress}`, 'info');
+            }
+          }
+
+          // Desbloquear insignia si exploró 10 o más elementos
+          if (this.inspectedElementsCount >= 10) {
+            this.progressService.unlockBadge('detective-organico');
+          }
+        }
+      } catch {
+        // Fallback seguro
+      }
+    }
+
     this.cdr.markForCheck();
+  }
+
+  /**
+   * Alterna el resaltado de una capa cuántica específica en el modelo de Bohr
+   */
+  highlightShell(index: number): void {
+    this.activeShellHighlight = this.activeShellHighlight === index ? null : index;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Obtiene la cantidad de electrones de valencia (última capa)
+   */
+  get valenceElectrons(): number {
+    if (!this.selectedElement || !this.selectedElement.shells?.length) return 0;
+    return this.selectedElement.shells[this.selectedElement.shells.length - 1];
+  }
+
+  /**
+   * Copia la configuración electrónica al portapapeles
+   */
+  copyElectronConfig(): void {
+    if (!this.selectedElement) return;
+    const formula = this.selectedElement.electronConfig;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(formula).then(() => {
+        this.showToast(`Configuración copiada: ${formula} (${this.selectedElement?.symbol})`, 'success');
+      }).catch(() => {
+        this.showToast(`Configuración: ${formula}`, 'info');
+      });
+    } else {
+      this.showToast(`Configuración: ${formula}`, 'info');
+    }
   }
 
   /**
@@ -1206,11 +1379,13 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
     if (tab === 'memory' && this.memoryCards.length === 0) {
       this.initMemoryGame();
     }
+    this.loadGamificationData();
     this.cdr.markForCheck();
   }
 
   setGameCategory(cat: string): void {
     this.selectedGameCategory = cat as any;
+    this.loadBestRecord();
     this.initMemoryGame();
   }
 
@@ -1219,9 +1394,11 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
     this.movesCount = 0;
     this.matchesCount = 0;
     this.gameWon = false;
+    this.lastGameReward = null;
     this.timerSeconds = 0;
     this.flippedCards = [];
     this.isLockBoard = false;
+    this.loadBestRecord();
 
     const pool = this.selectedGameCategory === 'all'
       ? this.memoryElements
@@ -1302,6 +1479,31 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
       if (this.matchesCount === this.totalPairs) {
         this.gameWon = true;
         this.stopTimer();
+
+        // Recompensa funcional de XP e insignias
+        const hasBonus = this.timerSeconds <= 60;
+        const totalXpGained = 100 + (hasBonus ? 50 : 0);
+        const xpResult = this.progressService.addXp(totalXpGained);
+
+        // Desbloquear insignia de cazador de electrones
+        this.progressService.unlockBadge('cazador-electrones');
+
+        // Guardar nuevo récord
+        this.saveBestRecord(this.movesCount, this.timerSeconds);
+
+        this.lastGameReward = {
+          xp: totalXpGained,
+          bonus: hasBonus,
+          leveledUp: xpResult.leveledUp
+        };
+
+        this.gamification = this.progressService.getGamificationState();
+
+        if (xpResult.leveledUp) {
+          this.showToast(`🎉 ¡SUBISTE DE NIVEL! Ahora eres Nivel ${this.gamification.level}: ${this.gamification.levelTitle}`, 'success');
+        } else {
+          this.showToast(`¡Completaste el Reto de Memoria! +${totalXpGained} XP acreditados a tu cuenta 🏆`, 'success');
+        }
       }
       this.cdr.markForCheck();
     } else {
@@ -1335,6 +1537,22 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
     const mins = Math.floor(this.timerSeconds / 60);
     const secs = this.timerSeconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Muestra notificación visual flotante temporal (Toast)
+   */
+  private showToast(message: string, type: 'success' | 'info' = 'success'): void {
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+    this.toastNotification = { message, visible: true, type };
+    this.cdr.markForCheck();
+
+    this.toastTimeout = setTimeout(() => {
+      this.toastNotification.visible = false;
+      this.cdr.markForCheck();
+    }, 4000);
   }
 }
 
