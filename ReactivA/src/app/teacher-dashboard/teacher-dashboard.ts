@@ -3,7 +3,7 @@
 // Arquitectura Standalone Components • Angular 21
 // ============================================================
 
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -33,10 +33,13 @@ export type TeacherSidebarTab =
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.scss'
 })
-export class TeacherDashboardComponent implements OnInit {
+export class TeacherDashboardComponent implements OnInit, OnDestroy {
   private teacherService = inject(TeacherDashboardService);
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
+
+  private liveTimerInterval: ReturnType<typeof setInterval> | null = null;
+  liveElapsedSeconds: number = 35 * 60; // 35m iniciales en segundos
 
   // Tab lateral del docente activo
   activeSidebarTab: TeacherSidebarTab = 'general';
@@ -75,7 +78,8 @@ export class TeacherDashboardComponent implements OnInit {
     description: ['']
   });
 
-  // Estados de Modales
+  // Estados de Modales y Drawer Flotante
+  isStudentDrawerOpen: boolean = false;
   isScreensModalOpen: boolean = false;
   isCreateAssignmentModalOpen: boolean = false;
   isGroupDetailModalOpen: boolean = false;
@@ -91,6 +95,35 @@ export class TeacherDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboardData();
+    this.startLiveSessionTimer();
+  }
+
+  ngOnDestroy(): void {
+    if (this.liveTimerInterval) {
+      clearInterval(this.liveTimerInterval);
+    }
+  }
+
+  /**
+   * Cronómetro en vivo de la sesión de laboratorio (avanza segundo a segundo)
+   */
+  startLiveSessionTimer(): void {
+    if (typeof window === 'undefined') return;
+    this.liveTimerInterval = setInterval(() => {
+      if (this.liveSession && this.liveSession.status === 'EN CURSO') {
+        this.liveElapsedSeconds++;
+        const mins = Math.floor(this.liveElapsedSeconds / 60);
+        this.liveSession.elapsedMinutes = mins;
+        this.liveSession.progressPercent = Math.min(100, Math.round((this.liveElapsedSeconds / (this.liveSession.totalMinutes * 60)) * 100));
+        this.cdr.markForCheck();
+      }
+    }, 1000);
+  }
+
+  get liveFormattedTime(): string {
+    const mins = Math.floor(this.liveElapsedSeconds / 60);
+    const secs = this.liveElapsedSeconds % 60;
+    return `${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
   }
 
   // -------------------------------------------------------------
@@ -196,6 +229,14 @@ export class TeacherDashboardComponent implements OnInit {
   exportGrades(): void {
     this.teacherService.exportGradesCsv();
     this.showToast('Planilla de calificaciones descargada en CSV.', 'success');
+  }
+
+  // -------------------------------------------------------------
+  // Drawer Lateral de Navegación ReactivA
+  // -------------------------------------------------------------
+  toggleStudentDrawer(): void {
+    this.isStudentDrawerOpen = !this.isStudentDrawerOpen;
+    this.cdr.markForCheck();
   }
 
   // -------------------------------------------------------------

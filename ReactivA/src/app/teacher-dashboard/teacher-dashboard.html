@@ -10,6 +10,16 @@
        ============================================================ -->
   <header class="topbar-header">
     <div class="topbar-left">
+      <!-- Botón para alternar/desplegar el Sidebar del Estudiante sin estorbar -->
+      <button 
+        type="button" 
+        class="btn-platform-toggle" 
+        (click)="toggleStudentDrawer()" 
+        [title]="isStudentDrawerOpen ? 'Cerrar navegación ReactivA' : 'Abrir navegación de ReactivA'">
+        <i class="ph" [ngClass]="isStudentDrawerOpen ? 'ph-x' : 'ph-squares-four'"></i>
+        <span>{{ isStudentDrawerOpen ? 'Cerrar Menú' : 'Portal ReactivA' }}</span>
+      </button>
+
       <div class="brand-cluster">
         <div class="brand-flask-icon">
           <i class="ph ph-flask"></i>
@@ -313,8 +323,8 @@
             <div class="session-timing-section">
               <div class="timing-labels-line">
                 <div class="timing-left">
-                  <i class="ph ph-clock"></i>
-                  <span>Tiempo Transcurrido: <strong>{{ liveSession.elapsedMinutes }}m / {{ liveSession.totalMinutes }}m</strong></span>
+                  <i class="ph ph-clock live-clock-spin"></i>
+                  <span>Tiempo Transcurrido: <strong>{{ liveFormattedTime }} / {{ liveSession.totalMinutes }}m</strong></span>
                 </div>
                 <div class="timing-right">
                   <span><strong>{{ liveSession.progressPercent }}%</strong> de la sesión completado</span>
@@ -912,6 +922,91 @@
     <div class="toast-teacher-alert" [ngClass]="'toast-' + toastType" role="status">
       <i class="ph" [ngClass]="toastType === 'success' ? 'ph-check-circle' : (toastType === 'warning' ? 'ph-warning' : 'ph-info')"></i>
       <span>{{ toastMessage }}</span>
+    </div>
+  }
+
+  <!-- DRAWER LATERAL FLOTANTE: Menú de ReactivA Estudiantes (Acceso sin estorbar) -->
+  @if (isStudentDrawerOpen) {
+    <div class="drawer-backdrop" (click)="toggleStudentDrawer()">
+      <aside class="student-navigation-drawer animate-slide-right" (click)="$event.stopPropagation()">
+        <div class="drawer-header">
+          <div class="drawer-brand">
+            <div class="drawer-logo"><i class="ph ph-flask"></i></div>
+            <div>
+              <h3>ReactivA</h3>
+              <span>Navegación de Estudiante</span>
+            </div>
+          </div>
+          <button type="button" class="btn-drawer-close" (click)="toggleStudentDrawer()" aria-label="Cerrar">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <nav class="drawer-nav">
+          <span class="drawer-section-label">MÓDULOS DE ESTUDIANTE</span>
+          <ul class="drawer-links-list">
+            <li>
+              <a routerLink="/dashboard" (click)="toggleStudentDrawer()">
+                <i class="ph ph-squares-four"></i>
+                <span>Dashboard Estudiante</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/tabla-periodica" (click)="toggleStudentDrawer()">
+                <i class="ph ph-table"></i>
+                <span>Tabla Periódica</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/virtual-lab" (click)="toggleStudentDrawer()">
+                <i class="ph ph-test-tube"></i>
+                <span>Virtual Lab (Simulador 3D)</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/mision-organica" (click)="toggleStudentDrawer()">
+                <i class="ph ph-tree-structure"></i>
+                <span>Misión Orgánica</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/challenges" (click)="toggleStudentDrawer()">
+                <i class="ph ph-trophy"></i>
+                <span>Challenges & Arena</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/profile" (click)="toggleStudentDrawer()">
+                <i class="ph ph-user-circle"></i>
+                <span>Perfil del Estudiante</span>
+              </a>
+            </li>
+          </ul>
+
+          <span class="drawer-section-label">PREFERENCIAS</span>
+          <ul class="drawer-links-list">
+            <li>
+              <a routerLink="/settings" (click)="toggleStudentDrawer()">
+                <i class="ph ph-gear"></i>
+                <span>Configuración</span>
+              </a>
+            </li>
+            <li>
+              <a routerLink="/help" (click)="toggleStudentDrawer()">
+                <i class="ph ph-question"></i>
+                <span>Centro de Ayuda</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div class="drawer-footer">
+          <div class="active-profile-card">
+            <span class="prof-tag">Modo Activo</span>
+            <strong>Docente / Supervisor</strong>
+          </div>
+        </div>
+      </aside>
     </div>
   }
 
