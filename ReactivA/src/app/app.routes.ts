@@ -70,6 +70,12 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home').then(m => m.HomeComponent)
   },
 
+  // Ruta del módulo docente Mis Aulas y Grupos
+  {
+    path: 'my-classrooms',
+    loadComponent: () => import('./my-classrooms/my-classrooms').then(m => m.MyClassroomsComponent)
+  },
+
   // Redirección inicial por defecto a la página principal (Home)
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }
