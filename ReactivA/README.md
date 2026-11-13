@@ -12,7 +12,7 @@ El proyecto se desarrolla bajo una arquitectura modular y escalable con **Angula
 
 ```mermaid
 graph TD
-    A[Login & Registro: feature/Valeria] -->|Auth UI & Forms| D[develop / main]
+    A[Login & Registro: feature/Valeria] -->|Auth UI & Forms| D[develop]
     B[Sidebar & App Layout: feature/Vanessa & feature/app-layout] -->|Shell Responsivo| D
     C[Dashboard & Misiones: feature/Andres] -->|Buscador & Rutas| D
     E[Tabla Periódica & Memory: feature/Andres] -->|Matriz 18 Cols + 3D Cards| D
@@ -98,19 +98,11 @@ src/app/
 
 ## 🌿 Flujo de Trabajo y Gestión en Git
 
-Para asegurar la estabilidad del proyecto, el desarrollo se organiza en ramas por feature:
+El flujo oficial utiliza exactamente seis ramas: `main`, `develop`, `feature/Valeria`, `feature/Vanessa`, `feature/Andres` y `feature/app-layout`.
 
-* **`main` / `develop`**: Ramas estables donde se consolidan las versiones aprobadas.
-* **`feature/Andres`**: Módulos interactivos centrales:
-  - Dashboard y lista reactiva de misiones.
-  - Tabla periódica de 18 columnas con detalle inferior (Modelo de Bohr cuántico).
-  - Minijuego de memoria periódica (3D Flip Cards).
-  - Componente de Desafíos y Arena de Logros (`ChallengesComponent`).
-* **`feature/Valeria`**: Módulo de autenticación (`/login`, `/register`) y formularios reactivos.
-* **`feature/Vanessa`**: Componente de navegación lateral (`SidebarComponent`) y experiencia responsive.
-* **`feature/app-layout`**: Shell global de la aplicación, control de rutas (`app.routes.ts`) y contenedor responsivo.
-* **`feature/virtual-lab`**: Módulo de simulación 3D de experimentos moleculares.
-* **`feature/organic-mission`**: Módulo gamificado de química orgánica y nomenclatura IUPAC.
+Cada integrante desarrolla sus componentes en su rama personal. Andrés revisa e integra los Pull Requests hacia `develop`; `main` se reserva para la entrega final autorizada. Las rutas se configuran por turnos en `feature/app-layout`, después de integrar los componentes.
+
+Consulta [responsabilidades, validaciones y flujo de Git Graph](../CONTRIBUTING.md).
 
 ---
 
@@ -123,7 +115,7 @@ Para asegurar la estabilidad del proyecto, el desarrollo se organiza en ramas po
 * **Animaciones 3D:** CSS 3D Transforms (`perspective`, `rotateY(180deg)`, `transform-style: preserve-3d`) para el volteo de cartas.
 * **Estilos:** SCSS modular, BEM, sistema de variables corporativas, gradientes personalizados y maquetación CSS Grid / Flexbox.
 * **Iconografía:** [Phosphor Icons](https://phosphoricons.com/) (`<i class="ph ph-..."></i>`).
-* **Persistencia Local:** `localStorage` para almacenamiento seguro de progreso, vidas, insignias y configuraciones.
+* **Persistencia Local:** `localStorage` para almacenamiento local de progreso, vidas, insignias y configuraciones.
 * **Pruebas:** Vitest (`@angular/build:unit-test`).
 
 ---
@@ -131,7 +123,7 @@ Para asegurar la estabilidad del proyecto, el desarrollo se organiza en ramas po
 ## 🚀 Guía de Inicio Rápido
 
 ### Requisitos Previos
-* [Node.js](https://nodejs.org/) v20 o superior.
+* [Node.js](https://nodejs.org/) v24.16.0 (versión usada en las validaciones y CI).
 * [Angular CLI](https://angular.dev/tools/cli) (`npm install -g @angular/cli`).
 
 ### Pasos de Instalación y Ejecución
@@ -144,7 +136,7 @@ Para asegurar la estabilidad del proyecto, el desarrollo se organiza en ramas po
 
 2. **Instalar dependencias:**
    ```bash
-   npm install
+   npm ci
    ```
 
 3. **Iniciar el servidor local de desarrollo:**
