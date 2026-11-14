@@ -4,12 +4,14 @@
      Exclusivo para Escritorio (Desktop UI/UX)
      ============================================================ -->
 
+<div class="teacher-layout">
+<app-teacher-sidebar></app-teacher-sidebar>
 <div class="teacher-dashboard-page">
 
   <!-- ============================================================
        1. CABECERA INSTITUCIONAL DEL DOCENTE
        ============================================================ -->
-  <header class="dashboard-header">
+  <header class="dashboard-header" id="teacher-overview">
     <div class="header-left">
       <div class="brand-badge">
         <i class="ph ph-chalkboard-teacher"></i>
@@ -115,7 +117,7 @@
   <!-- ============================================================
        3. SUPERVISIÓN DE LAS CUATRO SECCIONES EDUCATIVAS
        ============================================================ -->
-  <section class="sections-supervision-block">
+  <section class="sections-supervision-block" id="teacher-modules">
     <div class="section-title-bar">
       <div>
         <h2>Supervisión de las Cuatro Secciones Educativas</h2>
@@ -170,7 +172,7 @@
   <div class="main-supervision-layout">
 
     <!-- COLUMNA IZQUIERDA: LISTADO DE ESTUDIANTES -->
-    <div class="students-list-panel">
+    <div class="students-list-panel" id="teacher-students">
       <div class="panel-header-line">
         <div>
           <h3>Estudiantes ({{ filteredStudents.length }})</h3>
@@ -668,5 +670,7 @@
       <span>{{ toastMessage }}</span>
     </div>
   }
+
+</div>
 
 </div>
