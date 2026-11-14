@@ -111,7 +111,7 @@ $text-muted:      #8c9ba5;
       li {
         margin-bottom: 0.5rem;
 
-        a {
+        a, .nav-link-btn {
           display: flex;
           align-items: center;
           gap: 0.75rem;
@@ -123,6 +123,12 @@ $text-muted:      #8c9ba5;
           font-size: 0.9rem;
           transition: all 0.2s ease;
           white-space: nowrap;
+          background: transparent;
+          border: none;
+          width: 100%;
+          text-align: left;
+          cursor: pointer;
+          font-family: inherit;
 
           i {
             font-size: 1.2rem;
@@ -155,7 +161,7 @@ $text-muted:      #8c9ba5;
     }
 
     .nav-menu {
-      ul li a {
+      ul li a, ul li .nav-link-btn {
         justify-content: center;
         padding: 0.75rem 0;
         i { font-size: 1.3rem; }
