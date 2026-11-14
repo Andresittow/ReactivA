@@ -35,14 +35,7 @@ $c-border:          #E5ECE8;
   color: $c-text-main;
 }
 
-.teacher-layout {
-  display: flex;
-  align-items: flex-start;
-  min-height: 100vh;
-}
-
 .teacher-dashboard-page {
-  flex: 1;
   min-width: 0;
   overflow-x: auto;
   width: 100%;

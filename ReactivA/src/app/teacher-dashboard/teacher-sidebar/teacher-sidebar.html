@@ -16,13 +16,13 @@
   <nav id="teacher-navigation" class="nav-menu" aria-label="Navegación docente">
     <ul>
       <li>
-        <a href="/teacher-dashboard#teacher-overview" class="active" aria-current="page" title="Vista general" aria-label="Vista general">
+        <a routerLink="/teacher-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page" title="Vista general" aria-label="Vista general">
           <i class="ph ph-squares-four" aria-hidden="true"></i>
           @if (!collapsed()) { <span>Vista general</span> }
         </a>
       </li>
       <li>
-        <a routerLink="/my-classrooms" title="Mis aulas y grupos" aria-label="Mis aulas y grupos">
+        <a routerLink="/my-classrooms" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page" title="Mis aulas y grupos" aria-label="Mis aulas y grupos">
           <i class="ph ph-chalkboard-teacher" aria-hidden="true"></i>
           @if (!collapsed()) { <span>Mis aulas y grupos</span> }
         </a>
