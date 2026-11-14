@@ -1,14 +1,28 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard';
+import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
 
+  afterEach(() => vi.unstubAllGlobals());
+
   beforeEach(async () => {
+    // Aislar la persistencia entre pruebas, también en Node sin Web Storage.
+    const values = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+      clear: () => values.clear(),
+      key: (index: number) => [...values.keys()][index] ?? null,
+      get length() { return values.size; }
+    } satisfies Storage);
     await TestBed.configureTestingModule({
-      imports: [DashboardComponent]
+      imports: [DashboardComponent],
+      providers: [provideRouter([])]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardComponent);

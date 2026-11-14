@@ -5,7 +5,7 @@
      ============================================================ -->
 
 <div class="teacher-layout">
-<app-teacher-sidebar></app-teacher-sidebar>
+<app-teacher-sidebar [currentView]="currentView" (viewChange)="setView($event)"></app-teacher-sidebar>
 <div class="teacher-dashboard-page">
 
   <!-- ============================================================
@@ -18,8 +18,13 @@
         <span>PANEL DEL PROFESOR</span>
       </div>
       <div class="header-titles">
-        <h1>Panel de Supervisión Académica</h1>
-        <p>Seguimiento al aprendizaje, interacción, continuidad y cumplimiento en ReactivA</p>
+        @if (currentView === 'overview') {
+          <h1>Panel de Supervisión Académica</h1>
+          <p>Seguimiento al aprendizaje, interacción, continuidad y cumplimiento en ReactivA</p>
+        } @else {
+          <h1>Mis Aulas y Grupos</h1>
+          <p>Administración académica de grupos, estudiantes y avance curricular de Química</p>
+        }
       </div>
     </div>
 
@@ -49,6 +54,7 @@
     </div>
   </header>
 
+  @if (currentView === "overview") {
   <!-- ============================================================
        2. VISTA GENERAL: INDICADORES CLAVE (KPIS)
        ============================================================ -->
@@ -625,6 +631,298 @@
     </div>
 
   </div>
+
+  }
+
+  <!-- ============================================================
+       VISTA 2: MIS AULAS Y GRUPOS (MY CLASSROOMS & GROUPS)
+       ============================================================ -->
+  @if (currentView === 'classrooms') {
+    <div class="classrooms-management-view">
+
+      <section class="classrooms-header-block">
+        <div class="section-title-row">
+          <div class="section-title-text">
+            <h2>Gestión de Cursos y Grupos</h2>
+            <p>Supervisa tus aulas asignadas, número de alumnos y avance en los simuladores interactivos.</p>
+          </div>
+          <button type="button" class="btn-create-group" (click)="abrirCrearAulaModal()">
+            <i class="ph ph-plus"></i>
+            <span>Crear Nuevo Grupo</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="classroom-search-filter-bar">
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass"></i>
+          <input
+            type="text"
+            [(ngModel)]="classroomSearchQuery"
+            placeholder="Buscar por grupo, materia o aula..."
+            class="search-input"
+            aria-label="Buscar grupo"
+          />
+        </div>
+        <div class="filter-pills">
+          <button type="button" class="pill" [class.active]="classroomActiveFilter === 'all'" (click)="setClassroomFiltro('all')">
+            Todos <span class="pill-count">{{ contarAulasPorFiltro('all') }}</span>
+          </button>
+          <button type="button" class="pill" [class.active]="classroomActiveFilter === '10'" (click)="setClassroomFiltro('10')">
+            10° Grado <span class="pill-count">{{ contarAulasPorFiltro('10') }}</span>
+          </button>
+          <button type="button" class="pill" [class.active]="classroomActiveFilter === '11'" (click)="setClassroomFiltro('11')">
+            11° Grado <span class="pill-count">{{ contarAulasPorFiltro('11') }}</span>
+          </button>
+          <button type="button" class="pill" [class.active]="classroomActiveFilter === 'stem'" (click)="setClassroomFiltro('stem')">
+            Programa STEM <span class="pill-count">{{ contarAulasPorFiltro('stem') }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="aulas-grid">
+        @for (aula of aulasFiltradas; track aula.id) {
+          <article class="aula-card">
+            <div class="card-top">
+              <span class="aula-tag" [ngClass]="aula.tagClass">{{ aula.tag }}</span>
+              <div class="card-meta-row">
+                <span class="meta-item"><i class="ph ph-map-pin"></i> {{ aula.ubicacion }}</span>
+                <span class="meta-item"><i class="ph ph-clock"></i> {{ aula.horario }}</span>
+              </div>
+              <h3 class="aula-nombre">{{ aula.nombre }}</h3>
+            </div>
+
+            <div class="card-kpis">
+              <div class="kpi-cell">
+                <i class="ph ph-users"></i>
+                <div>
+                  <strong>{{ aula.totalEstudiantes }}</strong>
+                  <span>Estudiantes</span>
+                </div>
+              </div>
+              <div class="kpi-cell kpi-green">
+                <i class="ph ph-star"></i>
+                <div>
+                  <strong>{{ aula.promedio > 0 ? aula.promedio.toFixed(1) + ' / 5.0' : 'Pendiente' }}</strong>
+                  <span>Promedio</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-progress-block">
+              <div class="progress-labels">
+                <span class="module-label">
+                  <i class="ph ph-flask"></i>
+                  Módulo: <strong>{{ aula.moduloActivo }}</strong>
+                </span>
+                <span class="week-label">Semana {{ aula.semanaActual }} de {{ aula.semanasTotal }}</span>
+              </div>
+              <div class="progress-rail">
+                <div
+                  class="progress-fill"
+                  [style.width.%]="aula.progreso"
+                  [style.background-color]="progresoColor(aula.progreso)">
+                </div>
+              </div>
+              <span class="progress-pct">{{ aula.progreso }}%</span>
+            </div>
+
+            <div class="card-actions">
+              <button type="button" class="btn-ver" (click)="verEstudiantesAula(aula)">
+                <i class="ph ph-users"></i>
+                <span>Ver Estudiantes</span>
+              </button>
+              <button type="button" class="btn-asignar" (click)="abrirAsignarTaller(aula)">
+                <i class="ph ph-clipboard-text"></i>
+                <span>Asignar Taller</span>
+              </button>
+            </div>
+          </article>
+        }
+
+        @if (aulasFiltradas.length === 0) {
+          <div class="empty-state">
+            <i class="ph ph-magnifying-glass"></i>
+            <p>No se encontraron grupos que coincidan con la búsqueda.</p>
+            <button type="button" class="btn-reset-filters" (click)="setClassroomFiltro('all'); classroomSearchQuery = ''">
+              Ver todos los grupos
+            </button>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- MODAL: CREAR NUEVO GRUPO -->
+  @if (isCrearAulaModalOpen) {
+    <div class="modal-backdrop" (click)="cerrarCrearAulaModal()">
+      <div class="modal-window modal-medium" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="ph ph-plus-circle"></i>
+            <div>
+              <h3>Crear Nuevo Grupo</h3>
+              <p>Período Académico B-2026</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="cerrarCrearAulaModal()"><i class="ph ph-x"></i></button>
+        </div>
+        <form class="modal-form-content" (ngSubmit)="crearNuevoGrupo()">
+          <div class="form-field">
+            <label>Nombre del Grupo *</label>
+            <input type="text" [(ngModel)]="nuevoGrupoForm.nombre" name="nombre"
+              placeholder="Ej. Grado 10° C — Química General" class="modal-input" required />
+          </div>
+          <div class="form-row-grid">
+            <div class="form-field">
+              <label>Ubicación / Salón *</label>
+              <input type="text" [(ngModel)]="nuevoGrupoForm.ubicacion" name="ubicacion"
+                placeholder="Ej. Salón 205" class="modal-input" required />
+            </div>
+            <div class="form-field">
+              <label>Horario</label>
+              <input type="text" [(ngModel)]="nuevoGrupoForm.horario" name="horario"
+                placeholder="Ej. Lun & Mié 07:00 – 08:40" class="modal-input" />
+            </div>
+          </div>
+          <div class="form-row-grid">
+            <div class="form-field">
+              <label>Nivel / Etiqueta</label>
+              <select [(ngModel)]="nuevoGrupoForm.tag" name="tag" class="modal-select">
+                <option>INTERMEDIATE</option>
+                <option>LAB PRACTICE</option>
+                <option>ADVANCED</option>
+                <option>HIGH PERFORMANCE</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Filtro de Grado</label>
+              <select [(ngModel)]="nuevoGrupoForm.filtro" name="filtro" class="modal-select">
+                <option value="all">General</option>
+                <option value="10">10° Grado</option>
+                <option value="11">11° Grado</option>
+                <option value="stem">Programa STEM</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Total de Estudiantes</label>
+            <input type="number" [(ngModel)]="nuevoGrupoForm.totalEstudiantes" name="total"
+              min="1" max="60" class="modal-input" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="cerrarCrearAulaModal()">Cancelar</button>
+            <button type="submit" class="btn-send">
+              <i class="ph ph-plus"></i> Crear Grupo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: VER ESTUDIANTES DEL AULA -->
+  @if (isVerEstudiantesAulaOpen && aulaSeleccionada) {
+    <div class="modal-backdrop" (click)="cerrarEstudiantesAula()">
+      <div class="modal-window modal-large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="ph ph-users"></i>
+            <div>
+              <h3>Listado de Estudiantes</h3>
+              <p>{{ aulaSeleccionada.nombre }}</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="cerrarEstudiantesAula()"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body-table">
+          @if (aulaSeleccionada.estudiantes.length > 0) {
+            <table class="students-roster-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Estudiante</th>
+                  <th>Calificación (1.0 – 5.0)</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (est of aulaSeleccionada.estudiantes; track est.nombre; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td class="name-cell">
+                      <i class="ph ph-user-circle"></i>
+                      <span>{{ est.nombre }}</span>
+                    </td>
+                    <td>
+                      <strong [class.nota-outstanding]="est.nota >= 4.5" [class.nota-risk]="est.nota < 3.0">
+                        {{ est.nota.toFixed(1) }}
+                      </strong>
+                    </td>
+                    <td>
+                      <span class="status-pill-badge"
+                        [class.status-green]="est.estado === 'Outstanding'"
+                        [class.status-blue]="est.estado === 'Passing'"
+                        [class.status-red]="est.estado === 'At risk'">
+                        {{ est.estado }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="empty-roster-state">
+              <p>Este grupo aún no tiene estudiantes registrados en la nómina.</p>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-send" (click)="cerrarEstudiantesAula()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: ASIGNAR TALLER AL AULA -->
+  @if (isAsignarTallerModalOpen && aulaSeleccionada) {
+    <div class="modal-backdrop" (click)="cerrarAsignarTaller()">
+      <div class="modal-window modal-medium" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <i class="ph ph-clipboard-text"></i>
+            <div>
+              <h3>Asignar Taller de Práctica</h3>
+              <p>{{ aulaSeleccionada.nombre }}</p>
+            </div>
+          </div>
+          <button type="button" class="btn-close-modal" (click)="cerrarAsignarTaller()"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <label>Selecciona la práctica a asignar:</label>
+          <select [(ngModel)]="tallerSeleccionado" name="taller" class="modal-select">
+            @for (t of talleresDisponibles; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+          <div class="workshop-preview-chip">
+            <i class="ph ph-flask"></i>
+            <div>
+              <strong>{{ tallerSeleccionado }}</strong>
+              <span>ReactivA &bull; Módulo Curricular 2026</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="cerrarAsignarTaller()">Cancelar</button>
+          <button type="button" class="btn-send" (click)="confirmarAsignacionTaller()">
+            <i class="ph ph-check"></i> Asignar a la Clase
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- MODAL: ENVIAR ORIENTACIÓN PEDAGÓGICA AL ESTUDIANTE -->
   @if (isGuidanceModalOpen && selectedStudent) {
