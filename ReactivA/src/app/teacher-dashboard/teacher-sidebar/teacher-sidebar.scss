@@ -1,0 +1,189 @@
+// La tipografía se define aquí porque el panel docente usa otra fuente.
+:host {
+  display: block;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+$primary-blue:    #00a2ed;
+$primary-dark:    #1d4ed8;
+$secondary-purple:#635bfc;
+$bg-sidebar:      #f8f9fa;
+$text-dark:       #2c3e50;
+$text-muted:      #8c9ba5;
+
+.teacher-sidebar {
+  width: 240px;
+  height: 100vh;
+  background-color: $bg-sidebar;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
+  box-sizing: border-box;
+  border-right: 1px solid #e2e8f0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // ── MARCA ────────────────────────────────────────────────
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+
+    .brand-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, $primary-blue 0%, $primary-dark 100%);
+      color: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0, 162, 237, 0.3);
+    }
+
+    .brand-text {
+      white-space: nowrap;
+      overflow: hidden;
+
+      h2 {
+        font-size: 1.1rem;
+        font-weight: 800;
+        margin: 0;
+        color: $text-dark;
+        letter-spacing: -0.02em;
+      }
+
+      span {
+        font-size: 0.72rem;
+        color: $text-muted;
+        font-weight: 500;
+      }
+    }
+
+    .btn-toggle {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $text-muted;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: $primary-blue;
+        color: #ffffff;
+        border-color: $primary-blue;
+      }
+
+      i { font-size: 0.95rem; }
+    }
+  }
+
+  // ── NAV PRINCIPAL & FOOTER ────────────────────────────────
+  .nav-menu {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: 0.5rem;
+
+        a {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem 1rem;
+          color: $text-muted;
+          text-decoration: none;
+          border-radius: 12px;
+          font-weight: 500;
+          font-size: 0.9rem;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+
+          i {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+          }
+
+          &.active, &:hover {
+            background-color: $primary-blue;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 162, 237, 0.3);
+          }
+        }
+      }
+    }
+  }
+
+
+  // ── ESTADO COLAPSADO ─────────────────────────────────────
+  &.collapsed {
+    width: 80px;
+    padding: 1.5rem 0.65rem;
+
+    .brand {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+
+      .brand-info { justify-content: center; }
+      .btn-toggle { margin: 0; }
+    }
+
+    .nav-menu {
+      ul li a {
+        justify-content: center;
+        padding: 0.75rem 0;
+        i { font-size: 1.3rem; }
+      }
+    }
+  }
+}
+
+.teacher-sidebar {
+  height: 100dvh;
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 3px;
+  }
+}
+
+@media (max-width: 900px) {
+  .teacher-sidebar {
+    width: 80px;
+    padding: 1.5rem 0.65rem;
+
+    .brand { justify-content: center; }
+    .brand-text, .btn-toggle, .nav-menu a span { display: none; }
+    .nav-menu ul li a {
+      justify-content: center;
+      padding: 0.75rem 0;
+      i { font-size: 1.3rem; }
+    }
+  }
+}
