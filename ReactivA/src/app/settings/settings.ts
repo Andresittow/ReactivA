@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 export type SettingsTab = 
@@ -101,6 +101,7 @@ const DEFAULT_ACCOUNT: UserAccountData = {
 })
 export class SettingsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private readonly platformId = inject(PLATFORM_ID);
   private fb = inject(FormBuilder);
 
   // Tab activo
@@ -162,6 +163,7 @@ export class SettingsComponent implements OnInit {
   // Persistencia Local (LocalStorage)
   // -------------------------------------------------------------
   private loadFromStorage(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     try {
       const savedPrefs = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (savedPrefs) {

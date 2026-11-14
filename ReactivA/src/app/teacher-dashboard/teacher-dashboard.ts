@@ -6,7 +6,8 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+
+import { TeacherSidebarComponent } from './teacher-sidebar/teacher-sidebar';
 
 import { TeacherDashboardService } from './services/teacher-dashboard.service';
 import {
@@ -22,7 +23,7 @@ export type SupervisionViewFilter = 'all' | 'periodic-table' | 'virtual-lab' | '
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TeacherSidebarComponent],
   templateUrl: './teacher-dashboard.html',
   styleUrl: './teacher-dashboard.scss'
 })
