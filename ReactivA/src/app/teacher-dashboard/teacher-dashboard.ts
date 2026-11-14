@@ -20,6 +20,40 @@ import {
 
 export type SupervisionViewFilter = 'all' | 'periodic-table' | 'virtual-lab' | 'organic-mission' | 'challenges';
 
+export type TeacherDashboardView = 'overview' | 'classrooms';
+
+export interface DashboardClassroomStudent {
+  nombre: string;
+  nota: number;
+  estado: 'Passing' | 'At risk' | 'Outstanding';
+}
+
+export interface DashboardClassroomGroup {
+  id: string;
+  nombre: string;
+  tag: string;
+  tagClass: string;
+  ubicacion: string;
+  horario: string;
+  totalEstudiantes: number;
+  promedio: number;
+  semanaActual: number;
+  semanasTotal: number;
+  moduloActivo: string;
+  progreso: number;
+  filtro: string; // 'all' | '10' | '11' | 'stem'
+  estudiantes: DashboardClassroomStudent[];
+}
+
+export interface DashboardNewGroupForm {
+  nombre: string;
+  tag: string;
+  ubicacion: string;
+  horario: string;
+  totalEstudiantes: number;
+  filtro: string;
+}
+
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
@@ -30,6 +64,9 @@ export type SupervisionViewFilter = 'all' | 'periodic-table' | 'virtual-lab' | '
 export class TeacherDashboardComponent implements OnInit {
   private teacherService = inject(TeacherDashboardService);
   private cdr = inject(ChangeDetectorRef);
+
+  // Vista activa del panel ('overview' para supervisión o 'classrooms' para mis aulas y grupos)
+  currentView: TeacherDashboardView = 'overview';
 
   // Perfil del Docente
   teacherProfile!: TeacherProfile;
@@ -59,6 +96,127 @@ export class TeacherDashboardComponent implements OnInit {
   // Modal para Enviar Orientación Pedagógica
   isGuidanceModalOpen: boolean = false;
   guidanceMessageText: string = '';
+
+  // -------------------------------------------------------------
+  // ESTADO Y GESTIÓN DE MIS AULAS Y GRUPOS (My Classrooms & Groups)
+  // -------------------------------------------------------------
+  classroomSearchQuery = '';
+  classroomActiveFilter = 'all';
+  isCrearAulaModalOpen = false;
+  isVerEstudiantesAulaOpen = false;
+  isAsignarTallerModalOpen = false;
+  aulaSeleccionada: DashboardClassroomGroup | null = null;
+
+  nuevoGrupoForm: DashboardNewGroupForm = {
+    nombre: '',
+    tag: 'INTERMEDIATE',
+    ubicacion: '',
+    horario: '',
+    totalEstudiantes: 25,
+    filtro: 'all'
+  };
+
+  tallerSeleccionado = 'Acid-Base Titration';
+
+  readonly talleresDisponibles = [
+    'Acid-Base Titration',
+    'Redox Balancing & Stoichiometry',
+    'Atomic Models & Periodic Table',
+    'Organic Nomenclature IUPAC',
+    'Thermochemistry & Enthalpy',
+    '3D Molecular Bond Simulation'
+  ];
+
+  aulas: DashboardClassroomGroup[] = [
+    {
+      id: 'aula-10a',
+      nombre: 'Grade 10° A — General Chemistry',
+      tag: 'INTERMEDIATE',
+      tagClass: 'tag-blue',
+      ubicacion: 'Room 204',
+      horario: 'Mon & Wed  08:00 – 09:40',
+      totalEstudiantes: 34,
+      promedio: 4.5,
+      semanaActual: 8,
+      semanasTotal: 10,
+      moduloActivo: 'Acid-Base Titration',
+      progreso: 82,
+      filtro: '10',
+      estudiantes: [
+        { nombre: 'Valeria Góngora', nota: 4.9, estado: 'Outstanding' },
+        { nombre: 'Mateo Rincón', nota: 4.3, estado: 'Passing' },
+        { nombre: 'Sara Pulido', nota: 3.8, estado: 'Passing' },
+        { nombre: 'Daniel Ospina', nota: 2.8, estado: 'At risk' },
+        { nombre: 'Lucía Mendoza', nota: 4.7, estado: 'Outstanding' },
+        { nombre: 'Tomás Herrera', nota: 3.5, estado: 'Passing' }
+      ]
+    },
+    {
+      id: 'aula-10b',
+      nombre: 'Grade 10° B — Stoichiometry',
+      tag: 'LAB PRACTICE',
+      tagClass: 'tag-purple',
+      ubicacion: 'Lab 2',
+      horario: 'Tue & Thu  10:15 – 11:55',
+      totalEstudiantes: 30,
+      promedio: 4.2,
+      semanaActual: 6,
+      semanasTotal: 10,
+      moduloActivo: 'Redox Balancing',
+      progreso: 65,
+      filtro: '10',
+      estudiantes: [
+        { nombre: 'Andrés Castro', nota: 4.5, estado: 'Outstanding' },
+        { nombre: 'Isabela Torres', nota: 4.0, estado: 'Passing' },
+        { nombre: 'Felipe Suárez', nota: 2.6, estado: 'At risk' },
+        { nombre: 'Mariana Lozano', nota: 3.9, estado: 'Passing' },
+        { nombre: 'Sebastián Ruiz', nota: 4.8, estado: 'Outstanding' }
+      ]
+    },
+    {
+      id: 'aula-11a',
+      nombre: 'Grade 11° A — Organic Chemistry',
+      tag: 'ADVANCED',
+      tagClass: 'tag-green',
+      ubicacion: 'Room 301',
+      horario: 'Mon & Wed  10:30 – 12:10',
+      totalEstudiantes: 28,
+      promedio: 4.7,
+      semanaActual: 9,
+      semanasTotal: 10,
+      moduloActivo: 'Organic Mission & IUPAC',
+      progreso: 90,
+      filtro: '11',
+      estudiantes: [
+        { nombre: 'Camila Reyes', nota: 4.9, estado: 'Outstanding' },
+        { nombre: 'Nicolás Vargas', nota: 4.6, estado: 'Outstanding' },
+        { nombre: 'Alejandra Mora', nota: 4.3, estado: 'Passing' },
+        { nombre: 'Samuel Pinto', nota: 3.7, estado: 'Passing' },
+        { nombre: 'Gabriela Ríos', nota: 2.9, estado: 'At risk' }
+      ]
+    },
+    {
+      id: 'aula-stem',
+      nombre: 'STEM Program — Chemistry Olympiad',
+      tag: 'HIGH PERFORMANCE',
+      tagClass: 'tag-amber',
+      ubicacion: 'Advanced Lab',
+      horario: 'Fri  15:00 – 17:30',
+      totalEstudiantes: 18,
+      promedio: 4.9,
+      semanaActual: 12,
+      semanasTotal: 12,
+      moduloActivo: 'Thermochemistry',
+      progreso: 94,
+      filtro: 'stem',
+      estudiantes: [
+        { nombre: 'Elena Sandoval', nota: 5.0, estado: 'Outstanding' },
+        { nombre: 'Martín Correa', nota: 4.9, estado: 'Outstanding' },
+        { nombre: 'Paula Jiménez', nota: 4.8, estado: 'Outstanding' },
+        { nombre: 'Rodrigo Nieto', nota: 4.7, estado: 'Outstanding' }
+      ]
+    }
+  ];
 
   // Toast Feedback
   toastMessage: string | null = null;
@@ -188,6 +346,128 @@ export class TeacherDashboardComponent implements OnInit {
 
     this.showToast(`Pauta pedagógica enviada a ${this.selectedStudent.name}.`, 'success');
     this.closeGuidanceModal();
+  }
+
+  // -------------------------------------------------------------
+  // Cambio de Vista Principal (Sidebar Docente)
+  // -------------------------------------------------------------
+  setView(view: TeacherDashboardView): void {
+    this.currentView = view;
+    this.cdr.markForCheck();
+  }
+
+  // -------------------------------------------------------------
+  // LÓGICA DE MIS AULAS Y GRUPOS (My Classrooms & Groups)
+  // -------------------------------------------------------------
+  get aulasFiltradas(): DashboardClassroomGroup[] {
+    const q = this.classroomSearchQuery.trim().toLowerCase();
+    return this.aulas.filter(a => {
+      const matchFiltro = this.classroomActiveFilter === 'all' || a.filtro === this.classroomActiveFilter;
+      if (!matchFiltro) return false;
+      if (!q) return true;
+      return (
+        a.nombre.toLowerCase().includes(q) ||
+        a.ubicacion.toLowerCase().includes(q) ||
+        a.moduloActivo.toLowerCase().includes(q)
+      );
+    });
+  }
+
+  contarAulasPorFiltro(f: string): number {
+    return f === 'all'
+      ? this.aulas.length
+      : this.aulas.filter(a => a.filtro === f).length;
+  }
+
+  setClassroomFiltro(f: string): void {
+    this.classroomActiveFilter = f;
+    this.cdr.markForCheck();
+  }
+
+  verEstudiantesAula(aula: DashboardClassroomGroup): void {
+    this.aulaSeleccionada = aula;
+    this.isVerEstudiantesAulaOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  cerrarEstudiantesAula(): void {
+    this.isVerEstudiantesAulaOpen = false;
+    this.aulaSeleccionada = null;
+    this.cdr.markForCheck();
+  }
+
+  abrirAsignarTaller(aula: DashboardClassroomGroup): void {
+    this.aulaSeleccionada = aula;
+    this.isAsignarTallerModalOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  cerrarAsignarTaller(): void {
+    this.isAsignarTallerModalOpen = false;
+    this.aulaSeleccionada = null;
+    this.cdr.markForCheck();
+  }
+
+  confirmarAsignacionTaller(): void {
+    const nombre = this.aulaSeleccionada?.nombre ?? '';
+    this.cerrarAsignarTaller();
+    this.showToast(`Taller "${this.tallerSeleccionado}" asignado a ${nombre}`, 'success');
+  }
+
+  abrirCrearAulaModal(): void {
+    this.nuevoGrupoForm = {
+      nombre: '',
+      tag: 'INTERMEDIATE',
+      ubicacion: '',
+      horario: '',
+      totalEstudiantes: 25,
+      filtro: 'all'
+    };
+    this.isCrearAulaModalOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  cerrarCrearAulaModal(): void {
+    this.isCrearAulaModalOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  crearNuevoGrupo(): void {
+    if (!this.nuevoGrupoForm.nombre.trim() || !this.nuevoGrupoForm.ubicacion.trim()) {
+      this.showToast('Por favor ingresa el nombre del grupo y la ubicación del aula.', 'warning');
+      return;
+    }
+    const tagMap: Record<string, string> = {
+      'INTERMEDIATE': 'tag-blue',
+      'LAB PRACTICE': 'tag-purple',
+      'ADVANCED': 'tag-green',
+      'HIGH PERFORMANCE': 'tag-amber'
+    };
+    const nuevo: DashboardClassroomGroup = {
+      id: 'aula-' + Date.now(),
+      nombre: this.nuevoGrupoForm.nombre,
+      tag: this.nuevoGrupoForm.tag,
+      tagClass: tagMap[this.nuevoGrupoForm.tag] ?? 'tag-blue',
+      ubicacion: this.nuevoGrupoForm.ubicacion,
+      horario: this.nuevoGrupoForm.horario || 'Por definir',
+      totalEstudiantes: this.nuevoGrupoForm.totalEstudiantes,
+      promedio: 0,
+      semanaActual: 1,
+      semanasTotal: 10,
+      moduloActivo: 'Por asignar',
+      progreso: 0,
+      filtro: this.nuevoGrupoForm.filtro,
+      estudiantes: []
+    };
+    this.aulas = [...this.aulas, nuevo];
+    this.cerrarCrearAulaModal();
+    this.showToast(`Grupo "${nuevo.nombre}" creado exitosamente.`, 'success');
+  }
+
+  progresoColor(p: number): string {
+    if (p >= 85) return '#10b981';
+    if (p >= 60) return '#00a2ed';
+    return '#f59e0b';
   }
 
   // -------------------------------------------------------------

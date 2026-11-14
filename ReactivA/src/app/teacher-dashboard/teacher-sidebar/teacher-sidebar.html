@@ -16,15 +16,15 @@
   <nav id="teacher-navigation" class="nav-menu" aria-label="Navegación docente">
     <ul>
       <li>
-        <button type="button" class="nav-link-btn" [class.active]="activeSection() === 'overview'"
-          (click)="scrollToSection('overview')" title="Vista general" aria-label="Vista general">
+        <button type="button" class="nav-link-btn" [class.active]="currentView() === 'overview'"
+          (click)="selectView('overview')" title="Vista general" aria-label="Vista general">
           <i class="ph ph-squares-four" aria-hidden="true"></i>
           @if (!collapsed()) { <span>Vista general</span> }
         </button>
       </li>
       <li>
-        <button type="button" class="nav-link-btn" [class.active]="activeSection() === 'classrooms'"
-          (click)="scrollToSection('classrooms')" title="Mis aulas y grupos" aria-label="Mis aulas y grupos">
+        <button type="button" class="nav-link-btn" [class.active]="currentView() === 'classrooms'"
+          (click)="selectView('classrooms')" title="Mis aulas y grupos" aria-label="Mis aulas y grupos">
           <i class="ph ph-chalkboard-teacher" aria-hidden="true"></i>
           @if (!collapsed()) { <span>Mis aulas y grupos</span> }
         </button>

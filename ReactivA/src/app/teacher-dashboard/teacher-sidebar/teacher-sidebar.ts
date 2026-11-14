@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 
 @Component({
   selector: 'app-teacher-sidebar',
@@ -9,22 +9,13 @@ import { Component, signal } from '@angular/core';
 })
 export class TeacherSidebarComponent {
   readonly collapsed = signal(false);
-  readonly activeSection = signal<'overview' | 'classrooms'>('overview');
+  readonly currentView = input<'overview' | 'classrooms'>('overview');
+  readonly viewChange = output<'overview' | 'classrooms'>();
 
-  scrollToSection(sectionId: 'overview' | 'classrooms'): void {
-    this.activeSection.set(sectionId);
-    if (sectionId === 'overview') {
-      const el = document.getElementById('teacher-overview');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } else if (sectionId === 'classrooms') {
-      const el = document.getElementById('teacher-students');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+  selectView(view: 'overview' | 'classrooms'): void {
+    this.viewChange.emit(view);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 }
