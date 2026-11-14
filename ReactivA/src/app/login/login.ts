@@ -57,10 +57,9 @@ export class LoginComponent {
   // Manejo del envío del formulario
   onSubmit(): void {
     if (this.loginForm.valid) {
-      console.log('Formulario válido. Datos de autenticación (ReactivA):', this.loginForm.value);
 
       // Redirección al Dashboard
-      this.router.navigate(['/dashboard']);
+      this.router.navigate([this.selectedRole === 'docente' ? '/teacher-dashboard' : '/dashboard']);
     } else {
       // Dispara la activación visual de todos los errores marcando los campos como tocados
       this.loginForm.markAllAsTouched();

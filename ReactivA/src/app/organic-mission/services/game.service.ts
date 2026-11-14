@@ -3,7 +3,8 @@
 // Gestiona puntaje, vidas, progreso y persistencia localStorage
 // ============================================================
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Badge, GameProgress, LevelProgress } from '../models/game.models';
 import { LEVELS, POINTS_BY_DIFFICULTY } from '../data/questions.data';
 import { StudentProgressService } from '../../dashboard/student-progress.service';
@@ -59,6 +60,8 @@ export class GameService {
   private studentProgressService = inject(StudentProgressService);
   private teacherDashboardService = inject(TeacherDashboardService);
 
+  private readonly platformId = inject(PLATFORM_ID);
+
   // ── Estado en memoria ──────────────────────────────────
   private progress!: GameProgress;
 
@@ -68,19 +71,29 @@ export class GameService {
 
   // ── Persistencia ───────────────────────────────────────
   private loadProgress(): void {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    if (isPlatformBrowser(this.platformId)) {
       try {
-        this.progress = JSON.parse(saved);
-        return;
-      } catch { /* fall through to reset */ }
+        const saved = window.localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          this.progress = JSON.parse(saved);
+          return;
+        }
+      } catch {
+        // El almacenamiento puede estar bloqueado o contener JSON inválido.
+      }
     }
     this.resetProgress();
   }
 
   saveProgress(): void {
     this.progress.lastPlayedAt = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.progress));
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.progress));
+      } catch {
+        // Mantener el juego en memoria si el navegador no permite persistir.
+      }
+    }
   }
 
   resetProgress(): void {
