@@ -1174,3 +1174,6 @@ $border-color: #e2e8f0;
   .simulation-workspace { height: auto; overflow: visible; }
   .equipment-panel { width: 100%; height: auto; border-left: none; border-top: 1px solid $border-color; }
 }
+.lab-progress-status { grid-column: 1 / -1; }
+.lab-progress-status:empty { display: none; }
+button:disabled { opacity: .55; }

@@ -596,3 +596,12 @@ $shadow-hover: 0 10px 25px rgba(16,185,129,.1);
   text-align: center; color: $c-text-muted; padding: 1.5rem 0; font-size: .9rem;
 }
 
+.embedded { padding: 0; background: transparent; min-height: 0; }
+.modal-box { max-height: 90vh; overflow-y: auto; }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 1rem; }
+.student-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .75rem; padding: 1rem 1.6rem; border-bottom: 1px solid #e2e8f0; }
+button:disabled { opacity: .55; cursor: wait; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+@media (max-width: 480px) { .form-row-2 { grid-template-columns: 1fr; } }
+:host.embedded { min-height: 0; background: transparent; }
+.embedded .search-filter-bar, .embedded .aulas-grid { margin-left: 0; margin-right: 0; }

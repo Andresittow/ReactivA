@@ -1,349 +1,82 @@
 <div class="profile-page">
-    <!-- Toast Informativo -->
-    @if (toastMessage) {
-    <div class="toast-banner" role="status">
-        <i class="ph ph-check-circle"></i>
-        <span>{{ toastMessage }}</span>
+  @if (toastMessage) { <div class="toast-banner" role="status">{{ toastMessage }}</div> }
+  <header class="profile-banner-card">
+    <div class="student-profile-lead">
+      <div class="avatar-pill-container initials-avatar" [attr.aria-label]="'Iniciales de ' + auth.user()?.fullName">{{ initials }}</div>
+      <div class="student-headings"><div class="rank-tagline"><span class="rank-name">{{ state.levelTitle }}</span></div>
+        <h1 class="student-title">{{ auth.user()?.fullName }}</h1>
+        <p>{{ auth.user()?.email }}</p><p>{{ auth.user()?.school || 'Colegio sin registrar' }} · {{ auth.user()?.grade || 'Grado sin registrar' }}</p>
+      </div>
     </div>
-    }
-
-    <!-- Input Oculto para Selección Dinámica de Foto de Perfil -->
-    <input
-        #fileInput
-        type="file"
-        accept="image/*"
-        class="file-input-hidden"
-        (change)="onFileSelected($event)"
-        style="display: none;"
-    />
-
-    <!-- 1. Banner Superior de Perfil y Acciones -->
-    <header class="profile-banner-card">
-        <div class="student-profile-lead">
-            <div class="avatar-pill-container" (click)="fileInput.click()" title="Haz clic para cambiar tu foto de perfil">
-                <img [src]="student.avatarUrl" [alt]="student.name" class="avatar-photo"
-                    (error)="onAvatarError($event)" />
-                <span class="active-dot" title="Estudiante Activa"></span>
-                <div class="avatar-hover-overlay">
-                    <i class="ph ph-camera"></i>
-                    <span>Cambiar</span>
-                </div>
-            </div>
-
-            <div class="student-headings">
-                <div class="rank-tagline">
-                    <span class="rank-symbol">✦</span>
-                    <span class="rank-name">{{ student.rank }}</span>
-                </div>
-                <h1 class="student-title">{{ student.name }}</h1>
-            </div>
-        </div>
-
-        <div class="banner-controls">
-            <button type="button" class="pill-btn btn-secondary-pill" (click)="openEditProfileModal()"
-                aria-label="Editar Perfil / Avatar">
-                <i class="ph ph-pencil-simple"></i>
-                <span>Editar Perfil / Avatar</span>
-            </button>
-
-            <button type="button" class="pill-btn btn-primary-pill" (click)="downloadReportPdf()"
-                [disabled]="isDownloadingPdf" aria-label="Descargar Ficha en formato PDF">
-                <i class="ph ph-download-simple"></i>
-                <span>{{ isDownloadingPdf ? 'Generando...' : 'Descargar Ficha (PDF)' }}</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- 2. Tarjetas de Métricas Principales (Grid de 4 KPIs - Escala 1.0 a 5.0) -->
-    <section class="kpi-row" aria-label="Tarjetas de Métricas Principales">
-        @for (kpi of metrics; track kpi.id) {
-        <div class="kpi-box" [ngClass]="'theme-' + kpi.colorTheme">
-            <div class="kpi-icon-cell">
-                <i [class]="kpi.icon"></i>
-            </div>
-            <div class="kpi-content-cell">
-                <span class="kpi-header-label">{{ kpi.label }}</span>
-                <div class="kpi-stat-line">
-                    <span class="kpi-stat-number">{{ kpi.value }}</span>
-                    @if (kpi.suffix) {
-                    <span class="kpi-stat-suffix">{{ kpi.suffix }}</span>
-                    }
-                </div>
-            </div>
-        </div>
-        }
+    <div class="banner-controls">
+      <button class="pill-btn btn-secondary-pill" type="button" (click)="openEditProfileModal()">Editar perfil</button>
+      <button class="pill-btn btn-primary-pill" type="button" (click)="downloadReportPdf()" [disabled]="loading || historyLoading">Descargar ficha (PDF)</button>
+    </div>
+  </header>
+  @if (loading) { <p role="status">Cargando progreso…</p> }
+  @if (progressError) { <p role="alert">{{ progressError }} <button type="button" (click)="load()">Reintentar</button></p> }
+  <section class="kpi-row" aria-label="Progreso real">
+    <div class="kpi-box theme-blue"><div class="kpi-content-cell"><span class="kpi-header-label">Experiencia</span><strong class="kpi-stat-number">{{ state.xp }} XP</strong></div></div>
+    <div class="kpi-box theme-purple"><div class="kpi-content-cell"><span class="kpi-header-label">Nivel</span><strong class="kpi-stat-number">{{ state.level }}</strong></div></div>
+    <div class="kpi-box theme-amber"><div class="kpi-content-cell"><span class="kpi-header-label">Racha</span><strong class="kpi-stat-number">{{ state.streakDays }} días</strong></div></div>
+    <div class="kpi-box theme-green"><div class="kpi-content-cell"><span class="kpi-header-label">Insignias</span><strong class="kpi-stat-number">{{ badges.length }}</strong></div></div>
+  </section>
+  <div class="mid-split-grid">
+    <section class="branches-panel"><div class="panel-top-bar"><div class="title-cluster"><h2 class="panel-heading">Mi aula</h2></div></div>
+      @if (classroomLoading) { <p role="status">Consultando aula…</p> }
+      @else if (classroomError) { <p role="alert">{{ classroomError }}</p><button type="button" class="pill-btn btn-secondary-pill" (click)="loadClassroom()">Reintentar</button> }
+      @else if (classroom) {
+        <h3>{{ classroom.name }}</h3><p>Docente: {{ teacherName || 'Nombre no disponible' }}</p>
+        <p>{{ classroom.location || 'Sin ubicación' }} · {{ classroom.schedule || 'Sin horario' }}</p>
+        @if (confirmLeave) {
+          <p>¿Quieres salir del aula? Perderás acceso a sus talleres.</p>
+          <button type="button" class="pill-btn btn-secondary-pill" (click)="confirmLeave = false" [disabled]="leaving">Cancelar</button>
+          <button type="button" class="pill-btn btn-primary-pill" (click)="leave()" [disabled]="leaving">{{ leaving ? 'Saliendo…' : 'Confirmar salida' }}</button>
+        } @else { <button type="button" class="pill-btn btn-secondary-pill" (click)="confirmLeave = true">Salir del aula</button> }
+      } @else {
+        <p>Aún no perteneces a un aula.</p>
+        <form (ngSubmit)="join()"><label for="profile-pin">PIN de clase</label>
+          <input id="profile-pin" class="text-input" name="pin" [(ngModel)]="pin" maxlength="9" required placeholder="CHEM-1234" [disabled]="joining" />
+          <button type="submit" class="pill-btn btn-primary-pill" [disabled]="joining || !pin.trim()">{{ joining ? 'Uniéndote…' : 'Unirme' }}</button>
+        </form>
+      }
+      @if (actionError && !isEditModalOpen) { <p role="alert">{{ actionError }}</p> }
     </section>
-
-    <!-- 3. Sección Central: Dominio por Ramas & Horas de Investigación -->
-    <div class="mid-split-grid">
-        <!-- Tarjeta Principal: Dominio por Ramas de la Química (Módulos Reales de ReactivA) -->
-        <section class="branches-panel">
-            <div class="panel-top-bar">
-                <div class="title-cluster">
-                    <h2 class="panel-heading">Dominio por Ramas de la Química</h2>
-                    <p class="panel-subheading">
-                        Rendimiento evaluado según normativas curriculares y prácticas de simulación
-                    </p>
-                </div>
-                <div class="academic-cycle-chip" title="Período académico activo">
-                    <span class="cycle-title">Año Lectivo</span>
-                    <strong class="cycle-year">{{ student.academicYear }}</strong>
-                </div>
-            </div>
-
-            <div class="branches-stack">
-                @for (branch of branches; track branch.id) {
-                <div class="branch-row">
-                    <div class="branch-labels">
-                        <div class="branch-name-wrap">
-                            <span class="dot-indicator" [style.background-color]="branch.bulletColor"></span>
-                            <span class="branch-title-text">{{ branch.name }}</span>
-                        </div>
-                        <div class="branch-stats-wrap">
-                            <span class="level-badge" [ngClass]="branch.tagClass">{{ branch.level }}</span>
-                            <span class="percentage-digits">{{ branch.percentage }}%</span>
-                        </div>
-                    </div>
-                    <div class="progress-bar-rail" role="progressbar" [attr.aria-valuenow]="branch.percentage"
-                        aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar-fill" [ngClass]="'fill-' + branch.colorTheme"
-                            [style.width.%]="branch.percentage"></div>
-                    </div>
-                </div>
-                }
-            </div>
-        </section>
-
-        <!-- Panel Lateral: Horas de Investigación -->
-        <aside class="research-panel">
-            <div class="panel-top-bar">
-                <div class="title-cluster">
-                    <h2 class="panel-heading">Horas de Investigación</h2>
-                    <p class="panel-subheading">Telemetría acumulada en ChemLab Cloud</p>
-                </div>
-            </div>
-
-            <div class="research-stack">
-                @for (item of researchMetrics; track item.id) {
-                <div class="research-widget" [ngClass]="'widget-' + item.colorTheme">
-                    <div class="widget-left">
-                        <div class="widget-icon-cell">
-                            <i [class]="item.icon"></i>
-                        </div>
-                        <div class="widget-text-cell">
-                            <h3 class="widget-title">{{ item.title }}</h3>
-                            <span class="widget-line">{{ item.subtitleLine1 }}</span>
-                            @if (item.subtitleLine2) {
-                            <span class="widget-line">{{ item.subtitleLine2 }}</span>
-                            }
-                        </div>
-                    </div>
-                    <div class="widget-right">
-                        <span class="widget-num">{{ item.value }}</span>
-                        @if (item.unit) {
-                        <span class="widget-unit">{{ item.unit }}</span>
-                        }
-                    </div>
-                </div>
-                }
-            </div>
-        </aside>
-    </div>
-
-    <!-- 4. Historial de Prácticas, Evaluaciones y Retroalimentación Pedagógica (Escala 1.0 a 5.0) -->
-    <section class="practices-panel">
-        <div class="panel-top-bar">
-            <div class="title-cluster">
-                <h2 class="panel-heading">Historial de Prácticas y Calificaciones</h2>
-                <p class="panel-subheading">
-                    Evaluadas y validadas por la Cátedra de Ciencias Experimentales (Prof. Roberto Méndez)
-                </p>
-            </div>
-            <button type="button" class="rubrics-link-pill" (click)="openRubricsModal()"
-                aria-label="Ver Rúbricas Oficiales">
-                <span>Ver Rúbricas Oficiales</span>
-                <i class="ph ph-caret-right"></i>
-            </button>
-        </div>
-
-        <div class="practices-stack">
-            @for (practice of practices; track practice.id) {
-            <article class="practice-card-item">
-                <!-- Icono Distintivo -->
-                <div class="practice-symbol-cell" [ngClass]="'symbol-' + practice.iconTheme">
-                    <i [class]="practice.icon"></i>
-                </div>
-
-                <!-- Contenido y Feedback Pedagógico -->
-                <div class="practice-details-cell">
-                    <div class="practice-title-line">
-                        <h3 class="practice-item-name">{{ practice.title }}</h3>
-                        <span class="practice-tag-chip" [ngClass]="'chip-' + practice.statusType">
-                            {{ practice.statusTag }}
-                        </span>
-                    </div>
-
-                    <div class="pedagogical-feedback-quote">
-                        <span class="prof-tag">Feedback del Prof:</span>
-                        <span class="feedback-sentence">"{{ practice.professorFeedback }}"</span>
-                    </div>
-
-                    <div class="practice-footnote">
-                        <span>{{ practice.deliveryTime }}</span>
-                        <span class="footnote-separator">•</span>
-                        <span>{{ practice.modality }}</span>
-                    </div>
-                </div>
-
-                <!-- Nota en Escala 1.0 a 5.0 y Acción de Rúbrica -->
-                <div class="practice-evaluation-cell">
-                    <div class="grade-score-wrap">
-                        <span class="grade-caption">Nota</span>
-                        <div class="grade-numbers-block">
-                            <span class="grade-main" [class.grade-perfect]="practice.score === practice.maxScore">
-                                {{ practice.score.toFixed(1) }}
-                            </span>
-                            <span class="grade-slash">/</span>
-                            <span class="grade-out-of">{{ practice.maxScore.toFixed(1) }}</span>
-                        </div>
-                    </div>
-                    <button type="button" class="eye-inspect-btn" (click)="openRubricsModal(practice)"
-                        [title]="'Inspeccionar rúbrica de ' + practice.code" aria-label="Ver rúbrica detallada">
-                        <i class="ph ph-eye"></i>
-                    </button>
-                </div>
-            </article>
-            }
-        </div>
-    </section>
-
-    <!-- MODAL: Editar Perfil / Avatar -->
-    @if (isEditModalOpen) {
-    <div class="modal-overlay" (click)="closeEditProfileModal()">
-        <div class="modal-dialog-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-            <div class="dialog-header">
-                <div class="dialog-title-group">
-                    <i class="ph ph-user-circle dialog-icon"></i>
-                    <h2>Editar Perfil del Estudiante</h2>
-                </div>
-                <button type="button" class="btn-dismiss" (click)="closeEditProfileModal()" aria-label="Cerrar modal">
-                    <i class="ph ph-x"></i>
-                </button>
-            </div>
-
-            <form [formGroup]="editProfileForm" (ngSubmit)="saveProfile()" class="dialog-form">
-                <!-- Selector de Avatar Dinámico -->
-                <div class="avatar-edit-section">
-                    <div class="current-avatar-preview">
-                        <img [src]="student.avatarUrl" [alt]="student.name" class="modal-avatar-img" />
-                        <button type="button" class="btn-upload-file" (click)="fileInput.click()">
-                            <i class="ph ph-upload-simple"></i>
-                            <span>Subir Foto</span>
-                        </button>
-                    </div>
-
-                    <div class="preset-avatars-cluster">
-                        <span class="presets-caption">Avatares Prediseñados:</span>
-                        <div class="preset-options-row">
-                            @for (av of presetAvatars; track av.id) {
-                            <button
-                                type="button"
-                                class="btn-preset-avatar"
-                                [class.active]="student.avatarUrl === av.url"
-                                (click)="selectPresetAvatar(av.url)"
-                                [title]="av.label"
-                            >
-                                <img [src]="av.url" [alt]="av.label" />
-                            </button>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-block">
-                    <label for="nameInput">Nombre y Apellidos</label>
-                    <input id="nameInput" type="text" formControlName="name" class="text-input" />
-                </div>
-
-                <div class="input-block">
-                    <label for="rankSelect">Rango Académico</label>
-                    <select id="rankSelect" formControlName="rank" class="select-input">
-                        @for (rank of availableRanks; track rank) {
-                        <option [value]="rank">{{ rank }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="input-block">
-                    <label for="yearInput">Año Lectivo</label>
-                    <input id="yearInput" type="text" formControlName="academicYear" class="text-input" />
-                </div>
-
-                <div class="input-block">
-                    <label for="emailInput">Correo Electrónico Institucional</label>
-                    <input id="emailInput" type="email" formControlName="email" class="text-input" />
-                </div>
-
-                <div class="dialog-footer">
-                    <button type="button" class="btn-ghost" (click)="closeEditProfileModal()">Cancelar</button>
-                    <button type="submit" class="btn-solid" [disabled]="editProfileForm.invalid">Guardar Cambios</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <aside class="research-panel"><div class="panel-top-bar"><div class="title-cluster"><h2 class="panel-heading">Insignias y evaluaciones</h2></div></div>
+      @for (badge of badges; track badge) { <p class="level-badge">{{ badge }}</p> } @empty { <p>Aún no tienes insignias.</p> }
+      <h3>Dominio por ramas y horas de investigación</h3><p>Aún no hay mediciones disponibles.</p>
+      <h3>Calificaciones y rúbricas</h3><p>Aún no hay evaluaciones docentes registradas.</p>
+    </aside>
+  </div>
+  <section class="practices-panel">
+    <div class="panel-top-bar"><div class="title-cluster"><h2 class="panel-heading">Historial de aprendizaje</h2><p class="panel-subheading">Hasta 100 eventos recientes de tu cuenta.</p></div></div>
+    @if (historyLoading) { <p role="status">Cargando historial…</p> }
+    @else if (historyError) { <p role="alert">{{ historyError }}</p><button type="button" class="pill-btn btn-secondary-pill" (click)="loadHistory()">Reintentar</button> }
+    @else {
+      <div class="practices-stack">
+        @for (event of events; track event.id) {
+          <article class="practice-card-item"><div class="practice-details-cell"><h3 class="practice-item-name">{{ event.title }}</h3>
+            <p>{{ event.detail }}</p><span class="practice-footnote">{{ event.createdAt | date:'medium' }} · {{ event.module }} · {{ event.xp ?? 0 }} XP</span>
+          </div></article>
+        } @empty { <p>Aún no tienes actividad registrada.</p> }
+      </div>
     }
-
-    <!-- MODAL: Rúbricas Oficiales -->
-    @if (isRubricsModalOpen && selectedPracticeForRubric) {
-    <div class="modal-overlay" (click)="closeRubricsModal()">
-        <div class="modal-dialog-box rubrics-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-            <div class="dialog-header">
-                <div class="dialog-title-group">
-                    <i class="ph ph-certificate dialog-icon green-icon"></i>
-                    <div>
-                        <h2>Rúbrica Oficial de Calificación (Escala 1.0 a 5.0)</h2>
-                        <p class="dialog-subtitle">{{ selectedPracticeForRubric.title }}</p>
-                    </div>
-                </div>
-                <button type="button" class="btn-dismiss" (click)="closeRubricsModal()" aria-label="Cerrar">
-                    <i class="ph ph-x"></i>
-                </button>
-            </div>
-
-            <div class="dialog-scroll-body">
-                <div class="official-score-banner">
-                    <span class="score-caption-text">Nota Registrada:</span>
-                    <strong class="score-highlight">{{ selectedPracticeForRubric.score.toFixed(1) }} / {{
-                        selectedPracticeForRubric.maxScore.toFixed(1) }}</strong>
-                    <span class="status-pill">{{ selectedPracticeForRubric.statusTag }}</span>
-                </div>
-
-                <div class="criteria-container">
-                    <h3>Criterios Evaluados por la Cátedra</h3>
-                    @for (crit of selectedPracticeForRubric.criteria; track crit.name) {
-                    <div class="criterion-card">
-                        <div class="criterion-top">
-                            <span class="criterion-label">{{ crit.name }}</span>
-                            <span class="criterion-point">{{ crit.score }}</span>
-                        </div>
-                        <p class="criterion-desc">{{ crit.comment }}</p>
-                    </div>
-                    }
-                </div>
-
-                <div class="cert-endorsement">
-                    <i class="ph ph-seal-check seal-icon"></i>
-                    <div>
-                        <strong>Validación Docente Oficial:</strong>
-                        <p>Prof. Roberto Méndez • Cátedra de Ciencias Experimentales</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dialog-footer">
-                <button type="button" class="btn-solid" (click)="closeRubricsModal()">Aceptar</button>
-            </div>
-        </div>
+  </section>
+  <p class="report-note">La ficha refleja tu progreso y actividad registrados; puedes guardarla como PDF desde el diálogo de impresión.</p>
+  @if (isEditModalOpen) {
+    <div class="modal-overlay" (click)="closeEditProfileModal()" (keydown.escape)="closeEditProfileModal()">
+      <section class="modal-dialog-box" role="dialog" aria-modal="true" aria-labelledby="profile-edit-title" (click)="$event.stopPropagation()">
+        <div class="dialog-header"><h2 id="profile-edit-title">Editar perfil</h2><button type="button" class="btn-dismiss" aria-label="Cerrar" (click)="closeEditProfileModal()" [disabled]="saving">×</button></div>
+        <form [formGroup]="editProfileForm" (ngSubmit)="saveProfile()" class="dialog-form">
+          <p>Tu avatar muestra tus iniciales. La subida de fotos estará disponible más adelante.</p>
+          <div class="input-block"><label for="profile-name">Nombre y apellidos</label><input id="profile-name" class="text-input" formControlName="fullName" maxlength="100" /></div>
+          <div class="input-block"><label for="profile-grade">Grado</label><input id="profile-grade" class="text-input" formControlName="grade" maxlength="50" /></div>
+          <div class="input-block"><label for="profile-school">Colegio</label><input id="profile-school" class="text-input" formControlName="school" maxlength="150" /></div>
+          @if (actionError) { <p role="alert">{{ actionError }}</p> }
+          <div class="dialog-footer"><button type="button" class="btn-ghost" (click)="closeEditProfileModal()" [disabled]="saving">Cancelar</button>
+            <button type="submit" class="btn-solid" [disabled]="saving || editProfileForm.invalid">{{ saving ? 'Guardando…' : 'Guardar cambios' }}</button></div>
+        </form>
+      </section>
     </div>
-    }
+  }
 </div>

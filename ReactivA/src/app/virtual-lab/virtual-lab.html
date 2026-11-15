@@ -1,4 +1,5 @@
 <div class="virtual-lab-layout">
+
   <!-- Notificación Flotante (Toast) -->
   @if (toastMessage) {
   <div class="toast-popup" role="status">
@@ -9,6 +10,10 @@
 
   <!-- COLUMNA CENTRAL: ÁREA DE SIMULACIÓN Y BALANCEADOR DE ECUACIONES -->
   <section class="simulation-workspace">
+  <div class="lab-progress-status">
+    @if (progressLoading) { <p role="status">Restaurando progreso del laboratorio…</p> }
+    @if (progressError) { <p role="alert">{{ progressError }} <button type="button" (click)="restoreProgress()">Reintentar</button></p> }
+  </div>
     <!-- Encabezado del Laboratorio y Telemetría -->
     <header class="lab-header">
       <div class="experiment-info">
@@ -71,6 +76,10 @@
           <span>{{ simulationRunning ? 'Pausar' : 'Reanudar' }}</span>
         </button>
       </div>
+      <button type="button" class="btn-control-play" (click)="completeExperiment()" [disabled]="!canRecordExperiment">
+        {{ completedExperiments.has(currentExercise.id) ? 'Experimento registrado' : 'Registrar experimento (+50 XP)' }}
+      </button>
+      <p>XP una sola vez por balanceo y por experimento. Para registrar un experimento: ecuación balanceada, recipiente y reactivo activos.</p>
     </header>
 
     <!-- VISTA 1: CANVAS DE SIMULACIÓN Y MESA DE EXPERIMENTACIÓN -->
@@ -717,13 +726,13 @@
         <h4>Ecuaciones Estequiométricas Resueltas:</h4>
         <div class="solved-list">
           @for (ex of balancingExercises; track ex.id; let i = $index) {
-          <div class="solved-row" [class.is-done]="ex.isBalanced">
+          <div class="solved-row" [class.is-done]="ex.scoreAwarded">
             <span class="row-num">{{ i + 1 }}.</span>
             <span class="row-name">{{ ex.title }}</span>
             <span class="row-tag">{{ ex.typeLabel }}</span>
             <span class="row-status">
-              <i class="ph" [class.ph-check-circle-fill]="ex.isBalanced" [class.ph-circle]="!ex.isBalanced"></i>
-              {{ ex.isBalanced ? '+50 XP' : 'Pendiente' }}
+              <i class="ph" [class.ph-check-circle-fill]="ex.scoreAwarded" [class.ph-circle]="!ex.scoreAwarded"></i>
+              {{ ex.scoreAwarded ? '+50 XP' : 'Pendiente' }}
             </span>
           </div>
           }
