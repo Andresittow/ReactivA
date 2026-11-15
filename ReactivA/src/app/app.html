@@ -1,6 +1,5 @@
-<div class="app-layout" [class.no-sidebar]="isAuthPage()">
-  <!-- Las pantallas docentes comparten su propio sidebar. -->
-  @if (!isAuthPage()) {
+<div class="app-layout" [class.no-sidebar]="isBareLayout()">
+  @if (!isBareLayout()) {
     @if (isTeacherPage()) {
       <app-teacher-sidebar></app-teacher-sidebar>
     } @else {

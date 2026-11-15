@@ -10,8 +10,16 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter(['teacher-dashboard', 'my-classrooms', 'dashboard', 'login', 'register', 'home']
-        .map(path => ({ path, component: RouteContent })))]
+      providers: [
+        provideRouter([
+          { path: 'teacher-dashboard', component: RouteContent, data: { layout: 'bare' } },
+          { path: 'my-classrooms', component: RouteContent, data: { layout: 'app' } },
+          { path: 'dashboard', component: RouteContent, data: { layout: 'app' } },
+          { path: 'login', component: RouteContent, data: { layout: 'bare' } },
+          { path: 'register', component: RouteContent, data: { layout: 'bare' } },
+          { path: 'home', component: RouteContent, data: { layout: 'bare' } }
+        ])
+      ]
     }).compileComponents();
   });
 
@@ -20,34 +28,38 @@ describe('App', () => {
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
-  it('keeps the teacher sidebar and collapse state when navigating to classrooms and back', async () => {
+
+  it('renders the appropriate sidebar and preserves layout across navigation', async () => {
     const fixture = TestBed.createComponent(App);
     const router = TestBed.inject(Router);
-    await router.navigateByUrl('/teacher-dashboard');
+
+    // En my-classrooms: renderiza teacher sidebar en el shell
+    await router.navigateByUrl('/my-classrooms');
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const sidebar = fixture.nativeElement.querySelector('app-teacher-sidebar') as HTMLElement;
-    expect(sidebar).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('app-sidebar')).toBeNull();
-    sidebar.querySelector<HTMLButtonElement>('button')!.click();
-    fixture.detectChanges();
-    expect(sidebar.querySelector('aside')!.classList.contains('collapsed')).toBe(true);
-
-    sidebar.querySelector<HTMLAnchorElement>('a[href="/my-classrooms"]')!.click();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(router.url).toBe('/my-classrooms');
-    expect(fixture.nativeElement.querySelector('app-teacher-sidebar')).toBe(sidebar);
-    expect(sidebar.querySelector('aside')!.classList.contains('collapsed')).toBe(true);
-    expect(sidebar.querySelector('a[aria-current="page"]')!.getAttribute('href')).toBe('/my-classrooms');
+    const teacherSidebar = fixture.nativeElement.querySelector('app-teacher-sidebar') as HTMLElement;
+    expect(teacherSidebar).toBeTruthy();
     expect(fixture.nativeElement.querySelector('app-sidebar')).toBeNull();
 
-    sidebar.querySelector<HTMLAnchorElement>('a[href="/teacher-dashboard"]')!.click();
-    await fixture.whenStable();
+    // Puede colapsarse
+    teacherSidebar.querySelector<HTMLButtonElement>('button.btn-toggle')?.click();
     fixture.detectChanges();
-    expect(router.url).toBe('/teacher-dashboard');
-    expect(sidebar.querySelector('a[aria-current="page"]')!.getAttribute('href')).toBe('/teacher-dashboard');
+    expect(teacherSidebar.querySelector('aside')?.classList.contains('collapsed')).toBe(true);
+
+    // Al navegar a dashboard estudiantil: cambia a app-sidebar
+    await router.navigateByUrl('/dashboard');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('app-sidebar')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-teacher-sidebar')).toBeNull();
+
+    // Al navegar a login: sin sidebar (layout bare)
+    await router.navigateByUrl('/login');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('app-sidebar')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-teacher-sidebar')).toBeNull();
   });
 
   it('selects the teacher sidebar on direct classroom entry and preserves student and public layouts', async () => {
