@@ -1,39 +1,42 @@
-# feat(andres): cimientos de arquitectura, auth y supabase fase 0
+# feat(andres): PR-A1 · StudentProgressService con Supabase, home y dashboard
 
-Destino: `develop`. Origen: `feature/app-layout`.
+Destino: `develop`. Origen: `feature/Andres`.
 
 ## Resumen del cambio
-Implementación completa de la **Fase 0 (Cimientos)** según lo especificado en el `docs/PLAN_FUNCIONAL.md`:
-1. **Dependencias y Entornos:**
-   - Adición de `@supabase/supabase-js`.
-   - Creación de `src/environments/environment.ts` (plantilla producción) y `src/environments/environment.development.ts` (desarrollo con publishable key), configurando `fileReplacements` en `angular.json`.
-   - Documentación de variables en `README.md`.
-2. **Arquitectura Core (`src/app/core/`):**
-   - `core/supabase/supabase.client.ts`: Cliente Supabase SSR-safe (`isPlatformBrowser`), con almacenamiento dinámico (`ConfigurableAuthStorage`) para soportar la preferencia de «Recordarme» (`sessionStorage` vs `localStorage`) y transporte seguro para prerender en Node 20.
-   - `core/models/`: Modelos e interfaces canónicos compartidos (`Role`, `UserProfile`, `ModuleKey`, `Classroom`, `NewClassroom`, `ClassroomMember`, `LearningEvent`, `UserPreferences`).
-   - `core/auth/auth.service.ts`: Servicio reactivo completo basado en Signals (`user`, `isAuthenticated`, `role`, `ready`), registro adaptable (soporta tanto confirmación de correo activa como inactiva), login con validación de `expectedRole`, cierre de sesión con redirección `replaceUrl`, actualización de perfil y cambio/recuperación de contraseña.
-   - `core/auth/auth.guard.ts`: Guards funcionales (`authGuard`, `guestGuard`, `roleGuard`) con saneamiento de `returnUrl` interna y compatibilidad SSR.
-   - `core/services/learning-events.service.ts`: Servicio de eventos fire-and-forget con resolución de aula.
-   - `core/services/classroom.service.ts` y `settings.service.ts`: Esqueletos tipados listos para que Vanessa y Valeria implementen sin alterar dependencias.
-3. **Rutas, Layout y SSR:**
-   - `app.routes.ts`: Configuración estricta de matriz de rutas y permisos con `data: { layout: 'bare' | 'app' }` y guards correspondientes.
-   - `app.ts` / `app.html`: Layout desacoplado de cadenas de texto de URL, lectura reactiva de `data.layout`, llamada inicial a `settingsService.init()`.
-   - `app.config.ts`: Inicializador `provideAppInitializer` para restaurar la sesión de Supabase antes de la primera navegación (evita parpadeos de login al refrescar).
-   - `app.routes.server.ts`: Rutas públicas (`home`, `login`, `register`) con `RenderMode.Prerender`; privadas en `RenderMode.Client`.
-4. **Base de Datos:**
-   - Migración base `supabase/migrations/202611140000_core.sql` con tablas (`profiles`, `teacher_invite_codes`, `student_progress`, `student_tasks`, `student_challenges`, `student_badges`, `module_progress`, `learning_events`, `user_settings`), RLS estricto en todas las tablas, función `is_teacher_of()`, trigger de protección de rol y trigger `on_auth_user_created`.
-   - Documentación paso a paso en `supabase/README.md`.
+Implementación completa de **PR-A1** según `docs/PLAN_FUNCIONAL.md` (§2.3, §6):
+1. **StudentProgressService (`dashboard/student-progress.service.ts`):**
+   - Migración de `localStorage` a Supabase mediante el patrón «caché sincrónica + escritura asíncrona».
+   - Firmas públicas existentes conservadas intactas (`getProfile`, `setProfileName`, `setProfileGrade`, `getGamificationState`, `addXp`, `getDashboardTasks`, `toggleDashboardTask`, `getChallengesState`, `progressChallenge`, `claimChallenge`, `getUnlockedBadges`, `unlockBadge`).
+   - Métodos nuevos `hydrate(): Promise<void>` y `reset(): void`, con sincronización reactiva ante cambios de sesión.
+   - Métodos nuevos `getModuleProgress<T>(module)` y `saveModuleProgress<T>(module, data)` sincronizados con la tabla `module_progress`.
+   - Eliminación de datos mock por defecto: un estudiante nuevo arranca en 0 XP, Nivel 1 ("Iniciado en Química") y 0 días de racha.
+   - Cálculo real de racha (`streakDays`) basado en la fecha de última actividad (`last_active_date`).
+   - Limpieza automática de claves obsoletas de `localStorage` (`reactiva_*`, `currentUser`, `reactiva_user`).
+2. **Ciclo de vida y sincronización de progreso en AuthService (`src/app/core/auth/auth.service.ts`):**
+   - Contrato desacoplado `ProgressSyncHandler` / `PROGRESS_SYNC_HANDLER` para evitar dependencias circulares entre el Core y el Dashboard.
+   - **`hydrate()`**: invocado explícitamente tras `signIn()` exitoso y al restaurar la sesión en `restoreSession()` (ejecutado en el bootstrap vía `provideAppInitializer`), además de reactivamente en `onAuthStateChange` (`SIGNED_IN`, `TOKEN_REFRESHED`).
+   - **`reset()`**: invocado explícitamente en `signOut()` y ante el evento `SIGNED_OUT` en `onAuthStateChange` (así como defensivamente ante discrepancia de rol o sesión inválida).
+   - Pruebas unitarias dedicadas en `src/app/core/auth/auth.service.spec.ts` validando estas 4 transiciones de sincronización.
+3. **Modificación en archivo Core (`src/app/core/supabase/supabase.client.ts`):**
+   - Se adaptó `ConfigurableAuthStorage` para capturar con bloques defensivos `try / catch` cualquier excepción de `localStorage` / `sessionStorage` (e.g. acceso denegado en modo incógnito, iframes restringidos o entornos virtuales de prueba como Vitest).
+   - Se añadió stub de transporte `ServerWebSocketStub` para `@supabase/realtime-js` en SSR (Node.js < 22) para garantizar un build y prerender sin advertencias ni bloqueos de red.
+4. **Home (`src/app/home/`):**
+   - Eliminación de dependencias de `currentUser` y `reactiva_user` en `localStorage`.
+   - Integración directa con `AuthService`: botones de navegación dinámica según el estado de sesión («Iniciar sesión/Registrarse» vs «Ir a mi panel» / «Panel Docente» según rol).
+   - Enlaces protegidos a módulos que redirigen a `/login?returnUrl=...` si no hay sesión activa.
+5. **Dashboard (`src/app/dashboard/`):**
+   - Saludo con el nombre real del estudiante autenticado desde `AuthService.user()`.
+   - `onGradeChange` persiste el cambio en backend a través de `AuthService.updateProfile` y `setProfileGrade`.
+   - Cálculo dinámico de progreso de unidades temáticas (`topics[].progress`) desde `module_progress` (0% inicial honesto en lugar de números fijos 75/40/0).
+   - Tareas diarias persistidas en `student_tasks` y vinculadas con `LearningEventsService.record(...)`.
+   - Hook preparado para visualizar `assignments` (asignaciones académicas del aula) cuando Vanessa publique PR-V2.
 
 ## Validación
 - `npm exec tsc -- --noEmit -p tsconfig.app.json`: Aprobado (0 errores).
 - `npm exec tsc -- --noEmit -p tsconfig.spec.json`: Aprobado (0 errores).
-- `npm test -- --watch=false`: 46 tests aprobados (28 tests existentes + 18 tests nuevos de `AuthService`, `authGuard`, `guestGuard` y `roleGuard`).
-- `npm run build`: Compilación exitosa para producción y prerender SSR completado.
+- `npm test -- --watch=false`: **56 tests aprobados de 56** (10 suites en verde, incluyendo nuevas pruebas unitarias para `StudentProgressService`, sincronización de `AuthService` y dobles de prueba en `DashboardComponent`).
+- `npm run build`: Compilación exitosa para producción y prerender SSR completo.
 
 ## Requiere de otros
 - **Vanessa:**
-  - En `src/app/virtual-lab/virtual-lab.spec.ts` (línea 26) se ajustó temporalmente el assert a `"Mechero Bunsen"` para coincidir con los datos reales en español de la maqueta y habilitar CI en verde. Si en PR-V2 se migra a bilingüe, revisar este spec.
-  - Implementación de `ClassroomService` y migración de tablas `classrooms` y `classroom_members` en PR-V1.
-- **Valeria:**
-  - Implementación de `SettingsService` en PR-L2.
-  - Incrustar `<app-my-classrooms [embedded]="true">` en `teacher-dashboard` para PR-L3.
+  - `assignments`: el hook para renderizar tareas asignadas en el dashboard del estudiante está listo para consumir la tabla `assignments` cuando se implemente en PR-V2.
