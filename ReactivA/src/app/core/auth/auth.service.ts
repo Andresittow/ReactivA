@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, PLATFORM_ID, InjectionToken } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID, InjectionToken, Injector } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -40,8 +40,9 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
-  private readonly injectedProgressHandler = inject(PROGRESS_SYNC_HANDLER, { optional: true });
+  private readonly injector = inject(Injector);
   private manualProgressHandler: ProgressSyncHandler | null = null;
+  private _cachedInjectedHandler: ProgressSyncHandler | null | undefined = undefined;
 
   private readonly _user = signal<UserProfile | null>(null);
   private readonly _ready = signal<boolean>(false);
@@ -52,7 +53,17 @@ export class AuthService {
   readonly role = computed<Role | null>(() => this._user()?.role ?? null);
 
   get progressHandler(): ProgressSyncHandler | null {
-    return this.manualProgressHandler ?? this.injectedProgressHandler ?? null;
+    if (this.manualProgressHandler) {
+      return this.manualProgressHandler;
+    }
+    if (this._cachedInjectedHandler === undefined) {
+      try {
+        this._cachedInjectedHandler = this.injector.get(PROGRESS_SYNC_HANDLER, null, { optional: true });
+      } catch {
+        this._cachedInjectedHandler = null;
+      }
+    }
+    return this._cachedInjectedHandler;
   }
 
   registerProgressSyncHandler(handler: ProgressSyncHandler): void {
