@@ -23,7 +23,7 @@ describe('VirtualLabComponent', () => {
 
     component.searchControl.setValue('Bunsen');
     expect(component.filteredEquipment.length).toBe(1);
-    expect(component.filteredEquipment[0].name).toBe('Bunsen Burner');
+    expect(component.filteredEquipment[0].name).toBe('Mechero Bunsen');
 
     component.searchControl.setValue('');
     expect(component.filteredEquipment.length).toBe(component.equipmentList.length);

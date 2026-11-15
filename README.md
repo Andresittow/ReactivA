@@ -139,24 +139,31 @@ Consulta [responsabilidades, validaciones y flujo de Git Graph](CONTRIBUTING.md)
    npm ci
    ```
 
-3. **Iniciar el servidor local de desarrollo:**
+3. **Configuración de variables de entorno (Supabase):**
+   El proyecto utiliza Supabase para autenticación y persistencia relacional con RLS. Las configuraciones residen en `src/environments/`:
+   - `src/environments/environment.development.ts`: Configuración para entorno de desarrollo local (`supabaseUrl` y `supabaseAnonKey` / publishable key del proyecto `reactiva-dev`).
+   - `src/environments/environment.ts`: Plantilla para entorno de producción con placeholders (`fileReplacements` configurado en `angular.json`).
+   
+   > ⚠️ **Importante:** Nunca commitear la `service_role` (secret key) en ningún archivo del frontend ni repositorio. Solo se utiliza la clave pública anónima / publishable.
+
+4. **Iniciar el servidor local de desarrollo:**
    ```bash
    npm start
    # o bien: ng serve
    ```
    Accede a [http://localhost:4200/](http://localhost:4200/) en tu navegador.
 
-4. **Compilar para desarrollo/verificación:**
+5. **Compilar para desarrollo/verificación:**
    ```bash
    npm run build -- --configuration development
    ```
 
-5. **Compilar para producción:**
+6. **Compilar para producción:**
    ```bash
    npm run build
    ```
 
-6. **Ejecutar pruebas unitarias:**
+7. **Ejecutar pruebas unitarias:**
    ```bash
    npm test -- --no-watch
    ```
