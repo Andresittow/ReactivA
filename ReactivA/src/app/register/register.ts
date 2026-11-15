@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../core/auth/auth.service';
+import { accessError, pendingPin } from '../login/access-feedback';
+import { ClassroomService } from '../core/services/classroom.service';
 
 @Component({
   selector: 'app-register',
@@ -11,34 +14,47 @@ import { Router, RouterLink } from '@angular/router';
   styleUrl: './register.scss'
 })
 export class RegisterComponent {
-  registerForm!: FormGroup;
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly classroomService = inject(ClassroomService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
+  private readonly cdr = inject(ChangeDetectorRef);
+  infoMessage: string | null = null;
+  continuation: string | null = null;
+  registerForm!: FormGroup;
   showPassword = false;
   showConfirmPassword = false;
+  isLoading = false;
+  errorMessage: string | null = null;
+  needsEmailConfirmation = false;
+  registeredEmail = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router
-  ) {
+  constructor() {
     this.initForm();
   }
 
-  // 1. Inicialización de FormGroup con FormBuilder y validaciones correspondientes (Clase 5b)
   private initForm(): void {
+    // Si viene un PIN en sessionStorage, usarlo como valor inicial
+    const initialPin = this.isBrowser ? pendingPin() : '';
+
     this.registerForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(3)]],
+      fullName: ['', [Validators.required, Validators.minLength(3), (control: AbstractControl) => control.value?.trim().length >= 3 ? null : { minlength: true }, Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)]],
       role: ['estudiante', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       grade: ['', [Validators.required]],
-      school: ['Colegio San Ignacio'],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      school: ['', [Validators.required, Validators.minLength(3), (control: AbstractControl) => control.value?.trim().length >= 3 ? null : { minlength: true }]],
+      classPin: [initialPin, [(control: AbstractControl) => !control.value || /^CHEM-[0-9]{4}$/.test(control.value.trim().toUpperCase()) ? null : { pattern: true }]],
+      teacherInviteCode: [''],
+      password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)]],
       confirmPassword: ['', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]],
       newsletter: [false]
     }, { validators: this.passwordMatchValidator });
   }
 
-  // 2. Validador personalizado a nivel de FormGroup para verificar coincidencia exacta de contraseñas (Clase 5b/5c)
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password')?.value;
     const confirmPassword = control.get('confirmPassword')?.value;
@@ -50,58 +66,125 @@ export class RegisterComponent {
     return password === confirmPassword ? null : { mismatch: true };
   }
 
-  // Getter auxiliar para obtener el rol actual seleccionado
   get selectedRole(): 'estudiante' | 'docente' {
     return this.registerForm.get('role')?.value ?? 'estudiante';
   }
 
-  // Permite seleccionar el perfil y ajusta dinámicamente las validaciones del campo 'grade'
   setRole(role: 'estudiante' | 'docente'): void {
     this.registerForm.get('role')?.setValue(role);
+    this.errorMessage = null;
+
     const gradeControl = this.registerForm.get('grade');
+    const teacherCodeControl = this.registerForm.get('teacherInviteCode');
+    const classPinControl = this.registerForm.get('classPin');
 
     if (role === 'estudiante') {
       gradeControl?.setValidators([Validators.required]);
+      teacherCodeControl?.clearValidators();
+      classPinControl?.setValidators([(control: AbstractControl) => !control.value || /^CHEM-[0-9]{4}$/.test(control.value.trim().toUpperCase()) ? null : { pattern: true }]);
     } else {
       gradeControl?.clearValidators();
+      gradeControl?.setValue('');
+      teacherCodeControl?.setValidators([Validators.required, Validators.minLength(4)]);
+      classPinControl?.clearValidators();
+      classPinControl?.setValue('');
     }
+
     gradeControl?.updateValueAndValidity();
+    teacherCodeControl?.updateValueAndValidity();
+    classPinControl?.updateValueAndValidity();
   }
 
-  // Alterna entre mostrar y ocultar la contraseña principal
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
-  // Alterna entre mostrar y ocultar la confirmación de contraseña
   toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  // 3. Helper para consultar si un control es inválido y ya ha sido interactuado (touched o dirty)
   isFieldInvalid(field: string): boolean {
     const control = this.registerForm.get(field);
     return !!(control && control.invalid && (control.touched || control.dirty));
   }
 
-  // Helper para verificar el error de contraseñas no coincidentes
   hasPasswordMismatch(): boolean {
     const confirmControl = this.registerForm.get('confirmPassword');
     return !!(this.registerForm.hasError('mismatch') && (confirmControl?.touched || confirmControl?.dirty));
   }
 
-  // 4. Manejo del envío del formulario con validación previa
-  onSubmit(): void {
-    if (this.registerForm.valid) {
-      // Redirección al Dashboard o al Login
-      this.router.navigate([this.selectedRole === 'docente' ? '/teacher-dashboard' : '/dashboard']);
-    } else {
-      // Si el formulario es inválido, marcamos todos los controles como touched para disparar las validaciones visuales
+  async onSubmit(): Promise<void> {
+    if (this.isLoading || this.continuation) return;
+
+    if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    const {
+      fullName,
+      email,
+      password,
+      role,
+      grade,
+      school,
+      classPin,
+      teacherInviteCode,
+      newsletter
+    } = this.registerForm.value;
+
+    const cleanPin = (classPin || '').trim().toUpperCase();
+    const cleanTeacherCode = (teacherInviteCode || '').trim();
+
+    try {
+      const result = await this.authService.signUp({
+        fullName: fullName.trim(),
+        email: email.trim(),
+        password,
+        role,
+        grade: role === 'estudiante' ? grade?.trim() : undefined,
+        school: school?.trim(),
+        teacherInviteCode: role === 'docente' ? cleanTeacherCode : undefined,
+        classPin: role === 'estudiante' && cleanPin ? cleanPin : undefined,
+        newsletter: !!newsletter
+      });
+
+      this.registeredEmail = email.trim();
+      if (role === 'estudiante' && cleanPin && this.isBrowser) pendingPin(cleanPin);
+
+      if (result.needsEmailConfirmation) {
+        // Pantalla informativa: no navegar al dashboard
+        this.needsEmailConfirmation = true;
+      } else {
+        // Sesión iniciada inmediatamente
+        if (role === 'estudiante' && cleanPin && this.isBrowser) {
+          pendingPin(null);
+          try {
+            await this.classroomService.joinByPin(cleanPin);
+          } catch {
+            this.infoMessage = 'Tu cuenta está lista, pero no pudimos canjear el PIN. Puedes continuar y volver a intentarlo desde tu aula.';
+          }
+        }
+
+        const destination = this.authService.homeFor(role);
+        if (this.infoMessage) this.continuation = destination;
+        else await this.router.navigateByUrl(destination, { replaceUrl: true });
+      }
+    } catch (err: any) {
+      this.errorMessage = accessError(err, true);
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 
-  // Redirección al Login
+  async continueToHome(): Promise<void> {
+    if (this.continuation) await this.router.navigateByUrl(this.continuation, { replaceUrl: true });
+  }
+
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
