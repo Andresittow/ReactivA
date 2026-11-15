@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { SidebarComponent } from './sidebar/sidebar';
+import { TeacherSidebarComponent } from './teacher-dashboard/teacher-sidebar/teacher-sidebar';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent],
+  imports: [RouterOutlet, SidebarComponent, TeacherSidebarComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -22,11 +23,14 @@ export class AppComponent {
       currentUrl.startsWith('/register') ||
       currentUrl === '/home' ||
       currentUrl.startsWith('/home') ||
-      currentUrl === '/teacher-dashboard' ||
-      currentUrl.startsWith('/teacher-dashboard') ||
       currentUrl === '/' ||
       currentUrl === ''
     );
+  }
+
+  isTeacherPage(): boolean {
+    const path = this.router.url.split(/[?#]/)[0];
+    return path === '/teacher-dashboard' || path === '/my-classrooms';
   }
 
   // Compatibilidad hacia atrás
