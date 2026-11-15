@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { StudentProgressService, StudentProfile, GamificationState } from '../dashboard/student-progress.service';
+import { AuthService } from '../core/auth/auth.service';
 
 /**
  * Tarjeta Informativa de Módulo para el Home (Solo presentación informativa)
@@ -38,39 +39,38 @@ export interface PedagogicMetric {
 })
 export class HomeComponent implements OnInit {
   private progressService = inject(StudentProgressService);
+  readonly authService = inject(AuthService);
 
-  // Estado sincronizado del estudiante
-  profile: StudentProfile = {
-    name: 'Científico',
-    grade: '10th Grade',
-    email: 'estudiante@reactiva.edu.co'
-  };
+  get hasActiveSession(): boolean {
+    return this.authService.isAuthenticated();
+  }
 
-  gamification: GamificationState = {
-    xp: 4850,
-    level: 14,
-    levelTitle: 'Alquimista Experto',
-    streakDays: 5,
-    lastActiveDate: '',
-    nextLevelXp: 5000,
-    levelProgressPercent: 97
-  };
+  get dashboardUrl(): string {
+    const role = this.authService.role();
+    return this.authService.homeFor(role ?? 'estudiante');
+  }
 
-  hasActiveSession = false;
+  get dashboardLabel(): string {
+    return this.authService.role() === 'docente' ? 'Panel Docente' : 'Ir a mi Dashboard';
+  }
+
+  get profile(): StudentProfile {
+    return this.progressService.getProfile();
+  }
+
+  get gamification(): GamificationState {
+    return this.progressService.getGamificationState();
+  }
 
   ngOnInit(): void {
-    this.profile = this.progressService.getProfile();
-    this.gamification = this.progressService.getGamificationState();
-
-    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
-      const storedUser = localStorage.getItem('currentUser') || localStorage.getItem('reactiva_user');
-      this.hasActiveSession = !!storedUser || (this.profile && this.profile.name !== 'Científico');
+    // Si hay sesión activa en navegador, asegurar hidratación
+    if (this.authService.isAuthenticated()) {
+      this.progressService.hydrate().then();
     }
   }
 
   /**
    * Colección de módulos informativos de ReactivA.
-   * Nota: Las tarjetas son puramente informativas; para acceder se requiere iniciar sesión.
    */
   readonly modules: FeatureModuleCard[] = [
     {
@@ -89,100 +89,78 @@ export class HomeComponent implements OnInit {
       title: 'Laboratorio Virtual 3D',
       subtitle: 'Simulador Molecular Interactivo',
       category: 'Experimentación Segura',
-      badge: 'Simulación Sin Riesgos',
-      description: 'Mesa de trabajo virtual para combinar reactivos químicos, deducir enlaces iónicos y covalentes, y comprobar estequiometría sin riesgos de un laboratorio físico.',
-      icon: 'ph-test-tube',
+      badge: 'Reactivos & Balances',
+      description: 'Experimenta con material de vidrio e instrumental de laboratorio, balancea reacciones de combustión y visualiza enlaces covalentes e iónicos en tiempo real.',
+      icon: 'ph-flask',
       themeColor: 'emerald',
-      highlights: ['Simulaciones moleculares 3D', 'Combinación de reactivos', 'Cálculos estequiométricos']
+      highlights: ['Simulación de instrumental', 'Balanceo estequiométrico', 'Mesa de mezclas virtual']
     },
     {
-      id: 'organic-mission',
-      title: 'Misión Orgánica: Domina el Carbono',
-      subtitle: 'Química Orgánica para Grado 11',
-      category: 'Gamificación Pedagógica',
-      badge: '4 Niveles Progresivos',
-      description: 'Supera 4 niveles temáticos: detectives del carbono, cazadores de hidrocarburos, desafío de nomenclatura IUPAC y prueba maestra con feedback didáctico.',
+      id: 'mision-organica',
+      title: 'Misión Orgánica',
+      subtitle: 'Domina la Química del Carbono',
+      category: 'Química Grado 11°',
+      badge: '4 Fases Gamificadas',
+      description: 'Asciende desde Detective del Carbono hasta Maestro Orgánico resolviendo desafíos contrarreloj, estructuras de Lewis y nomenclatura IUPAC de hidrocarburos.',
       icon: 'ph-tree-structure',
       themeColor: 'purple',
-      highlights: ['Hibridación del carbono', 'Nomenclatura IUPAC oficial', 'Mecánicas de match & vidas']
+      highlights: ['Hibridaciones sp3, sp2, sp', 'Nomenclatura IUPAC', 'Retos contrarreloj']
     },
     {
-      id: 'challenges-arena',
-      title: 'Desafíos & Arena de Logros',
-      subtitle: 'Competición & Clasificación Escolar',
-      category: 'Torneos y Competencias',
-      badge: 'Temporada 3 En Vivo',
-      description: 'Arena competitiva escolar con torneos en vivo, leaderboard por clase y colegio, vitrina de trofeos con 18 insignias y evaluación de competencias MEN.',
+      id: 'challenges',
+      title: 'Arena de Desafíos & Trofeos',
+      subtitle: 'Competencia y Logros Curriculares',
+      category: 'Gamificación & MEN',
+      badge: '18 Insignias Coleccionables',
+      description: 'Participa en torneos de química, acumula puntos de experiencia (XP), mantén rachas de actividad y compara tu nivel en leaderboards de clase y colegio.',
       icon: 'ph-trophy',
       themeColor: 'amber',
-      highlights: ['Torneo Gran Enlace Covalente', 'Leaderboard escolar', '18 Insignias coleccionables']
-    },
-    {
-      id: 'dashboard',
-      title: 'Panel de Ruta del Conocimiento',
-      subtitle: 'Dashboard Central del Estudiante',
-      category: 'Gestión del Aprendizaje',
-      badge: 'Racha Activa 🔥',
-      description: 'Organiza tus misiones diarias con checklist interactivo, buscador rápido de unidades con Reactive Forms y métricas de progreso dinámico por tema.',
-      icon: 'ph-squares-four',
-      themeColor: 'blue',
-      highlights: ['Buscador reactivo en vivo', 'Misiones diarias To-Do', 'Racha de días activos']
-    },
-    {
-      id: 'academic-profile',
-      title: 'Perfil y Reporte Académico',
-      subtitle: 'Analítica de Desempeño Escolar',
-      category: 'Evaluación Curricular',
-      badge: 'Estándares MEN',
-      description: 'Monitorea tus competencias de indagación, explicación de fenómenos y uso comprensivo del conocimiento científico con informes detallados para docentes.',
-      icon: 'ph-user-circle',
-      themeColor: 'emerald',
-      highlights: ['Eficiencia pedagógica (94.2%)', 'Seguimiento por estándares', 'Historial de actividades']
+      highlights: ['Leaderboards en vivo', 'Torneos de temporada', 'Vitrina de 18 trofeos']
     }
   ];
 
   /**
-   * Métricas y Estándares Curriculares de Ciencias Naturales (MEN)
+   * Métricas y estadísticas pedagógicas alineadas con el Ministerio de Educación Nacional (MEN).
    */
   readonly metrics: PedagogicMetric[] = [
     {
-      value: '118',
-      label: 'Elementos Químicos',
-      description: 'Modelos cuánticos de Bohr, capas electrónicas y propiedades físicas integradas.',
-      icon: 'ph-atom',
-      accent: 'blue'
-    },
-    {
       value: '94.2%',
       label: 'Eficiencia Pedagógica',
-      description: 'Tasa media de acierto al primer intento en resolución de problemas químicos.',
+      description: 'Estudiantes demuestran mayor retención conceptual con modelos visuales interactivos.',
       icon: 'ph-chart-line-up',
       accent: 'emerald'
     },
     {
-      value: '4 Niveles',
-      label: 'Química del Carbono',
-      description: 'Desde tetravalencia hasta formulación y nomenclatura IUPAC para grado 11.',
-      icon: 'ph-tree-structure',
-      accent: 'purple'
+      value: '18',
+      label: 'Insignias y Logros',
+      description: 'Metas curriculares de los Estándares Básicos de Competencias en Ciencias Naturales.',
+      icon: 'ph-medal',
+      accent: 'amber'
+    },
+    {
+      value: '4+',
+      label: 'Módulos Integrados',
+      description: 'Desde la estructura atómica hasta síntesis de cadenas complejas de hidrocarburos.',
+      icon: 'ph-stack',
+      accent: 'blue'
     },
     {
       value: '100%',
-      label: 'Alineado al MEN',
-      description: 'Cumplimiento de los Estándares Básicos de Competencias en Ciencias Naturales.',
-      icon: 'ph-certificate',
-      accent: 'amber'
+      label: 'Seguridad Experimental',
+      description: 'Permite simular reacciones exotérmicas complejas sin riesgos físicos en el aula.',
+      icon: 'ph-shield-check',
+      accent: 'purple'
     }
   ];
 
   /**
-   * Desplazamiento suave hacia la sección de módulos informativos
+   * Desplazamiento suave hacia la sección de módulos en el Home
    */
   scrollToModules(): void {
     if (typeof document !== 'undefined') {
-      const el = document.getElementById('modules-section');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const element = document.getElementById('modules-section');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
   }

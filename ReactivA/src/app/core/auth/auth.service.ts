@@ -1,10 +1,17 @@
-import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID, InjectionToken } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CLIENT, setRememberMePreference } from '../supabase/supabase.client';
 import { Role, UserProfile } from '../models/user.model';
 import { AuthError, mapSupabaseError } from './auth-error';
+
+export interface ProgressSyncHandler {
+  hydrate(): Promise<void>;
+  reset(): void;
+}
+
+export const PROGRESS_SYNC_HANDLER = new InjectionToken<ProgressSyncHandler>('PROGRESS_SYNC_HANDLER');
 
 export interface SignUpInput {
   email: string;
@@ -33,6 +40,8 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly injectedProgressHandler = inject(PROGRESS_SYNC_HANDLER, { optional: true });
+  private manualProgressHandler: ProgressSyncHandler | null = null;
 
   private readonly _user = signal<UserProfile | null>(null);
   private readonly _ready = signal<boolean>(false);
@@ -41,6 +50,14 @@ export class AuthService {
   readonly ready = this._ready.asReadonly();
   readonly isAuthenticated = computed(() => this._user() !== null);
   readonly role = computed<Role | null>(() => this._user()?.role ?? null);
+
+  get progressHandler(): ProgressSyncHandler | null {
+    return this.manualProgressHandler ?? this.injectedProgressHandler ?? null;
+  }
+
+  registerProgressSyncHandler(handler: ProgressSyncHandler): void {
+    this.manualProgressHandler = handler;
+  }
 
   constructor() {
     if (this.isBrowser) {
@@ -53,6 +70,7 @@ export class AuthService {
       this.supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_OUT') {
           this._user.set(null);
+          this.progressHandler?.reset();
           // Redirigir a login con replaceUrl para no dejar pantallas privadas en historial
           if (this.router.url !== '/login' && !this.router.url.startsWith('/login') && this.router.url !== '/home') {
             await this.router.navigate(['/login'], { replaceUrl: true });
@@ -60,6 +78,7 @@ export class AuthService {
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
           if (session?.user) {
             await this.loadUserProfile(session.user.id, session.user.email ?? '');
+            await this.progressHandler?.hydrate();
           }
         }
       });
@@ -78,12 +97,15 @@ export class AuthService {
       const { data, error } = await this.supabase.auth.getSession();
       if (error || !data.session?.user) {
         this._user.set(null);
+        this.progressHandler?.reset();
       } else {
         await this.loadUserProfile(data.session.user.id, data.session.user.email ?? '');
+        await this.progressHandler?.hydrate();
       }
     } catch (err) {
       console.warn('[AuthService] Error restoring session:', err);
       this._user.set(null);
+      this.progressHandler?.reset();
     } finally {
       this._ready.set(true);
     }
@@ -161,6 +183,7 @@ export class AuthService {
 
       if (!needsEmailConfirmation && data.user) {
         await this.loadUserProfile(data.user.id, data.user.email ?? input.email);
+        await this.progressHandler?.hydrate();
       }
 
       return { needsEmailConfirmation };
@@ -191,12 +214,14 @@ export class AuthService {
       if (input.expectedRole && profile.role !== input.expectedRole) {
         await this.supabase.auth.signOut();
         this._user.set(null);
+        this.progressHandler?.reset();
         throw new AuthError(
           'role_mismatch',
           `El rol seleccionado (${input.expectedRole}) no coincide con el de tu cuenta (${profile.role}).`
         );
       }
 
+      await this.progressHandler?.hydrate();
       return profile;
     } catch (err: any) {
       if (err instanceof AuthError) throw err;
@@ -211,6 +236,7 @@ export class AuthService {
       console.warn('[AuthService] Error during signOut:', err);
     } finally {
       this._user.set(null);
+      this.progressHandler?.reset();
       await this.router.navigate(['/login'], { replaceUrl: true });
     }
   }
