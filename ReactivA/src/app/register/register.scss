@@ -1006,3 +1006,11 @@ $radius-control: 8px;
   }
 }
 
+
+.alert { padding: 1rem; margin-bottom: 1rem; border-radius: 8px; display: flex; gap: .5rem; }
+.alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.alert svg { width: 24px; height: 24px; flex-shrink: 0; }
+.confirmation-screen { text-align: center; padding: 2rem 0; }
+.confirm-icon { font-size: 3rem; }
+.confirm-note { line-height: 1.6; margin-bottom: 1.5rem; }
+.uppercase-field { text-transform: uppercase; }

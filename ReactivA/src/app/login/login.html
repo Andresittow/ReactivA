@@ -43,6 +43,31 @@
           <p>Ingresa para continuar tus experimentos, mantener tu racha activa 🔥 y explorar el laboratorio digital.</p>
         </div>
 
+        <!-- Mensajes de Error y Feedback -->
+        @if (errorMessage) {
+          <div class="alert alert-danger" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+        @if (infoMessage && !continuation) {
+          <div class="alert alert-info" role="status">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ infoMessage }}</span>
+          </div>
+        }
+
+        @if (continuation) {
+          <div role="status">
+            <p>{{ infoMessage }}</p>
+            <button type="button" (click)="continueToHome()">Continuar al inicio</button>
+          </div>
+        }
+
         <!-- Selector de Rol (Estudiante / Docente) vinculado al formulario reactivo -->
         <div class="role-selector">
           <button 
@@ -113,7 +138,7 @@
           <div class="form-group">
             <div class="label-row">
               <label for="password">Contraseña</label>
-              <a href="#forgot" class="forgot-link">¿Olvidaste tu contraseña?</a>
+              <button type="button" class="forgot-link-btn" (click)="openResetModal()">¿Olvidaste tu contraseña?</button>
             </div>
             <div class="input-wrapper">
               <span class="input-icon">
@@ -123,7 +148,7 @@
                 id="password" 
                 [type]="showPassword ? 'text' : 'password'" 
                 formControlName="password" 
-                placeholder="Ingresa al menos 6 caracteres"
+                placeholder="Ingresa al menos 8 caracteres"
                 [class.is-invalid]="isFieldInvalid('password')"
               />
               <button 
@@ -144,7 +169,7 @@
                 @if (loginForm.get('password')?.hasError('required')) {
                   La contraseña es requerida.
                 } @else if (loginForm.get('password')?.hasError('minlength')) {
-                  La contraseña debe tener al menos 6 caracteres.
+                  La contraseña debe tener al menos 8 caracteres.
                 }
               </span>
             }
@@ -164,8 +189,12 @@
           </div>
 
           <!-- Botón de acción principal con control de estado [disabled] -->
-          <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
-            Iniciar Experimento 🚀
+          <button type="submit" class="btn-primary" [disabled]="loginForm.invalid || isLoading">
+            @if (isLoading) {
+              <span class="spinner-small"></span> Iniciando sesión...
+            } @else {
+              Iniciar Experimento 🚀
+            }
           </button>
         </form>
 
@@ -175,10 +204,10 @@
             <div class="pin-icon">🔑</div>
             <div>
               <strong>¿Tienes un código PIN de tu profesor?</strong>
-              <p>Acceso directo a la sesión de hoy sin contraseña</p>
+              <p>Únete a un aula después de iniciar sesión</p>
             </div>
           </div>
-          <button type="button" class="btn-secondary">Ingresar PIN de Clase</button>
+          <button type="button" class="btn-secondary" (click)="openPinModal()">Ingresar PIN de Clase</button>
         </div>
 
         <!-- Enlace hacia el componente independiente de Registro -->
@@ -257,4 +286,81 @@
       <span>© 2026 ReactivA Pro. All rights reserved.</span>
     </div>
   </footer>
+
+  <!-- MODAL: Recuperar Contraseña -->
+  @if (isResetModalOpen) {
+    <div class="modal-backdrop" (click)="closeResetModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Recuperar Contraseña</h3>
+          <button type="button" class="btn-close" (click)="closeResetModal()" aria-label="Cerrar modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Ingresa tu correo electrónico escolar. Te enviaremos un enlace seguro para restablecer tu acceso.</p>
+          <div class="form-group">
+            <label for="resetEmailInput">Correo electrónico</label>
+            <input
+              id="resetEmailInput"
+              type="email"
+              [(ngModel)]="resetEmail"
+              placeholder="ej. alex@quimica.edu.co"
+              class="modal-input"
+            />
+          </div>
+          @if (resetMessage) {
+            <div class="alert alert-info mt-2">
+              <span>{{ resetMessage }}</span>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-text" (click)="closeResetModal()">Cancelar</button>
+          <button type="button" class="btn-modal-action" (click)="submitPasswordReset()" [disabled]="isResetLoading">
+            @if (isResetLoading) {
+              Enviando...
+            } @else {
+              Enviar Instrucciones
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: Ingresar PIN de Clase -->
+  @if (isPinModalOpen) {
+    <div class="modal-backdrop" (click)="closePinModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Ingresar PIN de Clase</h3>
+          <button type="button" class="btn-close" (click)="closePinModal()" aria-label="Cerrar modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Ingresa el código proporcionado por tu profesor (ej. <strong>CHEM-8420</strong>). Se canjeará en tu cuenta al iniciar sesión o registrarte.</p>
+          <div class="form-group">
+            <label for="pinInput">Código PIN</label>
+            <input
+              id="pinInput"
+              type="text"
+              [(ngModel)]="pinValue"
+              placeholder="CHEM-8420"
+              class="modal-input uppercase-input"
+              maxlength="9"
+            />
+          </div>
+          @if (pinError) {
+            <div class="alert alert-danger mt-2">
+              <span>{{ pinError }}</span>
+            </div>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-text" (click)="closePinModal()">Cancelar</button>
+          <button type="button" class="btn-modal-action" (click)="savePendingPin()">
+            Guardar PIN
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>
