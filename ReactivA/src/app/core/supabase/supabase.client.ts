@@ -6,15 +6,23 @@ import { environment } from '../../../environments/environment';
 const REMEMBER_ME_KEY = 'reactiva_remember_me';
 
 export function setRememberMePreference(remember: boolean): void {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    window.localStorage.setItem(REMEMBER_ME_KEY, remember ? 'true' : 'false');
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(REMEMBER_ME_KEY, remember ? 'true' : 'false');
+    }
+  } catch {
+    // Modo privado o storage bloqueado
   }
 }
 
 export function getRememberMePreference(): boolean {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    const val = window.localStorage.getItem(REMEMBER_ME_KEY);
-    return val !== 'false';
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const val = window.localStorage.getItem(REMEMBER_ME_KEY);
+      return val !== 'false';
+    }
+  } catch {
+    // Fallback seguro
   }
   return true;
 }
@@ -22,27 +30,43 @@ export function getRememberMePreference(): boolean {
 export class ConfigurableAuthStorage implements SupportedStorage {
   getItem(key: string): string | null {
     if (typeof window === 'undefined') return null;
-    const local = window.localStorage?.getItem(key);
-    if (local !== null && local !== undefined) return local;
-    return window.sessionStorage?.getItem(key) ?? null;
+    try {
+      const local = window.localStorage?.getItem(key);
+      if (local !== null && local !== undefined) return local;
+    } catch {
+      // localStorage bloqueado
+    }
+    try {
+      return window.sessionStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
   }
 
   setItem(key: string, value: string): void {
     if (typeof window === 'undefined') return;
     const remember = getRememberMePreference();
-    if (remember) {
-      window.localStorage?.setItem(key, value);
-      window.sessionStorage?.removeItem(key);
-    } else {
-      window.sessionStorage?.setItem(key, value);
-      window.localStorage?.removeItem(key);
+    try {
+      if (remember) {
+        window.localStorage?.setItem(key, value);
+        window.sessionStorage?.removeItem(key);
+      } else {
+        window.sessionStorage?.setItem(key, value);
+        window.localStorage?.removeItem(key);
+      }
+    } catch {
+      // Storage bloqueado
     }
   }
 
   removeItem(key: string): void {
     if (typeof window === 'undefined') return;
-    window.localStorage?.removeItem(key);
-    window.sessionStorage?.removeItem(key);
+    try {
+      window.localStorage?.removeItem(key);
+    } catch {}
+    try {
+      window.sessionStorage?.removeItem(key);
+    } catch {}
   }
 }
 

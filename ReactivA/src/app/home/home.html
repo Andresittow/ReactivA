@@ -24,14 +24,14 @@
     <!-- Acciones de Autenticación / Acceso al Dashboard -->
     <div class="nav-actions">
       @if (hasActiveSession) {
-        <div class="nav-user-chip" title="Sesión activa del estudiante">
+        <div class="nav-user-chip" title="Sesión activa">
           <i class="ph ph-user-circle"></i>
           <span>{{ profile.name }}</span>
           <span class="nav-level-tag">Nv. {{ gamification.level }}</span>
         </div>
-        <a routerLink="/dashboard" class="btn-nav btn-dashboard" title="Ir a mi Dashboard">
+        <a [routerLink]="dashboardUrl" class="btn-nav btn-dashboard" [title]="dashboardLabel">
           <i class="ph ph-squares-four"></i>
-          <span>Mi Dashboard</span>
+          <span>{{ dashboardLabel }}</span>
         </a>
       } @else {
         <a routerLink="/login" class="btn-nav btn-login" title="Acceder con tu cuenta">
@@ -72,9 +72,9 @@
         <!-- Botones de Acción (Call To Action) -->
         <div class="hero-actions-row">
           @if (hasActiveSession) {
-            <a routerLink="/dashboard" class="btn-hero btn-adventure">
+            <a [routerLink]="dashboardUrl" class="btn-hero btn-adventure">
               <i class="ph ph-squares-four"></i>
-              <span>Ir a mi Dashboard</span>
+              <span>{{ dashboardLabel }}</span>
             </a>
           } @else {
             <a routerLink="/register" class="btn-hero btn-adventure">
@@ -100,53 +100,15 @@
           }
         </div>
       </div>
-
-      <!-- Ilustración Científica del Átomo / Bohr Orbital -->
-      <div class="hero-visual-box">
-        <div class="bohr-atom-card">
-          <div class="bohr-orbital-scene">
-            <!-- Órbitas Concéntricas -->
-            <div class="orbit-ring ring-1">
-              <span class="electron-dot dot-1"></span>
-            </div>
-            <div class="orbit-ring ring-2">
-              <span class="electron-dot dot-2"></span>
-            </div>
-            <div class="orbit-ring ring-3">
-              <span class="electron-dot dot-3"></span>
-            </div>
-
-            <!-- Núcleo Atómico -->
-            <div class="atom-nucleus">
-              <i class="ph ph-flask nucleus-icon"></i>
-              <span class="nucleus-label">ReactivA</span>
-            </div>
-          </div>
-
-          <!-- Chips Informativos Flotantes -->
-          <div class="floating-chip chip-streak">
-            <span class="fire-icon">🔥</span>
-            <span>Racha de {{ gamification.streakDays }} Días</span>
-          </div>
-          <div class="floating-chip chip-table">
-            <i class="ph ph-table"></i>
-            <span>118 Elementos Cuánticos</span>
-          </div>
-          <div class="floating-chip chip-trophy">
-            <i class="ph ph-trophy"></i>
-            <span>Torneos Escolares</span>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
   <!-- ======================================================== -->
-  <!-- 2. RESUMEN DE MÓDULOS (GRID INFORMATIVO)                  -->
+  <!-- 2. SECCIÓN DE MÓDULOS DE REACTIVA (SHOWCASE)             -->
   <!-- ======================================================== -->
   <section id="modules-section" class="section-container modules-section">
     <div class="section-header">
-      <div class="section-tag">
+      <div class="section-tag tag-blue">
         <i class="ph ph-cube"></i>
         <span>Ecosistema de Aprendizaje</span>
       </div>
@@ -156,7 +118,7 @@
       </p>
     </div>
 
-    <!-- Grid Informativo de Tarjetas de Módulos (Solo Información) -->
+    <!-- Grid Informativo de Tarjetas de Módulos -->
     <div class="modules-grid">
       @for (module of modules; track module.id) {
         <article class="module-info-card" [ngClass]="module.themeColor">
@@ -188,12 +150,19 @@
             </ul>
           </div>
 
-          <!-- Pie Informativo: Recordatorio de Acceso -->
+          <!-- Pie: Enlace protegido al módulo -->
           <div class="card-footer-info">
-            <div class="access-pill">
-              <i class="ph ph-lock-simple"></i>
-              <span>Disponible al iniciar sesión</span>
-            </div>
+            @if (hasActiveSession) {
+              <a [routerLink]="'/' + module.id" class="access-pill">
+                <i class="ph ph-arrow-right"></i>
+                <span>Ingresar al Módulo</span>
+              </a>
+            } @else {
+              <a routerLink="/login" [queryParams]="{ returnUrl: '/' + module.id }" class="access-pill">
+                <i class="ph ph-lock-simple"></i>
+                <span>Disponible al iniciar sesión</span>
+              </a>
+            }
           </div>
         </article>
       }
@@ -282,14 +251,21 @@
         </p>
 
         <div class="cta-buttons-row">
-          <a routerLink="/register" class="btn-cta btn-register-cta">
-            <i class="ph ph-user-plus"></i>
-            <span>Registrarse Gratis</span>
-          </a>
-          <a routerLink="/login" class="btn-cta btn-login-cta">
-            <i class="ph ph-sign-in"></i>
-            <span>Iniciar Sesión</span>
-          </a>
+          @if (hasActiveSession) {
+            <a [routerLink]="dashboardUrl" class="btn-cta btn-register-cta">
+              <i class="ph ph-squares-four"></i>
+              <span>{{ dashboardLabel }}</span>
+            </a>
+          } @else {
+            <a routerLink="/register" class="btn-cta btn-register-cta">
+              <i class="ph ph-user-plus"></i>
+              <span>Registrarse Gratis</span>
+            </a>
+            <a routerLink="/login" class="btn-cta btn-login-cta">
+              <i class="ph ph-sign-in"></i>
+              <span>Iniciar Sesión</span>
+            </a>
+          }
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { PLATFORM_ID } from '@angular/core';
-import { AuthService } from './auth.service';
+import { AuthService, PROGRESS_SYNC_HANDLER, ProgressSyncHandler } from './auth.service';
 import { SUPABASE_CLIENT } from '../supabase/supabase.client';
 import { AuthError } from './auth-error';
 
@@ -9,6 +9,8 @@ describe('AuthService', () => {
   let service: AuthService;
   let mockSupabase: any;
   let mockRouter: any;
+  let mockProgressHandler: ProgressSyncHandler;
+  let authStateCallback: (event: string, session: any) => Promise<void>;
 
   beforeEach(() => {
     mockRouter = {
@@ -16,9 +18,17 @@ describe('AuthService', () => {
       navigate: vi.fn().mockResolvedValue(true)
     };
 
+    mockProgressHandler = {
+      hydrate: vi.fn().mockResolvedValue(undefined),
+      reset: vi.fn()
+    };
+
     mockSupabase = {
       auth: {
-        onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+        onAuthStateChange: vi.fn().mockImplementation((cb) => {
+          authStateCallback = cb;
+          return { data: { subscription: { unsubscribe: vi.fn() } } };
+        }),
         getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
         signInWithPassword: vi.fn(),
         signUp: vi.fn(),
@@ -50,7 +60,8 @@ describe('AuthService', () => {
         AuthService,
         { provide: SUPABASE_CLIENT, useValue: mockSupabase },
         { provide: Router, useValue: mockRouter },
-        { provide: PLATFORM_ID, useValue: 'browser' }
+        { provide: PLATFORM_ID, useValue: 'browser' },
+        { provide: PROGRESS_SYNC_HANDLER, useValue: mockProgressHandler }
       ]
     });
 
@@ -160,13 +171,53 @@ describe('AuthService', () => {
     expect(res.needsEmailConfirmation).toBe(false);
   });
 
-  it('cierra sesión, limpia el usuario y navega a /login con replaceUrl', async () => {
+  it('cierra sesión, limpia el usuario, resetea el progreso y navega a /login con replaceUrl', async () => {
     await service.signOut();
 
     expect(mockSupabase.auth.signOut).toHaveBeenCalled();
+    expect(mockProgressHandler.reset).toHaveBeenCalled();
     expect(service.user()).toBeNull();
     expect(service.isAuthenticated()).toBe(false);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/login'], { replaceUrl: true });
+  });
+
+  it('llama a hydrate() tras iniciar sesión exitosamente', async () => {
+    mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
+      data: {
+        user: { id: 'user-123', email: 'test@reactiva.edu' }
+      },
+      error: null
+    });
+
+    await service.signIn({
+      email: 'test@reactiva.edu',
+      password: 'password123',
+      rememberMe: true,
+      expectedRole: 'estudiante'
+    });
+
+    expect(mockProgressHandler.hydrate).toHaveBeenCalled();
+  });
+
+  it('llama a hydrate() al restaurar sesión activa', async () => {
+    mockSupabase.auth.getSession.mockResolvedValueOnce({
+      data: {
+        session: { user: { id: 'user-123', email: 'test@reactiva.edu' } }
+      },
+      error: null
+    });
+
+    await service.restoreSession();
+
+    expect(mockProgressHandler.hydrate).toHaveBeenCalled();
+  });
+
+  it('llama a reset() cuando onAuthStateChange emite SIGNED_OUT', async () => {
+    expect(authStateCallback).toBeDefined();
+    await authStateCallback('SIGNED_OUT', null);
+
+    expect(mockProgressHandler.reset).toHaveBeenCalled();
+    expect(service.user()).toBeNull();
   });
 
   it('devuelve la ruta de inicio adecuada para cada rol', () => {
