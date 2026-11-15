@@ -1,217 +1,108 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, inject, effect, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-
-/** Tarjeta de categoría de ayuda rápida. */
-export interface HelpCategory {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  colorTheme: 'blue' | 'purple' | 'cyan' | 'amber';
-  tags: string[];
-  linkRoute: string;
-}
-
-/** Pregunta frecuente del acordeón interactivo. */
-export interface FaqItem {
-  id: string;
-  question: string;
-  answerHtml: string;
-  categoryLabel: string;
-  isOpen: boolean;
-}
-
-/** Paso de la Guía Rápida de Uso (1-2-3). */
-export interface GuideStep {
-  stepBadge: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  tip: string;
-  icon: string;
-  colorTheme: 'cyan' | 'blue' | 'purple';
-}
+import { AuthService } from '../core/auth/auth.service';
+import { HelpRequestsService, HelpRequest } from '../core/services/help-requests.service';
 
 @Component({
-  selector: 'app-help',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './help.html',
-  styleUrl: './help.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-help', standalone: true, imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './help.html', styleUrl: './help.scss', changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HelpComponent {
-
-  /** Notificación flotante (toast) */
-  toastMessage: string | null = null;
-
-  /** 1. Categorías de Ayuda Rápida */
-  readonly categories: HelpCategory[] = [
-    {
-      id: 'virtual-lab',
-      title: 'Simulador & Virtual Lab',
-      description: 'Cómo armar experimentos, seleccionar equipos de laboratorio (buretas, matraces, mecheros Bunsen) y balancear ecuaciones de estequiometría y óxido-reducción.',
-      icon: 'ph ph-test-tube',
-      colorTheme: 'cyan',
-      tags: ['Equipos & Reactivos', 'Estequiometría', 'Reacciones Redox', 'Simulación 3D'],
-      linkRoute: '/virtual-lab'
-    },
-    {
-      id: 'periodic-table',
-      title: 'Tabla Periódica Interactiva',
-      description: 'Uso de filtros por familias químicas (metales, no metales, gases nobles), propiedades atómicas y visualizador del modelo orbital de Bohr.',
-      icon: 'ph ph-table',
-      colorTheme: 'purple',
-      tags: ['Familias Químicas', 'Modelo de Bohr', 'Configuración Electrónica', 'Electronegatividad'],
-      linkRoute: '/tabla-periodica'
-    },
-    {
-      id: 'organic-mission',
-      title: 'Misión Orgánica & Desafíos',
-      description: 'Sistema de gamificación: racha diaria de estudio, puntos de experiencia XP, vidas de laboratorio, insignias y tabla de clasificación por rangos.',
-      icon: 'ph ph-tree-structure',
-      colorTheme: 'amber',
-      tags: ['Racha Diaria', 'Puntos XP', 'Vidas & Desafíos', 'Grupos Funcionales'],
-      linkRoute: '/mision-organica'
-    },
-    {
-      id: 'profile',
-      title: 'Perfil & Calificaciones',
-      description: 'Consulta tu historial de prácticas, notas en escala 1.0 a 5.0, dominio por ramas de la química y descarga tu Ficha Académica Oficial en PDF.',
-      icon: 'ph ph-user-circle',
-      colorTheme: 'blue',
-      tags: ['Historial de Notas', 'Rúbricas Oficiales', 'Escala 1.0 a 5.0', 'Descargar PDF'],
-      linkRoute: '/profile'
-    }
-  ];
-
-  /** 2. Guía Rápida de Uso (Pasos 1-2-3) */
-  readonly guideSteps: GuideStep[] = [
-    {
-      stepBadge: 'Paso 1',
-      title: 'Selecciona tu Práctica o Módulo',
-      subtitle: 'Ruta Curricular Disponible',
-      description: 'Ingresa al Dashboard o Virtual Lab y escoge la experiencia pedagógica asignada: enlaces moleculares, estequiometría y balanceo, titulación ácido-base o química orgánica.',
-      tip: 'Consulta previamente los objetivos de aprendizaje y las rúbricas de evaluación oficiales asignadas por tu docente.',
-      icon: 'ph ph-target',
-      colorTheme: 'cyan'
-    },
-    {
-      stepBadge: 'Paso 2',
-      title: 'Utiliza el Equipo y Reactivos',
-      subtitle: 'Mesa de Trabajo Interactiva 3D',
-      description: 'Añade matraces Erlenmeyer, buretas graduadas, pipetas y mecheros Bunsen. Ajusta concentraciones molares, balancea coeficientes en tiempo real y observa las reacciones termoquímicas.',
-      tip: 'Puedes repetir los intentos cuantas veces necesites para mejorar la precisión del punto de equivalencia.',
-      icon: 'ph ph-toolbox',
-      colorTheme: 'blue'
-    },
-    {
-      stepBadge: 'Paso 3',
-      title: 'Revisa tu Feedback y Descarga el PDF',
-      subtitle: 'Calificaciones en Escala 1.0 a 5.0',
-      description: 'Al finalizar, dirígete a tu Perfil para consultar tu promedio, retroalimentación del docente y la rúbrica criterio por criterio. Descarga tu Ficha Académica en PDF.',
-      tip: 'Repite las simulaciones para perfeccionar tu precisión y elevar tu promedio general en el historial de prácticas.',
-      icon: 'ph ph-certificate',
-      colorTheme: 'purple'
-    }
-  ];
-
-  /** 3. Banco de Preguntas Frecuentes (FAQ Acordeón) */
-  faqs: FaqItem[] = [
-    {
-      id: 'faq-balanceo',
-      question: '¿Cómo balanceo una ecuación en el Laboratorio Virtual?',
-      categoryLabel: 'Simulador & Virtual Lab',
-      isOpen: true,
-      answerHtml: `
-        <p>El módulo de <strong>Balanceo de Ecuaciones Químicas</strong> de ReactivA valida la <em>Ley de Conservación de la Materia</em> en tiempo real:</p>
-        <ol>
-          <li><strong>Identifica reactivos y productos:</strong> observa la cantidad de átomos de cada elemento a ambos lados de la flecha reactiva.</li>
-          <li><strong>Modifica únicamente los coeficientes estequiométricos:</strong> utiliza los selectores <code>+</code> y <code>-</code> delante de cada molécula. <em>Nunca alteres los subíndices químicos</em>.</li>
-          <li><strong>Aplica el método de tanteo sugerido:</strong> balancea en orden: <em>Metales → No metales → Hidrógeno → Oxígeno</em>.</li>
-          <li><strong>Confirmación instantánea:</strong> cuando todos los elementos estén balanceados en proporciones mínimas enteras, el sistema activará el indicador de aprobación y sumará <strong>+25 XP</strong> a tu racha.</li>
-        </ol>
-      `
-    },
-    {
-      id: 'faq-xp-racha',
-      question: '¿Cómo funcionan los puntos XP y el sistema de racha diaria?',
-      categoryLabel: 'Misión Orgánica & Desafíos',
-      isOpen: false,
-      answerHtml: `
-        <p>ReactivA integra un sistema de gamificación formativa para recompensar la constancia investigativa:</p>
-        <ul>
-          <li><strong>Puntos de Experiencia (XP):</strong> se obtienen al resolver retos de balanceo (+25 XP), simulaciones 3D (+50 XP) y misiones de nomenclatura orgánica (+30 XP). Al acumular XP asciendes de rango: de <em>Aprendiz de Laboratorio</em> a <em>Alquimista Teórico</em> o <em>Maestro Molecular</em>.</li>
-          <li><strong>Racha Máxima (Días consecutivos):</strong> indicada con el icono 🔥 en tu Perfil. Avanza +1 día por cada jornada en que completes al menos una práctica o ejercicio.</li>
-          <li><strong>Vidas e Intentos:</strong> en Misión Orgánica dispones de vidas de prueba que se regeneran para promover el aprendizaje a partir del error.</li>
-        </ul>
-      `
-    },
-    {
-      id: 'faq-tabla-periodica',
-      question: '¿Cómo uso los filtros y el modelo 3D de la Tabla Periódica?',
-      categoryLabel: 'Tabla Periódica Interactiva',
-      isOpen: false,
-      answerHtml: `
-        <p>La <strong>Tabla Periódica Interactiva</strong> ofrece herramientas avanzadas para explorar los 118 elementos:</p>
-        <ul>
-          <li><strong>Filtros por Familias:</strong> selecciona categorías como Alcalinos, Alcalinotérreos, Metales de Transición, Halógenos o Gases Nobles para resaltarlos.</li>
-          <li><strong>Visualizador de Bohr:</strong> haz clic en cualquier elemento (ej. Carbono, Hierro, Oxígeno) para desplegar el modal con niveles de energía orbitales, electrones en movimiento y configuración electrónica condensada.</li>
-          <li><strong>Datos Físicos y Termodinámicos:</strong> consulta electronegatividad de Pauling, masa atómica, radio atómico y estados de oxidación (IUPAC).</li>
-        </ul>
-      `
-    },
-    {
-      id: 'faq-notas-perfil',
-      question: '¿Qué debo hacer si una práctica no aparece en mi perfil?',
-      categoryLabel: 'Perfil & Calificaciones',
-      isOpen: false,
-      answerHtml: `
-        <p>El registro de calificaciones está sincronizado con la <strong>Cátedra de Ciencias Experimentales</strong>:</p>
-        <ul>
-          <li><strong>Escala Oficial (1.0 a 5.0):</strong> la nota mínima de aprobación curricular es <strong>3.0 / 5.0</strong>. Las prácticas de excelencia se marcan como <em>"Aprobado con Mención" (5.0)</em>.</li>
-          <li><strong>Finalización de sesión:</strong> asegúrate de hacer clic en <em>"Finalizar Simulación / Guardar Práctica"</em> al terminar en el Virtual Lab para que la telemetría quede registrada.</li>
-          <li><strong>Comprobación en Perfil:</strong> visita la sección <strong>Profile</strong>. Si la nota no aparece, recarga la página o verifica tu conexión institucional.</li>
-          <li><strong>Rúbricas Oficiales:</strong> haz clic en el icono 👁️ de cualquier práctica para examinar la retroalimentación y el desglose de criterios evaluados por el docente.</li>
-        </ul>
-      `
-    },
-    {
-      id: 'faq-pdf',
-      question: '¿Cómo descargo mi Ficha Académica en formato PDF?',
-      categoryLabel: 'Perfil & Calificaciones',
-      isOpen: false,
-      answerHtml: `
-        <p>Para obtener tu reporte oficial de evidencias de laboratorio:</p>
-        <ol>
-          <li>Ingresa a la sección <strong>Profile</strong> desde la barra lateral de navegación.</li>
-          <li>En el encabezado superior, haz clic en el botón azul <strong>"Descargar Ficha (PDF)"</strong>.</li>
-          <li>El sistema generará tu documento con promedio lab (escala 1.0 a 5.0), horas acumuladas en el simulador, gráfico de dominio por ramas de la química e historial de prácticas validadas con sus rúbricas.</li>
-          <li>Guárdalo como PDF o imprímelo directamente para entregarlo a tu docente titular.</li>
-        </ol>
-      `
-    }
-  ];
-
-  constructor(private cdr: ChangeDetectorRef) {}
-
-  /** Alterna la expansión de una pregunta frecuente */
-  toggleFaq(id: string): void {
-    const target = this.faqs.find(f => f.id === id);
-    if (target) {
-      target.isOpen = !target.isOpen;
-      this.cdr.markForCheck();
-    }
+export class HelpComponent implements OnDestroy {
+  readonly auth = inject(AuthService);
+  private readonly service = inject(HelpRequestsService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private generation = 0;
+  private destroyed = false;
+  private loadedUserId: string | null = null;
+  query = '';
+  subject = '';
+  message = '';
+  sending = false;
+  loading = false;
+  error = '';
+  sendError = '';
+  toastMessage = '';
+  requests: HelpRequest[] = [];
+  get categories() {
+    return this.auth.role() === 'docente' ? [
+      { id: 'teacher', title: 'Panel docente', description: 'Consulta tu panel de enseñanza.', icon: 'ph ph-chalkboard-teacher', colorTheme: 'blue', linkRoute: '/teacher-dashboard' },
+      { id: 'classrooms', title: 'Mis aulas', description: 'Crea aulas, comparte el PIN y asigna talleres.', icon: 'ph ph-users', colorTheme: 'purple', linkRoute: '/my-classrooms' },
+      { id: 'settings', title: 'Configuración', description: 'Consulta las preferencias de tu cuenta.', icon: 'ph ph-gear', colorTheme: 'cyan', linkRoute: '/settings' }
+    ] : [
+      { id: 'virtual-lab', title: 'Laboratorio virtual', description: 'Explora equipos, registra experimentos y balancea ecuaciones.', icon: 'ph ph-test-tube', colorTheme: 'cyan', linkRoute: '/virtual-lab' },
+      { id: 'periodic-table', title: 'Tabla periódica', description: 'Explora elementos y sus propiedades.', icon: 'ph ph-table', colorTheme: 'purple', linkRoute: '/periodic-table' },
+      { id: 'organic-mission', title: 'Misión orgánica', description: 'Practica química orgánica.', icon: 'ph ph-tree-structure', colorTheme: 'amber', linkRoute: '/mision-organica' },
+      { id: 'profile', title: 'Mi perfil', description: 'Revisa tu progreso, historial y aula. Guarda tu ficha como PDF.', icon: 'ph ph-user-circle', colorTheme: 'blue', linkRoute: '/profile' }
+    ];
   }
-
-  /** Muestra un mensaje flotante temporal (toast) */
-  showToast(message: string): void {
-    this.toastMessage = message;
-    this.cdr.markForCheck();
-    setTimeout(() => {
-      this.toastMessage = null;
-      this.cdr.markForCheck();
-    }, 4000);
+  readonly guideSteps = [
+    { stepBadge: 'Paso 1', title: 'Elige una actividad', subtitle: 'Aprende a tu ritmo', description: 'Abre un módulo desde el menú y revisa sus instrucciones.', tip: 'Si eres docente, crea tu primera aula en Mis aulas.', icon: 'ph ph-target', colorTheme: 'cyan' },
+    { stepBadge: 'Paso 2', title: 'Practica y explora', subtitle: 'Aprendizaje interactivo', description: 'Ajusta coeficientes y utiliza los equipos del laboratorio.', tip: 'Puedes repetir las actividades; el laboratorio concede XP una sola vez por actividad.', icon: 'ph ph-toolbox', colorTheme: 'blue' },
+    { stepBadge: 'Paso 3', title: 'Revisa tu progreso', subtitle: 'Datos de tu cuenta', description: 'Consulta XP, nivel, insignias e historial en tu perfil.', tip: 'Las calificaciones y rúbricas sin registros se muestran vacías.', icon: 'ph ph-certificate', colorTheme: 'purple' }
+  ];
+  faqs = [
+    { id: 'balanceo', question: '¿Cómo balanceo una ecuación?', categoryLabel: 'Laboratorio', isOpen: true,
+      answer: 'Ajusta los coeficientes hasta conservar el número de átomos de cada elemento a ambos lados. El primer balanceo de cada ejercicio concede 50 XP. Repetirlo no vuelve a sumar XP.' },
+    { id: 'experimentos', question: '¿Cómo registro un experimento?', categoryLabel: 'Laboratorio', isOpen: false,
+      answer: 'Balancea la ecuación del ejercicio, deja un recipiente y al menos un reactivo activos en la mesa y pulsa Registrar experimento. La primera vez por ejercicio concede 50 XP adicionales. Puedes volver a practicar sin duplicar puntos.' },
+    { id: 'aula', question: '¿Cómo ingreso a mi aula con un PIN?', categoryLabel: 'Aulas', isOpen: false,
+      answer: 'En Perfil, introduce el PIN que te da tu docente en Mi aula. Solo puedes pertenecer a un aula a la vez. Si el aula está llena o el PIN cambió, consulta con tu docente.' },
+    { id: 'docente', question: '¿Cómo asigno un taller a mi aula?', categoryLabel: 'Docentes', isOpen: false,
+      answer: 'Abre Mis aulas, elige Asignar taller y completa el título, las instrucciones y la fecha opcional. Solo el docente propietario puede asignar talleres.' },
+    { id: 'perfil', question: '¿Por qué no veo notas o rúbricas?', categoryLabel: 'Perfil', isOpen: false,
+      answer: 'El perfil muestra el progreso y los eventos registrados de tu cuenta. Las notas, rúbricas, horas y mediciones sin una fuente disponible aparecen vacías; XP no equivale a una nota académica.' },
+    { id: 'pdf', question: '¿Cómo guardo mi ficha como PDF?', categoryLabel: 'Perfil', isOpen: false,
+      answer: 'En Perfil, pulsa Descargar ficha (PDF). En el diálogo de impresión selecciona Guardar como PDF. La ficha incluye tus datos reales y hasta 100 eventos recientes.' },
+    { id: 'soporte', question: '¿Qué hago si falta mi progreso?', categoryLabel: 'Soporte', isOpen: false,
+      answer: 'Comprueba que estás en la cuenta correcta y que tienes conexión. Si el problema persiste, envía una solicitud abajo indicando el módulo y lo que ocurrió. No incluyas tu contraseña ni claves.' }
+  ];
+  constructor() {
+    effect(() => {
+      const id = this.auth.user()?.id ?? null;
+      if (id === this.loadedUserId) return;
+      this.loadedUserId = id;
+      this.generation++; this.requests = []; this.subject = ''; this.message = '';
+      this.toastMessage = ''; this.sendError = ''; this.error = '';
+      if (id && this.browser) void this.load();
+    });
+  }
+  ngOnDestroy(): void { this.destroyed = true; this.generation++; }
+  private refresh(): void { if (!this.destroyed) this.cdr.markForCheck(); }
+  private normalized(value: string): string {
+    return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
+  }
+  get filteredFaqs() {
+    const q = this.normalized(this.query.trim());
+    return this.faqs.filter(f => this.normalized(f.question + ' ' + f.answer + ' ' + f.categoryLabel).includes(q));
+  }
+  toggleFaq(id: string): void { const faq = this.faqs.find(f => f.id === id); if (faq) faq.isOpen = !faq.isOpen; }
+  statusLabel(status: HelpRequest['status']): string {
+    return { pending: 'Pendiente', in_progress: 'En revisión', resolved: 'Resuelta' }[status];
+  }
+  async load(): Promise<void> {
+    const generation = this.generation;
+    this.loading = true; this.error = ''; this.refresh();
+    try { const requests = await this.service.listMine(); if (generation === this.generation) this.requests = requests; }
+    catch { if (generation === this.generation) this.error = 'No se pudieron cargar tus solicitudes.'; }
+    finally { if (generation === this.generation) { this.loading = false; this.refresh(); } }
+  }
+  async send(): Promise<void> {
+    if (this.sending) return;
+    const generation = this.generation;
+    if (this.subject.trim().length < 3 || this.subject.trim().length > 150 ||
+        this.message.trim().length < 10 || this.message.trim().length > 4000) {
+      this.sendError = 'Escribe un asunto de 3–150 caracteres y un mensaje de 10–4000.'; return;
+    }
+    this.sending = true; this.sendError = ''; this.toastMessage = ''; this.refresh();
+    try {
+      await this.service.send(this.subject, this.message);
+      if (generation !== this.generation) return;
+      this.subject = ''; this.message = ''; this.toastMessage = 'Solicitud enviada y guardada.';
+      await this.load();
+    } catch { if (generation === this.generation) this.sendError = 'No se pudo enviar la solicitud. Inténtalo nuevamente.'; }
+    finally { this.sending = false; this.refresh(); }
   }
 }

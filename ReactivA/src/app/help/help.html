@@ -1,134 +1,57 @@
 <div class="help-page">
-
-  <!-- Toast Informativo -->
-  @if (toastMessage) {
-    <div class="toast-banner" role="status" aria-live="polite">
-      <i class="ph ph-check-circle toast-icon"></i>
-      <span>{{ toastMessage }}</span>
-    </div>
-  }
-
-  <!-- 1. Encabezado Simple y Limpio -->
-  <header class="help-header">
-    <div class="help-header-icon">
-      <i class="ph ph-question"></i>
-    </div>
-    <div class="help-header-text">
-      <h1 class="help-title">Guía de Ayuda y Preguntas Frecuentes</h1>
-      <p class="help-subtitle">
-        Todo lo que necesitas saber para aprovechar al máximo los módulos de ReactivA: Virtual Lab, Tabla Periódica, Misión Orgánica y tu Perfil Académico.
-      </p>
-    </div>
+  @if (toastMessage) { <div class="toast-banner" role="status">{{ toastMessage }}</div> }
+  <header class="help-header"><div class="help-header-icon"><i class="ph ph-question"></i></div>
+    <div class="help-header-text"><h1 class="help-title">Guía de ayuda y preguntas frecuentes</h1>
+      <p class="help-subtitle">Encuentra instrucciones de los módulos y contacta con soporte.</p></div>
   </header>
-
-  <!-- 2. Categorías de Ayuda Rápida (Grid de 4 Cards) -->
-  <section class="section-block" aria-label="Categorías de ayuda rápida">
-    <h2 class="section-heading">Módulos de la Plataforma</h2>
-    <div class="categories-grid">
-      @for (cat of categories; track cat.id) {
-        <article class="category-card" [ngClass]="'theme-' + cat.colorTheme">
-          <div class="cat-icon-cell">
-            <i [class]="cat.icon"></i>
-          </div>
-          <h3 class="cat-title">{{ cat.title }}</h3>
-          <p class="cat-desc">{{ cat.description }}</p>
-          <div class="cat-tags-row">
-            @for (tag of cat.tags; track tag) {
-              <span class="tag-chip">{{ tag }}</span>
-            }
-          </div>
-          <div class="cat-footer">
-            <a [routerLink]="cat.linkRoute" class="cat-link">
-              <span>Ir al módulo</span>
-              <i class="ph ph-arrow-right"></i>
-            </a>
-          </div>
-        </article>
-      }
-    </div>
+  <section class="section-block" aria-label="Módulos de la plataforma"><h2 class="section-heading">Módulos de la plataforma</h2>
+    <div class="categories-grid">@for (cat of categories; track cat.id) {
+      <article class="category-card" [ngClass]="'theme-' + cat.colorTheme"><div class="cat-icon-cell"><i [class]="cat.icon"></i></div>
+        <h3 class="cat-title">{{ cat.title }}</h3><p class="cat-desc">{{ cat.description }}</p>
+        <div class="cat-footer"><a [routerLink]="cat.linkRoute" class="cat-link">Ir al módulo <i class="ph ph-arrow-right"></i></a></div>
+      </article>
+    }</div>
   </section>
-
-  <!-- 3. Guía Rápida de Uso (Tutorial 1-2-3) -->
-  <section class="section-block" aria-label="Guía rápida de simulación">
-    <h2 class="section-heading">Guía Rápida de Simulación</h2>
-    <p class="section-subheading">Flujo de 3 pasos para completar tus prácticas y obtener la mejor calificación</p>
-    <div class="steps-grid">
-      @for (step of guideSteps; track step.stepBadge) {
-        <div class="step-card" [ngClass]="'step-' + step.colorTheme">
-          <div class="step-lead">
-            <span class="step-badge">{{ step.stepBadge }}</span>
-            <div class="step-icon-wrap">
-              <i [class]="step.icon"></i>
-            </div>
-          </div>
-          <span class="step-sub">{{ step.subtitle }}</span>
-          <h3 class="step-title">{{ step.title }}</h3>
-          <p class="step-desc">{{ step.description }}</p>
-          <div class="step-tip">
-            <i class="ph ph-lightbulb tip-icon"></i>
-            <span>{{ step.tip }}</span>
-          </div>
-        </div>
-      }
-    </div>
+  <section class="section-block" aria-label="Guía rápida"><h2 class="section-heading">Guía rápida</h2>
+    <div class="steps-grid">@for (step of guideSteps; track step.stepBadge) {
+      <div class="step-card" [ngClass]="'step-' + step.colorTheme"><div class="step-lead"><span class="step-badge">{{ step.stepBadge }}</span><i [class]="step.icon"></i></div>
+        <span class="step-sub">{{ step.subtitle }}</span><h3 class="step-title">{{ step.title }}</h3>
+        <p class="step-desc">{{ step.description }}</p><div class="step-tip">{{ step.tip }}</div>
+      </div>
+    }</div>
   </section>
-
-  <!-- 4. Preguntas Frecuentes (Acordeón) -->
-  <section class="section-block faq-block" aria-label="Preguntas Frecuentes">
-    <h2 class="section-heading">Preguntas Frecuentes (FAQ)</h2>
-    <p class="section-subheading">Respuestas paso a paso a las dudas más comunes sobre la plataforma</p>
-
-    <div class="faq-list">
-      @for (faq of faqs; track faq.id) {
-        <article class="faq-item" [class.is-open]="faq.isOpen">
-          <button
-            type="button"
-            class="faq-btn"
-            (click)="toggleFaq(faq.id)"
-            [attr.aria-expanded]="faq.isOpen">
-            <div class="faq-question-block">
-              <span class="faq-label">{{ faq.categoryLabel }}</span>
-              <h3 class="faq-question">{{ faq.question }}</h3>
-            </div>
-            <div class="faq-caret">
-              <i class="ph" [class.ph-caret-down]="!faq.isOpen" [class.ph-caret-up]="faq.isOpen"></i>
-            </div>
-          </button>
-          @if (faq.isOpen) {
-            <div class="faq-body" [innerHTML]="faq.answerHtml"></div>
-          }
-        </article>
-      }
-    </div>
+  <section class="section-block faq-block" aria-label="Preguntas frecuentes">
+    <h2 class="section-heading">Preguntas frecuentes</h2>
+    <label for="faq-search">Buscar en preguntas y respuestas</label><input id="faq-search" class="support-input" [(ngModel)]="query" type="search" placeholder="Buscar ayuda" />
+    <div class="faq-list">@for (faq of filteredFaqs; track faq.id) {
+      <article class="faq-item" [class.is-open]="faq.isOpen"><button type="button" class="faq-btn" (click)="toggleFaq(faq.id)"
+        [attr.aria-expanded]="faq.isOpen" [attr.aria-controls]="'answer-' + faq.id">
+        <span class="faq-question-block"><span class="faq-label">{{ faq.categoryLabel }}</span><span class="faq-question">{{ faq.question }}</span></span>
+        <i class="ph" [class.ph-caret-down]="!faq.isOpen" [class.ph-caret-up]="faq.isOpen"></i>
+      </button>@if (faq.isOpen) { <div class="faq-body" [id]="'answer-' + faq.id">{{ faq.answer }}</div> }</article>
+    } @empty { <p>No hay preguntas que coincidan con tu búsqueda.</p> }</div>
   </section>
-
-  <!-- 5. Footer Institucional -->
-  <footer class="inst-footer">
-    <div class="inst-logo-row">
-      <div class="inst-logo-icon">
-        <i class="ph ph-flask"></i>
-      </div>
-      <div>
-        <h2 class="inst-name">ReactivA</h2>
-        <span class="inst-tagline">Plataforma Educativa de Química Interactiva</span>
-      </div>
-    </div>
-    <p class="inst-desc">
-      Entorno virtual de aprendizaje y simulación 3D para Educación Media (Grados 10° y 11°), alineado con los Estándares Básicos de Competencias en Ciencias Naturales.
-    </p>
-    <div class="inst-meta-row">
-      <div class="inst-meta-item">
-        <i class="ph ph-certificate"></i>
-        <span>Versión v2.4.0 · Edición Curricular 2024–2025</span>
-      </div>
-      <div class="inst-meta-item">
-        <i class="ph ph-clock-countdown"></i>
-        <span>Tutoría Lunes a Viernes · 7:00 a.m. a 4:00 p.m.</span>
-      </div>
-    </div>
-    <p class="inst-quote">
-      <em>"Inspirando la curiosidad científica a través de la simulación digital y el aprendizaje activo."</em>
-    </p>
-  </footer>
-
+  <section class="section-block" aria-labelledby="support-title">
+    <h2 class="section-heading" id="support-title">Contactar con soporte</h2>
+    <p>Describe el problema sin incluir contraseñas ni claves.</p>
+    <form class="support-form" (ngSubmit)="send()">
+      <fieldset [disabled]="sending">
+        <label for="help-subject">Asunto</label><input id="help-subject" class="support-input" name="subject" [(ngModel)]="subject" required minlength="3" maxlength="150" />
+        <label for="help-message">Mensaje</label><textarea id="help-message" class="support-input" name="message" [(ngModel)]="message" required minlength="10" maxlength="4000" rows="5"></textarea>
+      </fieldset>
+      @if (sendError) { <p role="alert">{{ sendError }}</p> }
+      <button type="submit" class="faq-btn support-submit" [disabled]="sending">{{ sending ? 'Enviando…' : 'Enviar solicitud' }}</button>
+    </form>
+    <h3>Tus 50 solicitudes más recientes</h3>
+    @if (loading) { <p role="status">Cargando solicitudes…</p> }
+    @else if (error) { <p role="alert">{{ error }}</p><button type="button" class="faq-btn" (click)="load()">Reintentar</button> }
+    @else {
+      @for (request of requests; track request.id) {
+        <article class="faq-item"><h4 class="faq-question">{{ request.subject }}</h4><p>{{ request.message }}</p>
+          <span class="faq-label">{{ statusLabel(request.status) }} · {{ request.createdAt | date:'medium' }}</span></article>
+      } @empty { <p>Aún no has enviado solicitudes.</p> }
+    }
+  </section>
+  <footer class="inst-footer"><div class="inst-logo-row"><i class="ph ph-flask"></i><h2 class="inst-name">ReactivA</h2></div>
+    <p class="inst-desc">Plataforma educativa de química interactiva.</p></footer>
 </div>

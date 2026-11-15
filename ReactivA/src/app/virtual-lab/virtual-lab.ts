@@ -1,7 +1,17 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, effect, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { AuthService } from '../core/auth/auth.service';
+import { StudentProgressService } from '../dashboard/student-progress.service';
+import { LearningEventsService } from '../core/services/learning-events.service';
+
+export interface LabProgress {
+  version: 1;
+  solved: string[];
+  experiments: string[];
+  exercises: { id: string; coefficients: (number | null)[] }[];
+}
 
 /**
  * Representa un equipo, instrumento o reactivo químico en el laboratorio virtual.
@@ -80,6 +90,91 @@ export interface BalancingExercise {
 })
 export class VirtualLabComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
+  private readonly auth = inject(AuthService);
+  private readonly progress = inject(StudentProgressService);
+  private readonly events = inject(LearningEventsService);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  progressReady = false;
+  progressLoading = false;
+  progressError = '';
+  completedExperiments = new Set<string>();
+  private generation = 0;
+  private destroyed = false;
+  private loadedUserId: string | null = null;
+  constructor() {
+    effect(() => {
+      const id = this.auth.user()?.id ?? null;
+      if (id === this.loadedUserId) return;
+      this.loadedUserId = id;
+      this.generation++;
+      this.progressReady = false;
+      this.completedExperiments.clear();
+      this.totalLabScore = 0; this.solvedCount = 0;
+      for (const ex of this.balancingExercises) {
+        ex.scoreAwarded = false; ex.isBalanced = false;
+        [...ex.reactants, ...ex.products].forEach(s => s.userCoeff = null);
+      }
+      if (id && this.browser) void this.restoreProgress();
+    });
+  }
+  async restoreProgress(): Promise<void> {
+    const generation = this.generation;
+    this.progressLoading = true; this.progressError = ''; this.progressReady = false;
+    try {
+      await this.progress.hydrate();
+      if (generation !== this.generation || this.destroyed) return;
+      const stored = this.progress.getModuleProgress<LabProgress>('virtual-lab');
+      const solved = new Set(Array.isArray(stored?.solved) ? stored.solved : []);
+      const experiments = new Set(Array.isArray(stored?.experiments) ? stored.experiments : []);
+      this.completedExperiments = new Set(this.balancingExercises.filter(ex => experiments.has(ex.id)).map(ex => ex.id));
+      for (const ex of this.balancingExercises) {
+        ex.scoreAwarded = solved.has(ex.id);
+        const saved = Array.isArray(stored?.exercises) ? stored.exercises.find(item => item.id === ex.id) : undefined;
+        [...ex.reactants, ...ex.products].forEach((species, index) => {
+          const value = saved?.coefficients?.[index];
+          species.userCoeff = typeof value === 'number' && Number.isInteger(value) && value > 0 ? value : null;
+        });
+      }
+      this.solvedCount = this.balancingExercises.filter(ex => ex.scoreAwarded).length;
+      this.totalLabScore = (this.solvedCount + this.completedExperiments.size) * 50;
+      this.progressReady = true;
+      this.evaluateCurrentExercise();
+    } catch {
+      if (generation === this.generation) this.progressError = 'No se pudo cargar tu progreso. Reintenta antes de registrar XP.';
+    } finally {
+      if (generation === this.generation && !this.destroyed) {
+        this.progressLoading = false; this.cdr.markForCheck();
+      }
+    }
+  }
+  private persistProgress(): void {
+    if (!this.progressReady || !this.browser || !this.loadedUserId || this.auth.user()?.id !== this.loadedUserId) return;
+    this.progress.saveModuleProgress<LabProgress>('virtual-lab', {
+      version: 1,
+      solved: this.balancingExercises.filter(ex => ex.scoreAwarded).map(ex => ex.id),
+      experiments: [...this.completedExperiments],
+      exercises: this.balancingExercises.map(ex => ({ id: ex.id,
+        coefficients: [...ex.reactants, ...ex.products].map(s => s.userCoeff) }))
+    });
+  }
+  get canRecordExperiment(): boolean {
+    return this.progressReady && !!this.loadedUserId && this.auth.user()?.id === this.loadedUserId && this.currentExercise.isBalanced && this.simulationRunning &&
+      this.activeEquipment.some(e => e.category === 'glassware') &&
+      this.activeEquipment.some(e => e.category === 'reagent');
+  }
+  completeExperiment(): void {
+    if (!this.canRecordExperiment) {
+      this.showToast('Balancea la ecuación y activa un recipiente y un reactivo con la simulación en marcha.'); return;
+    }
+    const ex = this.currentExercise;
+    if (this.completedExperiments.has(ex.id)) { this.showToast('Este experimento ya está registrado; puedes seguir practicando.'); return; }
+    this.completedExperiments.add(ex.id);
+    this.progress.addXp(50); this.totalLabScore += 50;
+    this.events.record({ module: 'virtual-lab', title: 'Experimento: ' + ex.title,
+      detail: 'Registro de práctica con ecuación balanceada y equipos activos.', xp: 50 });
+    this.persistProgress();
+    this.showToast('Experimento registrado. +50 XP');
+  }
 
   // 1. Buscador Reactivo con FormControl (Requerimiento 1)
   searchControl = new FormControl('');
@@ -694,8 +789,8 @@ export class VirtualLabComponent implements OnInit, OnDestroy {
   selectedExerciseFilter: string = 'all';
 
   // Gamificación y Puntuación
-  totalLabScore: number = 150; // XP inicial
-  streakDays: number = 18;
+  totalLabScore: number = 0; // XP inicial
+  get streakDays(): number { return this.progress.getGamificationState().streakDays; }
   solvedCount: number = 0;
 
   // Telemetría y estado de simulación
@@ -728,6 +823,7 @@ export class VirtualLabComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true; this.generation++;
     this.searchSubscription?.unsubscribe();
   }
 
@@ -1071,14 +1167,15 @@ export class VirtualLabComponent implements OnInit, OnDestroy {
 
     // Verificar que todos los coeficientes hayan sido ingresados y sean > 0
     const allReactantsFilled = ex.reactants.every(
-      r => r.userCoeff !== null && r.userCoeff !== undefined && r.userCoeff > 0
+      r => r.userCoeff !== null && r.userCoeff !== undefined && Number.isInteger(r.userCoeff) && r.userCoeff > 0
     );
     const allProductsFilled = ex.products.every(
-      p => p.userCoeff !== null && p.userCoeff !== undefined && p.userCoeff > 0
+      p => p.userCoeff !== null && p.userCoeff !== undefined && Number.isInteger(p.userCoeff) && p.userCoeff > 0
     );
 
     if (!allReactantsFilled || !allProductsFilled) {
       ex.isBalanced = false;
+      this.persistProgress();
       this.cdr.markForCheck();
       return;
     }
@@ -1117,18 +1214,22 @@ export class VirtualLabComponent implements OnInit, OnDestroy {
     ex.isBalanced = balanced;
 
     // Otorgar puntos y retroalimentación si se balanceó por primera vez
-    if (balanced && !ex.scoreAwarded) {
+    if (balanced && !ex.scoreAwarded && this.progressReady && !!this.loadedUserId && this.auth.user()?.id === this.loadedUserId) {
       ex.scoreAwarded = true;
+      this.progress.addXp(50);
+      this.events.record({ module: 'virtual-lab', title: 'Ecuación balanceada: ' + ex.title, xp: 50 });
       this.totalLabScore += 50;
       this.solvedCount++;
       this.showCelebrationBurst = true;
       this.showToast(`🎉 ¡Ecuación Balanceada! +50 XP (${ex.title})`);
       setTimeout(() => {
+        if (this.destroyed) return;
         this.showCelebrationBurst = false;
         this.cdr.markForCheck();
       }, 3000);
     }
 
+    this.persistProgress();
     this.cdr.markForCheck();
   }
 
@@ -1177,6 +1278,7 @@ export class VirtualLabComponent implements OnInit, OnDestroy {
     ex.reactants.forEach(r => (r.userCoeff = null));
     ex.products.forEach(p => (p.userCoeff = null));
     ex.isBalanced = false;
+    this.persistProgress();
     this.showToast('Coeficientes restablecidos');
     this.cdr.markForCheck();
   }
@@ -1247,6 +1349,7 @@ export class VirtualLabComponent implements OnInit, OnDestroy {
     this.toastMessage = message;
     this.cdr.markForCheck();
     setTimeout(() => {
+      if (this.destroyed) return;
       this.toastMessage = null;
       this.cdr.markForCheck();
     }, 3200);

@@ -128,4 +128,34 @@ describe('ClassroomService PR-V1', () => {
     queue.push({ data: null, error: new TypeError('Failed to fetch') });
     await expect(service.listMine()).rejects.toMatchObject({ code: 'network' });
   });
+  it('PR-V2 asigna taller con dueño autenticado y fecha opcional null', async () => {
+    queue.push({ data: { id: 'aula' }, error: null }, { data: null, error: null });
+    await service.assignWorkshop('aula', { title: ' Taller ', workshop: ' Balancea las ecuaciones ' });
+    expect(queries[0].eq).toHaveBeenCalledWith('teacher_id', 'teacher');
+    expect(client.from).toHaveBeenLastCalledWith('assignments');
+    expect(queries[1].insert).toHaveBeenCalledWith({
+      classroom_id: 'aula', title: 'Taller', workshop: 'Balancea las ecuaciones', due_date: null
+    });
+  });
+  it.each(['2026-02-30', 'mañana', '2026-13-01'])('PR-V2 rechaza fecha inválida %s', async dueDate => {
+    await expect(service.assignWorkshop('aula', { title: 'Taller', workshop: 'Instrucciones', dueDate }))
+      .rejects.toMatchObject({ code: 'invalid_input' });
+    expect(client.from).not.toHaveBeenCalled();
+  });
+  it('PR-V2 rechaza taller vacío, título largo y estudiante', async () => {
+    await expect(service.assignWorkshop('aula', { title: ' ', workshop: 'Taller' })).rejects.toMatchObject({ code: 'invalid_input' });
+    await expect(service.assignWorkshop('aula', { title: 'a'.repeat(151), workshop: 'Taller' })).rejects.toMatchObject({ code: 'invalid_input' });
+    user.set({ id: 's', role: 'estudiante' });
+    await expect(service.assignWorkshop('aula', { title: 'Taller', workshop: 'Texto' })).rejects.toMatchObject({ code: 'not_owner' });
+  });
+  it('PR-V2 no inserta taller si no es dueño del aula', async () => {
+    queue.push({ data: null, error: { code: 'PGRST116' } });
+    await expect(service.assignWorkshop('ajena', { title: 'Taller', workshop: 'Texto' })).rejects.toMatchObject({ code: 'not_owner' });
+    expect(client.from).toHaveBeenCalledTimes(1);
+  });
+  it('PR-V2 acepta una fecha real en formato ISO', async () => {
+    queue.push({ data: { id: 'aula' }, error: null }, { data: null, error: null });
+    await service.assignWorkshop('aula', { title: 'Taller', workshop: 'Balanceo', dueDate: '2026-12-01' });
+    expect(queries[1].insert).toHaveBeenCalledWith(expect.objectContaining({ due_date: '2026-12-01' }));
+  });
 });

@@ -1305,3 +1305,10 @@ $purple-text: #7e22ce;
     page-break-inside: avoid;
   }
 }
+.initials-avatar { display: grid; place-items: center; width: 90px; height: 90px; border-radius: 50%; background: #e0f2fe; color: #1d4ed8; font-size: 2rem; font-weight: 800; flex-shrink: 0; }
+.kpi-stat-number { display: block; }
+.branches-panel, .research-panel { padding: 1.5rem; }
+button:disabled { opacity: .55; cursor: wait; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+.modal-dialog-box { overflow-y: auto; }
+@media print { form, .branches-panel button { display: none !important; } .mid-split-grid { display: block; } .practice-card-item { break-inside: avoid; } }

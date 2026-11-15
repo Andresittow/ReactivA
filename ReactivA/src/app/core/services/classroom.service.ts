@@ -137,7 +137,20 @@ export class ClassroomService {
     });
   }
   async assignWorkshop(classroomId: string, input: AssignWorkshopInput): Promise<void> {
-    throw new Error('No implementado: lo implementa Vanessa (PR-V2)');
+    const user = this.user('docente');
+    const title = input.title.trim();
+    const workshop = input.workshop.trim();
+    const dueDate = input.dueDate || null;
+    if (!title || title.length > 150 || !workshop || workshop.length > 2000 ||
+      (dueDate && (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate) || !Number.isFinite(Date.parse(dueDate)) ||
+        new Date(dueDate).toISOString().slice(0, 10) !== dueDate))) {
+      throw new ClassroomError('invalid_input');
+    }
+    await this.request(this.client.from('classrooms').select('id')
+      .eq('id', classroomId).eq('teacher_id', user.id).single());
+    await this.request(this.client.from('assignments').insert({
+      classroom_id: classroomId, title, workshop, due_date: dueDate
+    }));
   }
   async joinByPin(pin: string): Promise<Classroom> {
     this.user('estudiante');
