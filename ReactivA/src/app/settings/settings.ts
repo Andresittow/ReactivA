@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 export type SettingsTab = 
@@ -19,38 +19,8 @@ export interface UserAccountData {
   joinDate: string;
 }
 
-export interface UserPreferences {
-  // Apariencia
-  theme: 'light' | 'dark' | 'system';
-  fontSize: 'sm' | 'md' | 'lg';
-  reduceMotion: boolean;
-
-  // Notificaciones
-  notifChallenges: boolean;
-  notifReminders: boolean;
-  notifUpdates: boolean;
-  notifAchievements: boolean;
-  notifLearningTips: boolean;
-
-  // Privacidad & Seguridad
-  profileVisibility: 'public' | 'institutional' | 'private';
-  showProgressPublicly: boolean;
-  allowPeerMessages: boolean;
-  twoFactorAuth: boolean;
-
-  // Preferencias de Aprendizaje
-  favoriteBranch: string;
-  preferredDifficulty: 'basico' | 'intermedio' | 'avanzado';
-  studyRemindersFrequency: 'daily' | 'weekdays' | 'none';
-  audioFeedback: boolean;
-  autoStepSolutions: boolean;
-
-  // Accesibilidad
-  highContrast: boolean;
-  dyslexicFont: boolean;
-  screenReaderOptimized: boolean;
-  largeInteractiveTargets: boolean;
-}
+import { UserPreferences } from '../core/models';
+export type { UserPreferences };
 
 const SETTINGS_STORAGE_KEY = 'reactiva_settings_preferences';
 const USER_STORAGE_KEY = 'reactiva_user_account_data';
@@ -101,6 +71,7 @@ const DEFAULT_ACCOUNT: UserAccountData = {
 })
 export class SettingsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private readonly platformId = inject(PLATFORM_ID);
   private fb = inject(FormBuilder);
 
   // Tab activo
@@ -162,6 +133,7 @@ export class SettingsComponent implements OnInit {
   // Persistencia Local (LocalStorage)
   // -------------------------------------------------------------
   private loadFromStorage(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     try {
       const savedPrefs = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (savedPrefs) {

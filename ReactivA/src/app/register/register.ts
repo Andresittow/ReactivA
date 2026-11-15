@@ -93,9 +93,8 @@ export class RegisterComponent {
   // 4. Manejo del envío del formulario con validación previa
   onSubmit(): void {
     if (this.registerForm.valid) {
-      console.log('Formulario válido. Registro exitoso en ReactivA:', this.registerForm.value);
       // Redirección al Dashboard o al Login
-      this.router.navigate(['/dashboard']);
+      this.router.navigate([this.selectedRole === 'docente' ? '/teacher-dashboard' : '/dashboard']);
     } else {
       // Si el formulario es inválido, marcamos todos los controles como touched para disparar las validaciones visuales
       this.registerForm.markAllAsTouched();

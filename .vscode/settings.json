@@ -1,0 +1,8 @@
+{
+  "git-graph.repository.onLoad.showCheckedOutBranch": false,
+  "git-graph.repository.showRemoteBranches": true,
+  "git-graph.repository.showRemoteHeads": true,
+  "git-graph.referenceLabels.combineLocalAndRemoteBranchLabels": false,
+  "git-graph.referenceLabels.alignment": "Branches (aligned to the graph) & Tags (on the right)",
+  "git-graph.date.type": "Author Date"
+}
