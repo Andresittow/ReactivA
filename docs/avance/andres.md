@@ -48,12 +48,12 @@
 ## FASE 1 y 2 — Mis componentes (rama `feature/Andres`)
 
 ### PR-A1 · StudentProgressService + home + dashboard
-- [ ] Migrar `StudentProgressService` a Supabase con patrón de caché síncrona + guardado asíncrono (`hydrate()`, `reset()`, `getModuleProgress`, `saveModuleProgress`). Mantener firmas públicas intactas.
-- [ ] Cálculo real de racha (`streakDays`) basado en `lastActiveDate`.
-- [ ] Eliminar valores mock / inventados por defecto.
-- [ ] `home`: integrar `AuthService` para saludo, botones por estado de sesión y redirección protegida con `returnUrl`.
-- [ ] `dashboard`: nombre real, persistencia de grado, progreso de unidades calculado, tareas diarias por usuario, integración con `LearningEventsService`.
-- [ ] Actualizar `dashboard.spec.ts` con dobles de prueba.
+- [x] Migrar `StudentProgressService` a Supabase con patrón de caché síncrona + guardado asíncrono (`hydrate()`, `reset()`, `getModuleProgress`, `saveModuleProgress`). Mantener firmas públicas intactas.
+- [x] Cálculo real de racha (`streakDays`) basado en `lastActiveDate`.
+- [x] Eliminar valores mock / inventados por defecto.
+- [x] `home`: integrar `AuthService` para saludo, botones por estado de sesión y redirección protegida con `returnUrl`.
+- [x] `dashboard`: nombre real, persistencia de grado, progreso de unidades calculado, tareas diarias por usuario, integración con `LearningEventsService`.
+- [x] Actualizar `dashboard.spec.ts` con dobles de prueba.
 
 ### PR-A2 · periodic-table + challenges (+ ranking)
 - [ ] `periodic-table`: sincronizar elementos explorados y récords de Memory con `module_progress` y registrar eventos/XP. Eliminar `localStorage`.
