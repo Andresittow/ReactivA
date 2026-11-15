@@ -157,3 +157,21 @@ $text-muted:      #8c9ba5;
     }
   }
 }
+
+.sidebar {
+  overflow-y: auto;
+  a:focus-visible, button:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 3px; }
+  .user-card { display: flex; align-items: center; gap: .5rem; padding: .75rem; color: #2c3e50;
+    min-width: 0;
+    strong { display: block; overflow-wrap: anywhere; font-size: .85rem; }
+    small { display: block; color: #627582; }
+    i { font-size: 1.5rem; }
+  }
+  .btn-logout { display: flex; align-items: center; justify-content: center; gap: .5rem;
+    width: 100%; padding: .75rem; border: 1px solid #e2e8f0; border-radius: 12px;
+    background: white; color: #2c3e50; cursor: pointer; font: inherit;
+    &:hover { background: #e2e8f0; }
+    &:disabled { opacity: .6; cursor: wait; }
+  }
+  &.collapsed .user-card { justify-content: center; padding: .5rem 0; }
+}

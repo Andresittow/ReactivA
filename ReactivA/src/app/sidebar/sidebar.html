@@ -1,68 +1,52 @@
 <aside class="sidebar" [class.collapsed]="isCollapsed">
-
-  <!-- Cabecera de Marca: ReactivA -->
   <div class="brand">
     <div class="brand-info">
-      <div class="logo-icon">
-        <i class="ph ph-flask"></i>
-      </div>
+      <div class="logo-icon"><i class="ph ph-flask" aria-hidden="true"></i></div>
       @if (!isCollapsed) {
-        <div class="brand-text">
-          <h2>ReactivA</h2>
-          <span>Plataforma de Química</span>
-        </div>
+        <div class="brand-text"><h2>ReactivA</h2><span>Plataforma de Química</span></div>
       }
     </div>
-
-    <!-- Botón Colapsar / Expandir -->
-    <button
-      type="button"
-      class="btn-toggle"
-      (click)="toggleSidebar()"
+    <button type="button" class="btn-toggle" (click)="toggleSidebar()"
       [title]="isCollapsed ? 'Expandir menú' : 'Colapsar menú'"
-      [attr.aria-label]="isCollapsed ? 'Expandir menú' : 'Colapsar menú'">
-      <i class="ph" [class.ph-caret-left]="!isCollapsed" [class.ph-caret-right]="isCollapsed"></i>
+      [attr.aria-label]="isCollapsed ? 'Expandir menú' : 'Colapsar menú'"
+      [attr.aria-expanded]="!isCollapsed">
+      <i class="ph" aria-hidden="true" [class.ph-caret-left]="!isCollapsed" [class.ph-caret-right]="isCollapsed"></i>
     </button>
   </div>
-
-  <!-- Navegación Principal -->
-  <nav class="nav-menu">
+  <nav class="nav-menu" aria-label="Navegación principal">
     <ul>
       @for (item of menuItems; track item.route) {
-        <li>
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
-            [title]="item.label">
-            <i class="ph" [ngClass]="item.icon"></i>
-            @if (!isCollapsed) {
-              <span>{{ item.label }}</span>
-            }
-          </a>
-        </li>
+        <li><a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+          [routerLinkActiveOptions]="{ exact: item.exact ?? false }" [title]="item.label" [attr.aria-label]="item.label">
+          <i class="ph" [ngClass]="item.icon" aria-hidden="true"></i>
+          @if (!isCollapsed) { <span>{{ item.label }}</span> }
+        </a></li>
       }
     </ul>
   </nav>
-
-  <!-- Menú Inferior (Settings & Help) -->
   <div class="footer-menu">
     <ul>
       @for (item of footerMenuItems; track item.route) {
-        <li>
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            (click)="onFooterClick(item)"
-            [title]="item.label">
-            <i class="ph" [ngClass]="item.icon"></i>
-            @if (!isCollapsed) {
-              <span>{{ item.label }}</span>
-            }
-          </a>
-        </li>
+        <li><a [routerLink]="item.route" routerLinkActive="active" ariaCurrentWhenActive="page"
+          (click)="onFooterClick(item)" [title]="item.label" [attr.aria-label]="item.label">
+          <i class="ph" [ngClass]="item.icon" aria-hidden="true"></i>
+          @if (!isCollapsed) { <span>{{ item.label }}</span> }
+        </a></li>
       }
     </ul>
+    @if (auth.user(); as user) {
+      <div class="user-card" [title]="user.fullName">
+        <i class="ph ph-user-circle" aria-hidden="true"></i>
+        @if (!isCollapsed) {
+          <div><strong>{{ user.fullName }}</strong><small>{{ user.role === 'docente' ? 'Docente' : 'Estudiante' }}</small></div>
+        }
+      </div>
+      <button type="button" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión"
+        (click)="signOut()" [disabled]="signingOut()" [attr.aria-busy]="signingOut()">
+        <i class="ph ph-sign-out" aria-hidden="true"></i>
+        @if (!isCollapsed) { <span>{{ signingOut() ? 'Cerrando sesión…' : 'Cerrar sesión' }}</span> }
+      </button>
+    }
+    @if (logoutError()) { <p role="alert">{{ logoutError() }}</p> }
   </div>
-
 </aside>
