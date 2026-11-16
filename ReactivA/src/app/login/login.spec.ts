@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 import { PLATFORM_ID } from '@angular/core';
 import { LoginComponent } from './login';
@@ -8,6 +8,7 @@ import { ClassroomService } from '../core/services/classroom.service';
 
 describe('LoginComponent: acceso real', () => {
   let component: LoginComponent;
+  let fixture: ComponentFixture<LoginComponent>;
   let navigate: ReturnType<typeof vi.spyOn>;
   let returnUrl: string;
   const auth = {
@@ -28,11 +29,63 @@ describe('LoginComponent: acceso real', () => {
         { provide: AuthService, useValue: auth }, { provide: ClassroomService, useValue: classroom },
         { provide: ActivatedRoute, useValue: { snapshot: { get queryParamMap() { return convertToParamMap({ returnUrl }); } } } }]
     });
-    component = TestBed.createComponent(LoginComponent).componentInstance;
+    fixture = TestBed.createComponent(LoginComponent);
+    component = fixture.componentInstance;
     navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     component.loginForm.patchValue({ email: 'persona@example.com', password: 'password123',
       fullName: 'Persona Prueba', confirmPassword: 'password123', school: 'Colegio Prueba', grade: '10', acceptTerms: true });
   });
+
+  for (const role of ['estudiante', 'docente'] as const) {
+    for (const password of ['abc12345', 'abc123']) {
+      it(`habilita el botón y consulta a Supabase como ${role} con contraseña de ${password.length} caracteres`, async () => {
+        component.loginForm.reset({ email: '', password: '', role: 'estudiante', rememberMe: false });
+        fixture.detectChanges();
+        const root = fixture.nativeElement as HTMLElement;
+        const button = root.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+        expect(button.disabled).toBe(true);
+        const roleButtons = root.querySelectorAll<HTMLButtonElement>('.role-selector button');
+        roleButtons[role === 'docente' ? 1 : 0].click();
+        for (const [id, value] of [['email', 'persona@example.com'], ['password', password]]) {
+          const input = root.querySelector<HTMLInputElement>(`#${id}`)!;
+          input.value = value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        await fixture.whenStable();
+        expect(component.loginForm.valid).toBe(true);
+        expect(button.disabled).toBe(false);
+        auth.signIn.mockResolvedValue({ role });
+        button.click();
+        await fixture.whenStable();
+        expect(auth.signIn).toHaveBeenCalledExactlyOnceWith({ email: 'persona@example.com', password, rememberMe: false, expectedRole: role });
+      });
+    }
+  }
+
+  for (const error of [new AuthError('network', 'Failed to fetch'), new AuthError('invalid_credentials', 'Invalid login credentials')]) {
+    it(`muestra ${error.code} en pantalla, libera carga y permite reintentar`, async () => {
+      let reject!: (error: AuthError) => void;
+      auth.signIn.mockReturnValueOnce(new Promise((_resolve, fail) => { reject = fail; }));
+      fixture.detectChanges();
+      const root = fixture.nativeElement as HTMLElement;
+      const button = root.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      const submit = vi.spyOn(component, 'onSubmit');
+      button.click();
+      // Do not await stability while the simulated HTTP request is pending.
+      fixture.detectChanges();
+      expect(component.isLoading).toBe(true);
+      expect(button.disabled).toBe(true);
+      reject(error);
+      await submit.mock.results[0].value;
+      await fixture.whenStable();
+      const expected = error.code === 'network' ? 'Error de conexión. Verifica tu conexión a internet.' : 'Correo o contraseña incorrectos.';
+      expect(root.querySelector('[role="alert"]')?.textContent).toContain(expected);
+      expect(component.errorMessage).toBeTruthy();
+      expect(component.isLoading).toBe(false);
+      expect(button.disabled).toBe(false);
+      expect(navigate).not.toHaveBeenCalled();
+    });
+  }
 
   it('bloquea formularios inválidos', async () => {
     component.loginForm.get('email')!.setValue('incorrecto');

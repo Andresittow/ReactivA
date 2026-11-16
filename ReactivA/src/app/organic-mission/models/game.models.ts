@@ -71,6 +71,10 @@ export interface LevelProgress {
 }
 
 export interface GameProgress {
+  /** Persisted reward ledger survives retries and resets to avoid duplicate XP. */
+  awardedQuestionIds?: string[];
+  awardedLevelIds?: number[];
+  finalBonusAwarded?: boolean;
   totalScore: number;
   currentLevel: number;
   levels: LevelProgress[];
