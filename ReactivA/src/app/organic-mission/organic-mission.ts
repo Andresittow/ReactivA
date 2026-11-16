@@ -8,13 +8,14 @@ import {
   OnInit,
   OnDestroy,
   signal,
-  computed
+  computed, inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { GameService } from './services/game.service';
-import { TeacherDashboardService } from '../teacher-dashboard/services/teacher-dashboard.service';
+import { ClassroomService } from '../core/services/classroom.service';
+import { AuthService } from '../core/auth/auth.service';
 import { LEVELS } from './data/questions.data';
 import {
   GameScreen,
@@ -81,35 +82,52 @@ export class MisionOrganicaComponent implements OnInit, OnDestroy {
   lostLifeIndex = signal<number>(-1);
 
   // ── Conexión con el Dashboard del Profesor ──────────────
-  activeTeacherPin = signal<string>('CHEM-8420');
+  private readonly classroomService = inject(ClassroomService);
+  private readonly auth = inject(AuthService);
+  private destroyed = false;
+  connectionLoading = signal(false);
+  connectionError = signal<string | null>(null);
+  classroomName = signal('');
+  activeTeacherPin = signal('');
   teacherGuidance = signal<{ title: string; message: string } | null>(null);
 
   constructor(
-    public gameService: GameService,
-    private teacherService: TeacherDashboardService
+    public gameService: GameService
   ) {}
 
   ngOnInit(): void {
-    this.syncTeacherConnection();
+    void this.gameService.initialize();
+    void this.syncTeacherConnection();
   }
 
-  /**
-   * Lee la configuración activa de la clase del docente y mensajes pedagógicos
-   */
-  syncTeacherConnection(): void {
-    this.activeTeacherPin.set(this.teacherService.getActivePin());
-    const guidance = this.teacherService.getStudentGuidance();
-    if (guidance) {
-      this.teacherGuidance.set(guidance);
-    }
-  }
-
-  dismissGuidance(): void {
+  async syncTeacherConnection(): Promise<void> {
+    if (this.connectionLoading()) return;
+    const id = this.auth.user()?.id;
+    if (!id) return;
+    this.connectionLoading.set(true);
+    this.connectionError.set(null);
+    this.activeTeacherPin.set('');
+    this.classroomName.set('');
     this.teacherGuidance.set(null);
-    this.teacherService.clearStudentGuidance();
+    try {
+      const classroom = await this.classroomService.getMyClassroom();
+      if (this.destroyed || this.auth.user()?.id !== id) return;
+      this.activeTeacherPin.set(classroom?.joinPin ?? '');
+      this.classroomName.set(classroom?.name ?? '');
+      const guidance = await this.gameService.getStudentGuidance();
+      if (!this.destroyed && this.auth.user()?.id === id) this.teacherGuidance.set(guidance);
+    } catch {
+      if (!this.destroyed && this.auth.user()?.id === id) this.connectionError.set('No se pudo cargar tu aula. Puedes continuar la misión o reintentar.');
+    } finally { if (!this.destroyed) this.connectionLoading.set(false); }
+  }
+
+  async dismissGuidance(): Promise<void> {
+    try { await this.gameService.clearStudentGuidance(); this.teacherGuidance.set(null); }
+    catch { this.connectionError.set('No se pudo marcar la orientación como leída. Inténtalo nuevamente.'); }
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.clearTimer();
   }
 
@@ -121,7 +139,7 @@ export class MisionOrganicaComponent implements OnInit, OnDestroy {
   }
 
   startLevel(levelId: number): void {
-    if (!this.gameService.isLevelUnlocked(levelId)) return;
+    if (!this.gameService.ready() || !this.gameService.isLevelUnlocked(levelId)) return;
 
     this.activeLevelId.set(levelId);
     const level = this.levels.find(l => l.id === levelId)!;

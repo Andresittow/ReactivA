@@ -50,7 +50,8 @@ export class LoginComponent {
     this.loginForm = this.fb.group({
       role: ['estudiante', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      // La política de creación pertenece al registro; login valida credenciales existentes.
+      password: ['', [Validators.required]],
       rememberMe: [false]
     });
   }

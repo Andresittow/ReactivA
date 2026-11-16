@@ -148,7 +148,7 @@
                 id="password" 
                 [type]="showPassword ? 'text' : 'password'" 
                 formControlName="password" 
-                placeholder="Ingresa al menos 8 caracteres"
+                placeholder="Ingresa tu contraseña"
                 [class.is-invalid]="isFieldInvalid('password')"
               />
               <button 
@@ -168,8 +168,6 @@
               <span class="error-text">
                 @if (loginForm.get('password')?.hasError('required')) {
                   La contraseña es requerida.
-                } @else if (loginForm.get('password')?.hasError('minlength')) {
-                  La contraseña debe tener al menos 8 caracteres.
                 }
               </span>
             }
