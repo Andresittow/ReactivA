@@ -13,3 +13,64 @@ html, body {
   background-color: #f8fafc;
   color: #1e293b;
 }
+
+/* Opt-in preferences: the default light design remains unchanged. */
+html[data-font-size='sm'] { font-size: 14px; }
+html[data-font-size='md'] { font-size: 16px; }
+html[data-font-size='lg'] { font-size: 20px; }
+html.theme-dark {
+  color-scheme: dark;
+  --reactiva-surface: #172235;
+  --reactiva-text: #e2e8f0;
+  --reactiva-border: #536580;
+  &, body { background-color: #0f172a; color: var(--reactiva-text); }
+  body :is([class$='-page'], [class$='-layout'], .dashboard-container, .game-wrapper,
+    .settings-nav-sidebar, .sidebar, .teacher-sidebar, .app-main) {
+    background-color: #0f172a !important; color: var(--reactiva-text);
+  }
+  body :is([class~='settings-card'], [class~='task-card'], [class~='route-card'],
+    [class~='level-card'], [class~='question-card'], [class~='stat-card'],
+    .modal-box, .modal-card, .form-card, .user-card, .guide-card, .equipment-card,
+    .radio-card, .theme-card, .theme-label-row, .nav-tab-btn, .nav-footer-card,
+    .teacher-live-badge, .option-btn, .form-input, .form-select) {
+    background: var(--reactiva-surface) !important;
+    color: var(--reactiva-text) !important; border-color: var(--reactiva-border) !important;
+  }
+  body :is(h1, h2, h3, h4, h5, p, label, strong, .info-value, .tab-title, .tab-desc,
+    .toggle-name, .toggle-sub, .section-card-desc, .pane-subtitle, .header-subtitle) {
+    color: var(--reactiva-text) !important;
+  }
+  input, select, textarea { color-scheme: dark; background-color: #172235; color: #e2e8f0; }
+  a { color: #7dd3fc; }
+}
+html.reduce-motion {
+  &, *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+html.dyslexic-font body :is(p, span, label, input, select, textarea, button, h1, h2, h3, h4) {
+  font-family: Verdana, Arial, sans-serif !important;
+  letter-spacing: .06em; word-spacing: .12em; line-height: 1.7;
+}
+html.large-targets body :is(button, a, input:not([type='checkbox']):not([type='radio']), select, [role='button']) {
+  min-height: 44px; min-width: 44px;
+}
+html.large-targets body :is(.switch-control, .radio-card) { min-height: 44px; }
+html.high-contrast {
+  &, body { background-color: #000 !important; color: #fff !important; }
+  body :is(main, aside, section, article, nav, header, footer, [class$='-card'],
+    [class$='-page'], [class$='-layout'], .dashboard-container, .game-wrapper, .screen,
+    .settings-card, .modal-box, .theme-card, .teacher-live-badge) {
+    background: #000 !important; border-color: #fff !important; color: #fff !important;
+  }
+  body :is(p, span, label, strong, h1, h2, h3, h4) { color: #fff !important; }
+  body :is(button, input, select, textarea, [role='button']) {
+    background-color: #000 !important; color: #fff !important; border: 2px solid #fff !important;
+  }
+  a { color: #ffff00 !important; text-decoration: underline; }
+}
+html:is(.high-contrast, .theme-dark, .large-targets) :focus-visible {
+  outline: 3px solid #f59e0b !important; outline-offset: 3px;
+}

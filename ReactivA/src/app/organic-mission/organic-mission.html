@@ -3,6 +3,15 @@
      ============================================================ -->
 
 <div class="game-wrapper">
+  @if (!gameService.ready()) {
+    <div class="screen intro-screen" role="status">
+      @if (gameService.error()) {
+        <p role="alert">{{ gameService.error() }}</p>
+        <button type="button" class="btn-back" (click)="gameService.initialize()">Reintentar</button>
+      } @else { <p>Cargando tu progreso de Misión Orgánica…</p> }
+    </div>
+  } @else {
+
 
   <!-- ══════════════════════════════════════════════════
        PANTALLA 1: INTRO
@@ -16,11 +25,16 @@
       </a>
 
       <!-- Conexión en vivo con el Dashboard del Profesor -->
-      <div class="teacher-live-badge" title="Sesión supervisada por el docente">
-        <span class="status-dot-pulse"></span>
-        <span class="ph ph-chalkboard-teacher"></span>
-        <span>Supervisión Docente Activa &bull; PIN: <strong>{{ activeTeacherPin() }}</strong></span>
-      </div>
+      @if (connectionLoading()) { <p role="status">Cargando tu aula…</p> }
+      @if (connectionError()) {
+        <div role="alert"><p>{{ connectionError() }}</p><button type="button" class="btn-back" (click)="syncTeacherConnection()">Reintentar</button></div>
+      }
+      @if (activeTeacherPin()) {
+        <div class="teacher-live-badge" title="Aula del estudiante">
+          <span class="ph ph-chalkboard-teacher"></span>
+          <span>{{ classroomName() }} &bull; PIN: <strong>{{ activeTeacherPin() }}</strong></span>
+        </div>
+      }
 
       <!-- Guía Pedagógica enviada desde el Panel del Profesor -->
       @if (teacherGuidance()) {
@@ -641,5 +655,6 @@
     </div>
   }
 
+  }
 </div>
 

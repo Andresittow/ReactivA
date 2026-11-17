@@ -45,21 +45,51 @@
 
   <!-- Contenedor Principal (Dos Columnas) -->
   <main class="main-layout">
-    
+
     <!-- Columna Izquierda: Tarjeta de Formulario Principal -->
     <div class="form-container">
       <div class="form-card">
+
+        @if (continuation) {
+          <div role="status">
+            <p>{{ infoMessage }}</p>
+            <button type="button" (click)="continueToHome()">Continuar al inicio</button>
+          </div>
+        }
+
+        <!-- Mensaje de Error en Registro -->
+        @if (errorMessage) {
+          <div class="alert alert-danger" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <!-- Pantalla Informativa: Revisa tu Correo -->
+        @if (needsEmailConfirmation) {
+          <div class="confirmation-screen">
+            <div class="confirm-icon">✉️</div>
+            <h2>¡Revisa tu correo escolar!</h2>
+            <p>Hemos enviado un enlace de confirmación a <strong>{{ registeredEmail }}</strong>.</p>
+            <p class="confirm-note">Abre el correo y confirma tu cuenta para activar tu acceso a ReactivA e iniciar tu primer experimento.</p>
+            <button type="button" class="btn-submit" (click)="goToLogin()">
+              Ir a Iniciar Sesión 🚀
+            </button>
+          </div>
+        } @else {
 
         <!-- Selector de Perfil Educativo -->
         <div class="profile-select-section">
           <label class="section-title">Selecciona tu perfil educativo</label>
           <div class="role-grid">
-            
+
             <!-- Opción Estudiante -->
-            <button 
-              type="button" 
-              class="role-card" 
-              [class.active]="selectedRole === 'estudiante'" 
+            <button
+              type="button"
+              class="role-card"
+              [class.active]="selectedRole === 'estudiante'"
               (click)="setRole('estudiante')">
               <div class="role-icon-box student-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -82,10 +112,10 @@
             </button>
 
             <!-- Opción Docente / Tutor -->
-            <button 
-              type="button" 
-              class="role-card" 
-              [class.active]="selectedRole === 'docente'" 
+            <button
+              type="button"
+              class="role-card"
+              [class.active]="selectedRole === 'docente'"
               (click)="setRole('docente')">
               <div class="role-icon-box teacher-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -140,7 +170,7 @@
 
         <!-- Formulario de Registro Reactivo -->
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-          
+
           <div class="inputs-grid">
             <!-- Nombre Completo -->
             <div class="field-item">
@@ -151,10 +181,10 @@
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                   </svg>
                 </span>
-                <input 
-                  id="fullName" 
-                  type="text" 
-                  formControlName="fullName" 
+                <input
+                  id="fullName"
+                  type="text"
+                  formControlName="fullName"
                   placeholder="Camila Morales"
                   [class.is-invalid]="isFieldInvalid('fullName')"
                 />
@@ -165,14 +195,16 @@
                     El nombre completo es obligatorio.
                   } @else if (registerForm.get('fullName')?.hasError('minlength')) {
                     El nombre debe tener al menos 3 caracteres.
+                  } @else if (registerForm.get('fullName')?.hasError('pattern')) {
+                    Solo se permiten letras, espacios y acentos.
                   }
                 </span>
               }
             </div>
 
-            <!-- Correo Escolar o Código PIN -->
+            <!-- Correo Escolar -->
             <div class="field-item">
-              <label for="email">Correo Escolar o Código PIN</label>
+              <label for="email">Correo Escolar</label>
               <div class="input-container">
                 <span class="field-icon">
                   <svg viewBox="0 0 20 20" fill="currentColor">
@@ -180,10 +212,10 @@
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                   </svg>
                 </span>
-                <input 
-                  id="email" 
-                  type="email" 
-                  formControlName="email" 
+                <input
+                  id="email"
+                  type="email"
+                  formControlName="email"
                   placeholder="c.morales@colegio.edu"
                   [class.is-invalid]="isFieldInvalid('email')"
                 />
@@ -209,18 +241,13 @@
                       <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                     </svg>
                   </span>
-                  <input 
-                    id="grade" 
-                    type="text" 
-                    formControlName="grade" 
+                  <input
+                    id="grade"
+                    type="text"
+                    formControlName="grade"
                     placeholder="10° Grado / Química General"
                     [class.is-invalid]="isFieldInvalid('grade')"
                   />
-                  <span class="select-chevron">
-                    <svg viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                  </span>
                 </div>
                 @if (isFieldInvalid('grade')) {
                   <span class="error-msg">El grado académico es obligatorio para estudiantes.</span>
@@ -237,19 +264,67 @@
                     <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                   </svg>
                 </span>
-                <input 
-                  id="school" 
-                  type="text" 
-                  formControlName="school" 
-                  placeholder="Colegio San Ignacio"
+                <input
+                  id="school"
+                  type="text"
+                  formControlName="school"
+                  placeholder="Ej. Colegio San Ignacio"
+                  [class.is-invalid]="isFieldInvalid('school')"
                 />
-                <span class="valid-badge" title="Institución verificada">
-                  <svg viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                </span>
               </div>
+              @if (isFieldInvalid('school')) {
+                <span class="error-msg">Ingresa el nombre de tu colegio o institución (mínimo 3 letras).</span>
+              }
             </div>
+
+            <!-- PIN de Clase (Opcional, solo estudiante) -->
+            @if (selectedRole === 'estudiante') {
+              <div class="field-item">
+                <label for="classPin">Código PIN de clase (Opcional)</label>
+                <div class="input-container">
+                  <span class="field-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H4v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                  <input
+                    id="classPin"
+                    type="text"
+                    formControlName="classPin"
+                    placeholder="Ej. CHEM-8420"
+                    class="uppercase-field"
+                    [class.is-invalid]="isFieldInvalid('classPin')"
+                  />
+                </div>
+                @if (isFieldInvalid('classPin')) {
+                  <span class="error-msg">El formato debe ser CHEM-XXXX (ej. CHEM-8420).</span>
+                }
+              </div>
+            }
+
+            <!-- Código de Invitación Docente (Obligatorio, solo docente) -->
+            @if (selectedRole === 'docente') {
+              <div class="field-item">
+                <label for="teacherInviteCode">Código de Invitación Docente *</label>
+                <div class="input-container">
+                  <span class="field-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                  </span>
+                  <input
+                    id="teacherInviteCode"
+                    type="text"
+                    formControlName="teacherInviteCode"
+                    placeholder="Código otorgado por la coordinación"
+                    [class.is-invalid]="isFieldInvalid('teacherInviteCode')"
+                  />
+                </div>
+                @if (isFieldInvalid('teacherInviteCode')) {
+                  <span class="error-msg">El código de invitación docente es obligatorio para crear cuentas de profesor.</span>
+                }
+              </div>
+            }
 
             <!-- Contraseña -->
             <div class="field-item">
@@ -260,17 +335,17 @@
                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                   </svg>
                 </span>
-                <input 
-                  id="password" 
-                  [type]="showPassword ? 'text' : 'password'" 
-                  formControlName="password" 
-                  placeholder="Mínimo 6 caracteres"
+                <input
+                  id="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Mínimo 8 caracteres (letras y números)"
                   [class.is-invalid]="isFieldInvalid('password')"
                 />
-                <button 
-                  type="button" 
-                  class="eye-btn" 
-                  (click)="togglePasswordVisibility()" 
+                <button
+                  type="button"
+                  class="eye-btn"
+                  (click)="togglePasswordVisibility()"
                   aria-label="Ver u ocultar contraseña">
                   <svg viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
@@ -282,8 +357,8 @@
                 <span class="error-msg">
                   @if (registerForm.get('password')?.hasError('required')) {
                     La contraseña es obligatoria.
-                  } @else if (registerForm.get('password')?.hasError('minlength')) {
-                    La contraseña debe tener al menos 6 caracteres.
+                  } @else if (registerForm.get('password')?.hasError('minlength') || registerForm.get('password')?.hasError('pattern')) {
+                    La contraseña debe tener al menos 8 caracteres e incluir letras y números.
                   }
                 </span>
               }
@@ -298,17 +373,17 @@
                     <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                   </svg>
                 </span>
-                <input 
-                  id="confirmPassword" 
-                  [type]="showConfirmPassword ? 'text' : 'password'" 
-                  formControlName="confirmPassword" 
+                <input
+                  id="confirmPassword"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  formControlName="confirmPassword"
                   placeholder="Repite tu contraseña"
                   [class.is-invalid]="isFieldInvalid('confirmPassword') || hasPasswordMismatch()"
                 />
-                <button 
-                  type="button" 
-                  class="eye-btn" 
-                  (click)="toggleConfirmPasswordVisibility()" 
+                <button
+                  type="button"
+                  class="eye-btn"
+                  (click)="toggleConfirmPasswordVisibility()"
                   aria-label="Ver u ocultar contraseña">
                   <svg viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
@@ -329,7 +404,7 @@
           <div class="password-meter-box">
             <div class="meter-labels">
               <span class="meter-text">Seguridad de la contraseña:</span>
-              <span class="meter-status">Fuerte (6+ car., núm. y símbolo)</span>
+              <span class="meter-status">Requisito: Mínimo 8 caracteres, con letras y números</span>
             </div>
             <div class="meter-track">
               <div class="meter-segment filled"></div>
@@ -360,8 +435,12 @@
           </div>
 
           <!-- Botón Principal de Envío con Property Binding [disabled] -->
-          <button type="submit" class="btn-submit" [disabled]="registerForm.invalid">
-            Comenzar a Experimentar 🚀
+          <button type="submit" class="btn-submit" [disabled]="registerForm.invalid || isLoading">
+            @if (isLoading) {
+              <span class="spinner-small"></span> Registrando cuenta...
+            } @else {
+              Comenzar a Experimentar 🚀
+            }
           </button>
 
           <!-- Enlace de retorno hacia el Login independiente -->
@@ -372,15 +451,17 @@
 
         </form>
 
+        } <!-- Cierre de @else de needsEmailConfirmation -->
+
       </div>
     </div>
 
     <!-- Columna Derecha: Tarjetas Informativas y Beneficios -->
     <div class="info-container">
-      
+
       <!-- Tarjeta 1: Beneficios y Estado de Cuota Escolar -->
       <section class="info-card benefits-card">
-        
+
         <div class="benefits-header">
           <div class="badge-icon-blue">
             <svg viewBox="0 0 20 20" fill="currentColor">
@@ -396,7 +477,7 @@
 
         <!-- Lista de Beneficios -->
         <ul class="perks-list">
-          
+
           <li class="perk-item">
             <div class="perk-icon-circle bg-amber">
               <span class="emoji-icon">🔥</span>
