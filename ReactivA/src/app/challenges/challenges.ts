@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StudentProgressService } from '../dashboard/student-progress.service';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { SUPABASE_CLIENT } from '../core/supabase/supabase.client';
 
 /**
  * Estructura de un Desafío / Misión Activa
@@ -77,6 +79,13 @@ export interface CurricularCompetencyMetric {
 export class ChallengesComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private progressService = inject(StudentProgressService);
+  private supabase: SupabaseClient = inject(SUPABASE_CLIENT);
+
+  isLoading = true;
+  loadError = '';
+  leaderboardLoading = false;
+  leaderboardError = '';
+  readonly nationalLeaderboardDisabled = true;
 
   // --------------------------------------------------------
   // Datos del Encabezado y Progreso del Usuario Sincronizado
@@ -85,13 +94,13 @@ export class ChallengesComponent implements OnInit, OnDestroy {
   readonly isLiveSeason = true;
   readonly seasonEndsInDays = 14;
 
-  studentName = 'Científico';
-  userLevel = 14;
+  studentName = 'Estudiante';
+  userLevel = 1;
   userTitle = 'Alquimista Experto';
-  userStreakDays = 5;
-  currentXP = 4850;
-  nextLevelXP = 5000;
-  xpProgressPercent = 97;
+  userStreakDays = 0;
+  currentXP = 0;
+  nextLevelXP = 300;
+  xpProgressPercent = 0;
 
   // Widget de Torneo Activo
   readonly activeTournament = {
@@ -121,13 +130,13 @@ export class ChallengesComponent implements OnInit, OnDestroy {
       tag: 'Diario (+50 XP)',
       tagType: 'daily',
       xpReward: 50,
-      currentProgress: 3,
+      currentProgress: 0,
       totalProgress: 3,
       unit: 'ecuaciones',
-      progressPercent: 100,
-      isClaimed: true,
+      progressPercent: 0,
+      isClaimed: false,
       buttonLabel: '¡Reclamado!',
-      buttonActionType: 'claimed',
+      buttonActionType: 'enter',
       icon: 'ph-arrows-left-right',
       competencyTrack: 'Conservación de masa y números de oxidación',
       pedagogicEfficiency: 96
@@ -139,10 +148,10 @@ export class ChallengesComponent implements OnInit, OnDestroy {
       tag: 'Diario (+40 XP)',
       tagType: 'daily',
       xpReward: 40,
-      currentProgress: 1,
+      currentProgress: 0,
       totalProgress: 2,
       unit: 'elementos',
-      progressPercent: 50,
+      progressPercent: 0,
       isClaimed: false,
       buttonLabel: 'Continuar (+40 XP)',
       buttonActionType: 'continue',
@@ -157,10 +166,10 @@ export class ChallengesComponent implements OnInit, OnDestroy {
       tag: 'Semanal (+200 XP)',
       tagType: 'weekly',
       xpReward: 200,
-      currentProgress: 3,
+      currentProgress: 0,
       totalProgress: 5,
       unit: 'sintetizados',
-      progressPercent: 60,
+      progressPercent: 0,
       isClaimed: false,
       buttonLabel: 'Ver Síntesis',
       buttonActionType: 'view',
@@ -176,10 +185,10 @@ export class ChallengesComponent implements OnInit, OnDestroy {
       tag: 'Misión Épica (+500 XP)',
       tagType: 'epic',
       xpReward: 500,
-      currentProgress: 4,
+      currentProgress: 0,
       totalProgress: 5,
       unit: 'seguidos',
-      progressPercent: 80,
+      progressPercent: 0,
       isClaimed: false,
       buttonLabel: 'Entrar al Matraz',
       buttonActionType: 'enter',
@@ -195,7 +204,9 @@ export class ChallengesComponent implements OnInit, OnDestroy {
   // --------------------------------------------------------
   activeLeaderboardTab: 'class' | 'school' | 'national' = 'class';
 
-  classLeaderboard: LeaderboardEntry[] = [
+  classLeaderboard: LeaderboardEntry[] = [];
+  /* Legacy mock rankings removed from runtime; real data is loaded from RPC.
+  private readonly legacyClassLeaderboard: LeaderboardEntry[] = [
     {
       rank: 1,
       name: 'Mateo R.',
@@ -250,19 +261,27 @@ export class ChallengesComponent implements OnInit, OnDestroy {
     }
   ];
 
-  schoolLeaderboard: LeaderboardEntry[] = [
+  ];
+  private readonly legacySchoolLeaderboard: LeaderboardEntry[] = [
     { rank: 1, name: 'Lucas H.', avatarText: 'LH', avatarColor: 'from-amber-400 to-yellow-600', level: 18, xp: 6240, isLeader: true, streakDays: 14, schoolGrade: '11° A' },
     { rank: 2, name: 'Daniela V.', avatarText: 'DV', avatarColor: 'from-sky-400 to-blue-600', level: 17, xp: 5890, streakDays: 11, schoolGrade: '11° B' },
     { rank: 3, name: 'Mateo R.', avatarText: 'MR', avatarColor: 'from-amber-400 to-yellow-600', level: 16, xp: 5420, streakDays: 8, schoolGrade: '10° B' },
     { rank: 7, name: 'Tú (Científico)', avatarText: 'TU', avatarColor: 'from-emerald-400 to-teal-600', level: 14, xp: 4850, isCurrentUser: true, streakDays: 5, schoolGrade: '10° B' }
   ];
 
-  nationalLeaderboard: LeaderboardEntry[] = [
+  ];
+  private readonly legacyNationalLeaderboard: LeaderboardEntry[] = [
     { rank: 1, name: 'Alejandro B. (Cali)', avatarText: 'AB', avatarColor: 'from-amber-400 to-yellow-600', level: 25, xp: 9800, isLeader: true, streakDays: 32, schoolGrade: '11° Nal' },
     { rank: 2, name: 'Mariana C. (Medellín)', avatarText: 'MC', avatarColor: 'from-sky-400 to-blue-600', level: 24, xp: 9410, streakDays: 28, schoolGrade: '11° Nal' },
     { rank: 3, name: 'Gabriel T. (Bogotá)', avatarText: 'GT', avatarColor: 'from-indigo-400 to-purple-600', level: 23, xp: 9120, streakDays: 25, schoolGrade: '10° Nal' },
     { rank: 48, name: 'Tú (Científico)', avatarText: 'TU', avatarColor: 'from-emerald-400 to-teal-600', level: 14, xp: 4850, isCurrentUser: true, streakDays: 5, schoolGrade: '10° B' }
   ];
+
+  ];
+  */
+
+  schoolLeaderboard: LeaderboardEntry[] = [];
+  nationalLeaderboard: LeaderboardEntry[] = [];
 
   // --------------------------------------------------------
   // Vitrina de Trofeos & Insignias
@@ -410,8 +429,66 @@ export class ChallengesComponent implements OnInit, OnDestroy {
   private toastTimeout?: ReturnType<typeof setTimeout>;
 
   ngOnInit(): void {
-    this.syncState();
+    this.loadData();
     this.startCountdownTimer();
+  }
+
+  async loadData(): Promise<void> {
+    this.isLoading = true;
+    this.loadError = '';
+    try {
+      this.syncState();
+      await this.loadLeaderboards();
+    } catch {
+      this.loadError = 'No pudimos cargar tus desafÃ­os. Intenta de nuevo.';
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  async retryLoad(): Promise<void> {
+    await this.loadData();
+  }
+
+  async loadLeaderboards(): Promise<void> {
+    this.leaderboardLoading = true;
+    this.leaderboardError = '';
+    try {
+      this.classLeaderboard = await this.fetchLeaderboard('class');
+      this.schoolLeaderboard = await this.fetchLeaderboard('school');
+    } catch {
+      this.leaderboardError = 'No pudimos cargar la clasificaciÃ³n. Intenta de nuevo.';
+    } finally {
+      this.leaderboardLoading = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  async retryLeaderboards(): Promise<void> {
+    await this.loadLeaderboards();
+  }
+
+  private async fetchLeaderboard(scope: 'class' | 'school'): Promise<LeaderboardEntry[]> {
+    const { data, error } = await this.supabase.rpc('get_leaderboard', { scope });
+    if (error) throw error;
+    const rows = (data ?? []) as Array<{ display_name: string; level: number; xp: number }>;
+    return rows.map((row, index) => {
+      const name = row.display_name || 'Estudiante';
+      const isCurrentUser = name === this.studentName;
+      return {
+        rank: index + 1,
+        name: isCurrentUser ? `TÃº (${name})` : name,
+        avatarText: name.slice(0, 2).toUpperCase(),
+        avatarColor: isCurrentUser ? 'from-emerald-400 to-teal-600' : 'from-sky-400 to-blue-600',
+        level: row.level,
+        xp: row.xp,
+        isLeader: index === 0,
+        isCurrentUser,
+        streakDays: 0,
+        schoolGrade: ''
+      };
+    });
   }
 
   ngOnDestroy(): void {
@@ -428,7 +505,7 @@ export class ChallengesComponent implements OnInit, OnDestroy {
    */
   syncState(): void {
     const profile = this.progressService.getProfile();
-    this.studentName = profile.name || 'Científico';
+    this.studentName = profile.name || 'Estudiante';
 
     const gamification = this.progressService.getGamificationState();
     this.userLevel = gamification.level;
@@ -517,6 +594,7 @@ export class ChallengesComponent implements OnInit, OnDestroy {
    * Cambia de tab en el Leaderboard
    */
   setLeaderboardTab(tab: 'class' | 'school' | 'national'): void {
+    if (tab === 'national' && this.nationalLeaderboardDisabled) return;
     this.activeLeaderboardTab = tab;
     this.cdr.markForCheck();
   }

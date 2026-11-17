@@ -1,4 +1,14 @@
 <div class="periodic-page">
+  @if (isLoading) {
+    <div class="section-container" role="status">Cargando tu progreso...</div>
+  } @else if (loadError) {
+    <div class="section-container" role="alert">
+      <p>{{ loadError }}</p>
+      <button type="button" class="btn-primary" (click)="retryLoadProgress()">Reintentar</button>
+    </div>
+  } @else if (elements.length === 0) {
+    <div class="section-container" role="status">No hay elementos disponibles.</div>
+  }
   <!-- Toast Notificación de Descubrimientos y Gamificación -->
   @if (toastNotification.visible) {
     <div class="periodic-toast-notification" [ngClass]="toastNotification.type" role="alert">
