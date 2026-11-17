@@ -98,6 +98,28 @@ describe('StudentProgressService', () => {
     expect(mockSupabase.from).toHaveBeenCalledWith('student_tasks');
   });
 
+  it('persiste el progreso de un reto y acredita su recompensa una sola vez', () => {
+    service.progressChallenge(1);
+    service.progressChallenge(1);
+    service.progressChallenge(1);
+    const firstClaim = service.claimChallenge(1, 50);
+    const secondClaim = service.claimChallenge(1, 50);
+
+    expect(firstClaim.item?.isClaimed).toBe(true);
+    expect(secondClaim.item?.isClaimed).toBe(true);
+    expect(service.getGamificationState().xp).toBe(50);
+    expect(mockLearningEvents.record).toHaveBeenCalledWith(expect.objectContaining({ module: 'challenges', xp: 50 }));
+    expect(mockSupabase.from).toHaveBeenCalledWith('student_challenges');
+  });
+
+  it('mantiene separados los datos de periodic-table y memory', () => {
+    service.saveModuleProgress('periodic-table', { inspectedElementNumbers: [1, 8] });
+    service.saveModuleProgress('memory', { bestRecords: { all: { moves: 12, seconds: 30, time: '00:30' } } });
+
+    expect(service.getModuleProgress<{ inspectedElementNumbers: number[] }>('periodic-table')?.inspectedElementNumbers).toEqual([1, 8]);
+    expect(service.getModuleProgress<{ bestRecords: Record<string, unknown> }>('memory')?.bestRecords['all']).toBeTruthy();
+  });
+
   it('limpia el estado al ejecutar reset()', () => {
     service.addXp(300);
     service.reset();

@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { StudentProgressService, StudentProfile, GamificationState } from '../dashboard/student-progress.service';
+import { LearningEventsService } from '../core/services/learning-events.service';
 
 /**
  * Estructura de datos completa para un elemento químico
@@ -55,22 +56,26 @@ export interface ChemicalElement {
 export class PeriodicTableComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private progressService = inject(StudentProgressService);
+  private learningEvents = inject(LearningEventsService);
+
+  isLoading = true;
+  loadError = '';
 
   // Perfil del estudiante y Gamificación sincronizada
   studentProfile: StudentProfile = {
     name: 'Científico',
-    grade: '10th Grade',
-    email: 'estudiante@reactiva.edu.co'
+    grade: '',
+    email: ''
   };
 
   gamification: GamificationState = {
-    xp: 4850,
-    level: 14,
+    xp: 0,
+    level: 1,
     levelTitle: 'Alquimista Experto',
-    streakDays: 5,
+    streakDays: 0,
     lastActiveDate: '',
-    nextLevelXp: 5000,
-    levelProgressPercent: 97
+    nextLevelXp: 300,
+    levelProgressPercent: 0
   };
 
   // Notificaciones flotantes (Toast)
@@ -1129,9 +1134,7 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // 1. Cargar datos de gamificación y perfil escolar
-    this.loadGamificationData();
-    this.loadInspectedElements();
-    this.loadBestRecord();
+    this.loadProgress();
 
     // 2. Inicializar con la lista completa de elementos
     this.filteredElements = [...this.elements];
@@ -1145,6 +1148,25 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
       this.filterElements();
       this.cdr.markForCheck();
     });
+  }
+
+  loadProgress(): void {
+    this.isLoading = true;
+    this.loadError = '';
+    try {
+      this.loadGamificationData();
+      this.loadInspectedElements();
+      this.loadBestRecord();
+    } catch {
+      this.loadError = 'No pudimos cargar tu progreso. Intenta de nuevo.';
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  retryLoadProgress(): void {
+    this.loadProgress();
   }
 
   ngOnDestroy(): void {
@@ -1167,51 +1189,30 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
    * Carga los elementos químicos ya explorados desde localStorage
    */
   loadInspectedElements(): void {
-    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
-    try {
-      const stored = localStorage.getItem('reactiva_inspected_elements');
-      if (stored) {
-        const list = JSON.parse(stored) as number[];
-        this.inspectedElementsCount = list.length;
-      }
-    } catch {
-      this.inspectedElementsCount = 0;
-    }
+    const progress = this.progressService.getModuleProgress<{ inspectedElementNumbers?: number[] }>('periodic-table');
+    this.inspectedElementsCount = progress?.inspectedElementNumbers?.length ?? 0;
   }
 
   /**
    * Carga el récord personal en el mini-juego de Memory
    */
   loadBestRecord(): void {
-    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
-    try {
-      const key = `reactiva_memory_best_${this.selectedGameCategory}`;
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        this.bestRecord = JSON.parse(stored);
-      } else {
-        this.bestRecord = null;
-      }
-    } catch {
-      this.bestRecord = null;
-    }
+    const progress = this.progressService.getModuleProgress<{ bestRecords?: Record<string, { moves: number; time: string; seconds: number }> }>('memory');
+    this.bestRecord = progress?.bestRecords?.[this.selectedGameCategory] ?? null;
   }
 
   /**
    * Guarda nuevo récord personal en el Memory
    */
   saveBestRecord(moves: number, seconds: number): void {
-    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return;
-    try {
-      const key = `reactiva_memory_best_${this.selectedGameCategory}`;
-      const isNewBest = !this.bestRecord || moves < this.bestRecord.moves || (moves === this.bestRecord.moves && seconds < this.bestRecord.seconds);
-      if (isNewBest) {
-        const record = { moves, seconds, time: this.formattedTime };
-        localStorage.setItem(key, JSON.stringify(record));
-        this.bestRecord = record;
-      }
-    } catch {
-      // Ignorar error de cuota de almacenamiento
+    const isNewBest = !this.bestRecord || moves < this.bestRecord.moves || (moves === this.bestRecord.moves && seconds < this.bestRecord.seconds);
+    if (isNewBest) {
+      const record = { moves, seconds, time: this.formattedTime };
+      const progress = this.progressService.getModuleProgress<{ bestRecords?: Record<string, typeof record> }>('memory');
+      this.progressService.saveModuleProgress('memory', {
+        bestRecords: { ...(progress?.bestRecords ?? {}), [this.selectedGameCategory]: record }
+      });
+      this.bestRecord = record;
     }
   }
 
@@ -1266,16 +1267,23 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
     this.activeShellHighlight = null;
 
     // Registro de exploración del elemento en localStorage
-    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+    if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem('reactiva_inspected_elements');
-        const list: number[] = stored ? JSON.parse(stored) : [];
+        const progress = this.progressService.getModuleProgress<{ inspectedElementNumbers?: number[] }>('periodic-table');
+        const list = [...(progress?.inspectedElementNumbers ?? [])];
         const isNew = !list.includes(element.number);
 
         if (isNew) {
           list.push(element.number);
-          localStorage.setItem('reactiva_inspected_elements', JSON.stringify(list));
+          this.progressService.saveModuleProgress('periodic-table', { inspectedElementNumbers: list });
           this.inspectedElementsCount = list.length;
+          this.progressService.addXp(5);
+          this.learningEvents.record({
+            module: 'periodic-table',
+            title: 'Elemento explorado',
+            detail: `${element.name} (${element.symbol})`,
+            xp: 5
+          });
 
           // Sincronizar con Desafío #2 ("Caza en la Tabla Periódica")
           const challenges = this.progressService.getChallengesState();
@@ -1484,6 +1492,12 @@ export class PeriodicTableComponent implements OnInit, OnDestroy {
         const hasBonus = this.timerSeconds <= 60;
         const totalXpGained = 100 + (hasBonus ? 50 : 0);
         const xpResult = this.progressService.addXp(totalXpGained);
+        this.learningEvents.record({
+          module: 'memory',
+          title: 'Victoria en Memory',
+          detail: `CategorÃ­a ${this.selectedGameCategory}; ${this.movesCount} movimientos`,
+          xp: totalXpGained
+        });
 
         // Desbloquear insignia de cazador de electrones
         this.progressService.unlockBadge('cazador-electrones');

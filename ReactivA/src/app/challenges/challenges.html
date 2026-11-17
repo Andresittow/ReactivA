@@ -1,4 +1,12 @@
 <div class="challenges-page">
+  @if (isLoading) {
+    <div class="section-container" role="status">Cargando tus desafÃ­os...</div>
+  } @else if (loadError) {
+    <div class="section-container" role="alert">
+      <p>{{ loadError }}</p>
+      <button type="button" class="btn-challenge-action btn-continue" (click)="retryLoad()">Reintentar</button>
+    </div>
+  }
   <!-- Toast Notificación de Acciones y Recompensas -->
   @if (toastNotification.visible) {
     <div class="toast-notification" [ngClass]="toastNotification.type" role="alert">
@@ -285,7 +293,8 @@
             type="button"
             class="tab-btn"
             [class.active]="activeLeaderboardTab === 'national'"
-            (click)="setLeaderboardTab('national')"
+            [disabled]="nationalLeaderboardDisabled"
+            title="PrÃ³ximamente"
           >
             <i class="ph ph-globe"></i>
             <span>Top Nacional</span>
@@ -323,6 +332,21 @@
               <small class="xp-sub">Puntos XP</small>
             </div>
           </div>
+        </div>
+      }
+
+      @if (leaderboardLoading) {
+        <div class="leaderboard-list" role="status">Cargando clasificaciÃ³n...</div>
+      } @else if (leaderboardError) {
+        <div class="leaderboard-list" role="alert">
+          <p>{{ leaderboardError }}</p>
+          <button type="button" class="btn-challenge-action btn-continue" (click)="retryLeaderboards()">Reintentar</button>
+        </div>
+      } @else if (activeLeaderboardTab === 'national' && nationalLeaderboardDisabled) {
+        <div class="leaderboard-list" role="status">PrÃ³ximamente</div>
+      } @else if (currentLeaderboard.length === 0) {
+        <div class="leaderboard-list" role="status">
+          Ãšnete a un aula con el PIN de tu profesor para aparecer en la clasificaciÃ³n.
         </div>
       }
 
