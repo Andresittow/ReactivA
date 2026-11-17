@@ -38,5 +38,24 @@ Implementación completa de **PR-A1** según `docs/PLAN_FUNCIONAL.md` (§2.3, §
 - `npm run build`: Compilación exitosa para producción y prerender SSR completo.
 
 ## Requiere de otros
+
+## PR-A2
+
+- Tabla periÃ³dica: elementos explorados y rÃ©cords de Memory se guardan en `module_progress`; las acciones nuevas registran XP y eventos.
+- Challenges: retos, recompensas e insignias se sincronizan con `student_challenges` y `student_badges`; los rankings usan `get_leaderboard('class'|'school')`.
+- La migraciÃ³n `supabase/migrations/202611150000_leaderboards.sql` es repetible y define el RPC como `SECURITY DEFINER` con `search_path` fijo.
+- Top Nacional permanece deshabilitado con Â«PrÃ³ximamenteÂ».
+
+## Pendiente de probar
+
+Login/registro de Valeria aÃºn no estÃ¡ en `develop`, por lo que estas pruebas quedan para cuando se integre:
+
+1. Registrar e iniciar sesiÃ³n con dos estudiantes distintos y comprobar que cada uno ve solo sus elementos explorados, rÃ©cords, retos, XP e insignias.
+2. En el estudiante A, explorar elementos y ganar Memory; confirmar XP, eventos y `module_progress` en Supabase; cerrar sesiÃ³n y verificar que el estudiante B no hereda esos datos.
+3. Completar y reclamar un reto; confirmar una sola acreditaciÃ³n de XP, `claimed = true`, evento y bloqueo del segundo reclamo.
+4. Unirse a un aula con PIN y comprobar que Mi Clase carga el ranking real; sin aula debe mostrar Â«Ãšnete a un aula con el PIN de tu profesorÂ».
+5. Cambiar `profileVisibility` a `private`: el usuario sigue viendo su propia posiciÃ³n, pero no aparece para otros estudiantes; probar tambiÃ©n `public` e `institutional`.
+6. Confirmar que Colegio filtra por colegio y que Top Nacional estÃ¡ deshabilitado mostrando Â«PrÃ³ximamenteÂ».
+7. Simular error de red en ambos componentes y comprobar los estados de error y los botones Â«ReintentarÂ».
 - **Vanessa:**
   - `assignments`: el hook para renderizar tareas asignadas en el dashboard del estudiante está listo para consumir la tabla `assignments` cuando se implemente en PR-V2.
