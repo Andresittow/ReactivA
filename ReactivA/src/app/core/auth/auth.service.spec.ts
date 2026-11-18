@@ -10,7 +10,7 @@ describe('AuthService', () => {
   let mockSupabase: any;
   let mockRouter: any;
   let mockProgressHandler: ProgressSyncHandler;
-  let authStateCallback: (event: string, session: any) => Promise<void>;
+  let authStateCallback: (event: string, session: any) => void | Promise<void>;
 
   beforeEach(() => {
     mockRouter = {
@@ -91,6 +91,37 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(true);
     expect(service.role()).toBe('estudiante');
     expect(service.user()?.fullName).toBe('Estudiante Demo');
+  });
+
+  it('termina la restauración aunque Supabase emita SIGNED_IN bajo el bloqueo de sesión', async () => {
+    const session = { user: { id: 'user-123', email: 'test@reactiva.edu' } };
+    const profile = { id: 'user-123', role: 'estudiante', full_name: 'Estudiante Demo' };
+    let releaseLock!: () => void;
+    const lockReleased = new Promise<void>(resolve => { releaseLock = resolve; });
+    // Las consultas esperan al bloqueo que Supabase libera al retornar el listener.
+    mockSupabase.from().maybeSingle.mockImplementation(() =>
+      lockReleased.then(() => ({ data: profile, error: null })));
+    mockSupabase.auth.getSession.mockImplementationOnce(async () => {
+      await authStateCallback('SIGNED_IN', session);
+      releaseLock();
+      return { data: { session }, error: null };
+    });
+    const restoration = service.restoreSession();
+    let timeout!: ReturnType<typeof setTimeout>;
+    try {
+      const result = await Promise.race([
+        restoration.then(() => 'ready'),
+        new Promise<string>(resolve => { timeout = setTimeout(() => resolve('blocked'), 250); })
+      ]);
+      expect(result).toBe('ready');
+      expect(service.ready()).toBe(true);
+      expect(service.user()?.id).toBe('user-123');
+    } finally {
+      clearTimeout(timeout);
+      releaseLock();
+      await restoration;
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
   });
 
   it('inicia sesión con éxito y valida expectedRole coincidente', async () => {
@@ -221,6 +252,33 @@ describe('AuthService', () => {
 
     expect(mockProgressHandler.reset).toHaveBeenCalled();
     expect(service.user()).toBeNull();
+  });
+
+  it('descarta una sincronización pendiente si se cierra sesión antes de ejecutarla', async () => {
+    vi.useFakeTimers();
+    try {
+      authStateCallback('SIGNED_IN', { user: { id: 'user-123' } });
+      authStateCallback('SIGNED_OUT', null);
+      await vi.runAllTimersAsync();
+      expect(mockSupabase.from).not.toHaveBeenCalled();
+      expect(mockProgressHandler.hydrate).not.toHaveBeenCalled();
+      expect(service.user()).toBeNull();
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('una respuesta de perfil tardía no restaura el usuario después de cerrar sesión', async () => {
+    vi.useFakeTimers();
+    let resolveProfile!: (value: unknown) => void;
+    mockSupabase.from().maybeSingle.mockReturnValueOnce(new Promise(resolve => { resolveProfile = resolve; }));
+    try {
+      authStateCallback('TOKEN_REFRESHED', { user: { id: 'user-123' } });
+      await vi.advanceTimersByTimeAsync(0);
+      authStateCallback('SIGNED_OUT', null);
+      resolveProfile({ data: { id: 'user-123', role: 'docente', full_name: 'Docente' }, error: null });
+      await vi.runAllTimersAsync();
+      expect(service.user()).toBeNull();
+      expect(mockProgressHandler.hydrate).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
   });
 
   it('devuelve la ruta de inicio adecuada para cada rol', () => {
