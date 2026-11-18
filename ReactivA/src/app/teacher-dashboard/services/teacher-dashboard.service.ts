@@ -5,6 +5,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { StudentProgressService } from '../../dashboard/student-progress.service';
+import { AuthService } from '../../core/auth/auth.service';
 import {
   TeacherProfile,
   AcademicOverviewKPIs,
@@ -13,7 +14,6 @@ import {
   StudentLearningDetail
 } from '../models/teacher-dashboard.models';
 
-const STORAGE_ACTIVE_PIN_KEY = 'reactiva_active_class_pin';
 const STORAGE_TEACHER_LIVE_EVENTS_KEY = 'reactiva_teacher_live_events';
 const STORAGE_STUDENT_GUIDANCE_KEY = 'reactiva_teacher_student_guidance';
 
@@ -22,6 +22,7 @@ const STORAGE_STUDENT_GUIDANCE_KEY = 'reactiva_teacher_student_guidance';
 })
 export class TeacherDashboardService {
   private studentProgressService = inject(StudentProgressService);
+  private readonly auth = inject(AuthService);
 
   private isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
@@ -31,40 +32,17 @@ export class TeacherDashboardService {
   // 1. Perfil del Docente
   // -------------------------------------------------------------
   getTeacherProfile(): TeacherProfile {
+    const user = this.auth.user();
     return {
-      name: 'Prof. Dr. Roberto Méndez',
-      title: 'Jefe de Cátedra y Laboratorio',
-      institution: 'Colegio San Ignacio',
-      department: 'Dpto. Ciencias Naturales & Química',
-      academicCycle: 'Ciclo Académico 2024 - Semestre 2',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80'
+      name: user?.fullName || 'Docente',
+      title: 'Docente',
+      institution: user?.school || 'Sin institución registrada',
+      department: 'Docente',
+      academicCycle: '',
+      avatarUrl: user?.avatarUrl || ''
     };
   }
 
-  // -------------------------------------------------------------
-  // 2. PIN Activo de Clase
-  // -------------------------------------------------------------
-  getActivePin(): string {
-    if (!this.isBrowser()) return 'CHEM-8420';
-    const stored = localStorage.getItem(STORAGE_ACTIVE_PIN_KEY);
-    return stored || 'CHEM-8420';
-  }
-
-  generateNewPin(): string {
-    const letters = ['CHEM', 'LAB', 'ATOM', 'REACT', 'MOL'];
-    const prefix = letters[Math.floor(Math.random() * letters.length)];
-    const num = Math.floor(1000 + Math.random() * 9000);
-    const newPin = `${prefix}-${num}`;
-
-    if (this.isBrowser()) {
-      localStorage.setItem(STORAGE_ACTIVE_PIN_KEY, newPin);
-    }
-    return newPin;
-  }
-
-  // -------------------------------------------------------------
-  // 3. Indicadores de la Vista General (KPIs Reales)
-  // -------------------------------------------------------------
   getAcademicOverviewKPIs(): AcademicOverviewKPIs {
     const studentTasks = this.studentProgressService.getDashboardTasks();
     const completedTasksCount = studentTasks.filter(t => t.completed).length;
@@ -562,7 +540,7 @@ export class TeacherDashboardService {
     const guidance = {
       studentId,
       studentName,
-      title: 'Pauta Pedagógica del Prof. Dr. Roberto Méndez',
+      title: `Pauta pedagógica de ${this.getTeacherProfile().name}`,
       message,
       timestamp: new Date().toISOString()
     };

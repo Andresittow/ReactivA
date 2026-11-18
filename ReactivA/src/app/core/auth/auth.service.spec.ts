@@ -150,6 +150,9 @@ describe('AuthService', () => {
     });
 
     expect(res.needsEmailConfirmation).toBe(true);
+    expect(mockSupabase.auth.signUp).toHaveBeenCalledWith(expect.objectContaining({
+      options: expect.objectContaining({ emailRedirectTo: `${window.location.origin}/home` })
+    }));
   });
 
   it('soporta registro sin confirmación de correo (sesión inmediata)', async () => {

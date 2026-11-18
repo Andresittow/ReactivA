@@ -31,4 +31,8 @@ jobs:
       - run: npm exec tsc -- --noEmit -p tsconfig.app.json
       - run: npm exec tsc -- --noEmit -p tsconfig.spec.json
       - run: npm test -- --watch=false
+      - run: npm run test:deploy
       - run: npm run build
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://example.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'sb_publishable_ci_build_only' }}

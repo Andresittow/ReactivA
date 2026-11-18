@@ -173,6 +173,17 @@ $text-muted:      #8c9ba5;
 .teacher-sidebar {
   height: 100dvh;
 
+  .session-actions { margin-top: auto; padding-top: 1rem; }
+  .btn-sign-out {
+    display: flex; align-items: center; gap: 0.75rem; width: 100%;
+    padding: 0.75rem; border: 1px solid #fecaca; border-radius: 12px;
+    background: #fff; color: #b91c1c; font: inherit; cursor: pointer;
+    i { font-size: 1.3rem; }
+    &:hover { background: #fef2f2; }
+    &:disabled { opacity: 0.6; cursor: wait; }
+  }
+  &.collapsed .btn-sign-out { justify-content: center; }
+
   a:focus-visible, button:focus-visible {
     outline: 2px solid #1d4ed8;
     outline-offset: 3px;
@@ -182,6 +193,8 @@ $text-muted:      #8c9ba5;
 @media (max-width: 900px) {
   .teacher-sidebar {
     width: 80px;
+    .session-actions span { display: none; }
+    .btn-sign-out { justify-content: center; }
     padding: 1.5rem 0.65rem;
 
     .brand { justify-content: center; }
