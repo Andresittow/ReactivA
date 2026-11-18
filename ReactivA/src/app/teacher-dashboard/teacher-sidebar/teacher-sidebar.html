@@ -31,4 +31,12 @@
       </li>
     </ul>
   </nav>
+  <div class="session-actions">
+    <button type="button" class="btn-sign-out" (click)="signOut()" [disabled]="signingOut()"
+      title="Cerrar sesión" aria-label="Cerrar sesión">
+      <i class="ph ph-sign-out" aria-hidden="true"></i>
+      @if (!collapsed()) { <span>{{ signingOut() ? 'Cerrando sesión…' : 'Cerrar sesión' }}</span> }
+    </button>
+    @if (logoutError()) { <p role="alert">{{ logoutError() }}</p> }
+  </div>
 </aside>

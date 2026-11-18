@@ -174,6 +174,7 @@ export class AuthService {
         email: input.email,
         password: input.password,
         options: {
+          emailRedirectTo: this.isBrowser ? `${window.location.origin}/home` : undefined,
           data: {
             full_name: input.fullName,
             role: input.role,
