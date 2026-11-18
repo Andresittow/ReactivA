@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, PLATFORM_ID, InjectionToken, Injector } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID, InjectionToken, Injector, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -35,7 +35,7 @@ export interface SignInInput {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
   private readonly supabase: SupabaseClient = inject(SUPABASE_CLIENT);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
@@ -43,6 +43,9 @@ export class AuthService {
   private readonly injector = inject(Injector);
   private manualProgressHandler: ProgressSyncHandler | null = null;
   private _cachedInjectedHandler: ProgressSyncHandler | null | undefined = undefined;
+  private authRevision = 0;
+  private pendingAuthSync: ReturnType<typeof setTimeout> | undefined;
+  private authSubscription: { unsubscribe(): void } | undefined;
 
   private readonly _user = signal<UserProfile | null>(null);
   private readonly _ready = signal<boolean>(false);
@@ -78,24 +81,50 @@ export class AuthService {
 
   private initAuthListener(): void {
     try {
-      this.supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data } = this.supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_OUT') {
+          this.authRevision++;
+          clearTimeout(this.pendingAuthSync);
           this._user.set(null);
           this.progressHandler?.reset();
           // Redirigir a login con replaceUrl para no dejar pantallas privadas en historial
           if (this.router.url !== '/login' && !this.router.url.startsWith('/login') && this.router.url !== '/home') {
-            await this.router.navigate(['/login'], { replaceUrl: true });
+            void this.router.navigate(['/login'], { replaceUrl: true }).catch(err => {
+              console.warn('[AuthService] Error navigating after sign out:', err);
+            });
           }
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
           if (session?.user) {
-            await this.loadUserProfile(session.user.id, session.user.email ?? '');
-            await this.progressHandler?.hydrate();
+            const revision = ++this.authRevision;
+            clearTimeout(this.pendingAuthSync);
+            // Supabase espera este callback bajo su bloqueo de sesion. Consultar
+            // perfiles aqui bloquearia getSession() y el arranque tras recargar.
+            this.pendingAuthSync = setTimeout(() => {
+              this.pendingAuthSync = undefined;
+              if (revision !== this.authRevision) return;
+              void this.syncAuthUser(session.user.id, session.user.email ?? '', revision).catch(err => {
+                console.warn('[AuthService] Error syncing auth state:', err);
+              });
+            }, 0);
           }
         }
       });
+      this.authSubscription = data.subscription;
     } catch (err) {
       console.warn('[AuthService] Error setting up auth state listener:', err);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.authRevision++;
+    clearTimeout(this.pendingAuthSync);
+    this.authSubscription?.unsubscribe();
+  }
+
+  private async syncAuthUser(userId: string, email: string, revision: number): Promise<void> {
+    await this.loadUserProfile(userId, email, revision);
+    if (revision !== this.authRevision) return;
+    await this.progressHandler?.hydrate();
   }
 
   async restoreSession(): Promise<void> {
@@ -122,13 +151,15 @@ export class AuthService {
     }
   }
 
-  private async loadUserProfile(userId: string, email: string): Promise<UserProfile | null> {
+  private async loadUserProfile(userId: string, email: string, revision = this.authRevision): Promise<UserProfile | null> {
     try {
       const { data, error } = await this.supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
+
+      if (revision !== this.authRevision) return null;
 
       if (error || !data) {
         // Si el trigger aún no terminó de escribir o no se encuentra perfil, usar fallback razonable
@@ -157,6 +188,7 @@ export class AuthService {
       this._user.set(profile);
       return profile;
     } catch {
+      if (revision !== this.authRevision) return null;
       const fallback: UserProfile = {
         id: userId,
         role: 'estudiante',
