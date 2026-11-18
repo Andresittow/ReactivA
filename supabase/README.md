@@ -40,3 +40,7 @@ supabase db push
 - **Vanessa (PR-V2):** `assignments`, `help_requests`, bucket storage `avatars`.
 - **Andrés (PR-A2):** RPC `get_leaderboard(scope text)`.
 - **Valeria (PR-L3):** `teacher_guidance`, RPCs/vistas analíticas del panel docente.
+
+## Despliegue actual
+
+Se agregaron las migraciones 202611150001_classrooms.sql y 202611150002_support_assignments.sql. Aplicalas despues de core y antes de leaderboards. La [guia de despliegue](../docs/DESPLIEGUE_VERCEL.md) contiene el orden completo y la validacion.

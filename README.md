@@ -167,3 +167,7 @@ Consulta [responsabilidades, validaciones y flujo de Git Graph](CONTRIBUTING.md)
    ```bash
    npm test -- --no-watch
    ```
+
+## Despliegue en Vercel
+
+Consulta la [guia de despliegue](docs/DESPLIEGUE_VERCEL.md) para configurar Supabase, variables de entorno y Preview antes de main.
