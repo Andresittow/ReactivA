@@ -1,0 +1,288 @@
+import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { PLATFORM_ID } from '@angular/core';
+import { AuthService, PROGRESS_SYNC_HANDLER, ProgressSyncHandler } from './auth.service';
+import { SUPABASE_CLIENT } from '../supabase/supabase.client';
+import { AuthError } from './auth-error';
+
+describe('AuthService', () => {
+  let service: AuthService;
+  let mockSupabase: any;
+  let mockRouter: any;
+  let mockProgressHandler: ProgressSyncHandler;
+  let authStateCallback: (event: string, session: any) => void | Promise<void>;
+
+  beforeEach(() => {
+    mockRouter = {
+      url: '/dashboard',
+      navigate: vi.fn().mockResolvedValue(true)
+    };
+
+    mockProgressHandler = {
+      hydrate: vi.fn().mockResolvedValue(undefined),
+      reset: vi.fn()
+    };
+
+    mockSupabase = {
+      auth: {
+        onAuthStateChange: vi.fn().mockImplementation((cb) => {
+          authStateCallback = cb;
+          return { data: { subscription: { unsubscribe: vi.fn() } } };
+        }),
+        getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
+        signInWithPassword: vi.fn(),
+        signUp: vi.fn(),
+        signOut: vi.fn().mockResolvedValue({ error: null }),
+        resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
+        updateUser: vi.fn().mockResolvedValue({ data: {}, error: null })
+      },
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({
+          data: {
+            id: 'user-123',
+            role: 'estudiante',
+            full_name: 'Estudiante Demo',
+            grade: '10A',
+            school: 'Colegio Demo'
+          },
+          error: null
+        }),
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null })
+        })
+      })
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: SUPABASE_CLIENT, useValue: mockSupabase },
+        { provide: Router, useValue: mockRouter },
+        { provide: PLATFORM_ID, useValue: 'browser' },
+        { provide: PROGRESS_SYNC_HANDLER, useValue: mockProgressHandler }
+      ]
+    });
+
+    service = TestBed.inject(AuthService);
+  });
+
+  it('debe crearse correctamente con estado inicial no autenticado', () => {
+    expect(service).toBeTruthy();
+    expect(service.user()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+    expect(service.role()).toBeNull();
+  });
+
+  it('restaura sesión existente y actualiza los signals', async () => {
+    mockSupabase.auth.getSession.mockResolvedValueOnce({
+      data: {
+        session: {
+          user: { id: 'user-123', email: 'test@reactiva.edu' }
+        }
+      },
+      error: null
+    });
+
+    await service.restoreSession();
+
+    expect(service.ready()).toBe(true);
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.role()).toBe('estudiante');
+    expect(service.user()?.fullName).toBe('Estudiante Demo');
+  });
+
+  it('termina la restauración aunque Supabase emita SIGNED_IN bajo el bloqueo de sesión', async () => {
+    const session = { user: { id: 'user-123', email: 'test@reactiva.edu' } };
+    const profile = { id: 'user-123', role: 'estudiante', full_name: 'Estudiante Demo' };
+    let releaseLock!: () => void;
+    const lockReleased = new Promise<void>(resolve => { releaseLock = resolve; });
+    // Las consultas esperan al bloqueo que Supabase libera al retornar el listener.
+    mockSupabase.from().maybeSingle.mockImplementation(() =>
+      lockReleased.then(() => ({ data: profile, error: null })));
+    mockSupabase.auth.getSession.mockImplementationOnce(async () => {
+      await authStateCallback('SIGNED_IN', session);
+      releaseLock();
+      return { data: { session }, error: null };
+    });
+    const restoration = service.restoreSession();
+    let timeout!: ReturnType<typeof setTimeout>;
+    try {
+      const result = await Promise.race([
+        restoration.then(() => 'ready'),
+        new Promise<string>(resolve => { timeout = setTimeout(() => resolve('blocked'), 250); })
+      ]);
+      expect(result).toBe('ready');
+      expect(service.ready()).toBe(true);
+      expect(service.user()?.id).toBe('user-123');
+    } finally {
+      clearTimeout(timeout);
+      releaseLock();
+      await restoration;
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+  });
+
+  it('inicia sesión con éxito y valida expectedRole coincidente', async () => {
+    mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
+      data: {
+        user: { id: 'user-123', email: 'test@reactiva.edu' }
+      },
+      error: null
+    });
+
+    const profile = await service.signIn({
+      email: 'test@reactiva.edu',
+      password: 'password123',
+      rememberMe: true,
+      expectedRole: 'estudiante'
+    });
+
+    expect(profile.role).toBe('estudiante');
+    expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('falla con role_mismatch si el expectedRole no coincide', async () => {
+    mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
+      data: {
+        user: { id: 'user-123', email: 'test@reactiva.edu' }
+      },
+      error: null
+    });
+
+    await expect(
+      service.signIn({
+        email: 'test@reactiva.edu',
+        password: 'password123',
+        rememberMe: false,
+        expectedRole: 'docente'
+      })
+    ).rejects.toThrowError(AuthError);
+
+    expect(mockSupabase.auth.signOut).toHaveBeenCalled();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('soporta registro requiriendo confirmación de correo', async () => {
+    mockSupabase.auth.signUp.mockResolvedValueOnce({
+      data: {
+        user: { id: 'new-user' },
+        session: null // Sin sesión directa = requiere confirmación
+      },
+      error: null
+    });
+
+    const res = await service.signUp({
+      email: 'nuevo@reactiva.edu',
+      password: 'password123',
+      fullName: 'Nuevo Alumno',
+      role: 'estudiante'
+    });
+
+    expect(res.needsEmailConfirmation).toBe(true);
+    expect(mockSupabase.auth.signUp).toHaveBeenCalledWith(expect.objectContaining({
+      options: expect.objectContaining({ emailRedirectTo: `${window.location.origin}/home` })
+    }));
+  });
+
+  it('soporta registro sin confirmación de correo (sesión inmediata)', async () => {
+    mockSupabase.auth.signUp.mockResolvedValueOnce({
+      data: {
+        user: { id: 'new-user', email: 'nuevo@reactiva.edu' },
+        session: { access_token: 'fake' }
+      },
+      error: null
+    });
+
+    const res = await service.signUp({
+      email: 'nuevo@reactiva.edu',
+      password: 'password123',
+      fullName: 'Nuevo Alumno',
+      role: 'estudiante'
+    });
+
+    expect(res.needsEmailConfirmation).toBe(false);
+  });
+
+  it('cierra sesión, limpia el usuario, resetea el progreso y navega a /login con replaceUrl', async () => {
+    await service.signOut();
+
+    expect(mockSupabase.auth.signOut).toHaveBeenCalled();
+    expect(mockProgressHandler.reset).toHaveBeenCalled();
+    expect(service.user()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/login'], { replaceUrl: true });
+  });
+
+  it('llama a hydrate() tras iniciar sesión exitosamente', async () => {
+    mockSupabase.auth.signInWithPassword.mockResolvedValueOnce({
+      data: {
+        user: { id: 'user-123', email: 'test@reactiva.edu' }
+      },
+      error: null
+    });
+
+    await service.signIn({
+      email: 'test@reactiva.edu',
+      password: 'password123',
+      rememberMe: true,
+      expectedRole: 'estudiante'
+    });
+
+    expect(mockProgressHandler.hydrate).toHaveBeenCalled();
+  });
+
+  it('llama a hydrate() al restaurar sesión activa', async () => {
+    mockSupabase.auth.getSession.mockResolvedValueOnce({
+      data: {
+        session: { user: { id: 'user-123', email: 'test@reactiva.edu' } }
+      },
+      error: null
+    });
+
+    await service.restoreSession();
+
+    expect(mockProgressHandler.hydrate).toHaveBeenCalled();
+  });
+
+  it('llama a reset() cuando onAuthStateChange emite SIGNED_OUT', async () => {
+    expect(authStateCallback).toBeDefined();
+    await authStateCallback('SIGNED_OUT', null);
+
+    expect(mockProgressHandler.reset).toHaveBeenCalled();
+    expect(service.user()).toBeNull();
+  });
+
+  it('descarta una sincronización pendiente si se cierra sesión antes de ejecutarla', async () => {
+    vi.useFakeTimers();
+    try {
+      authStateCallback('SIGNED_IN', { user: { id: 'user-123' } });
+      authStateCallback('SIGNED_OUT', null);
+      await vi.runAllTimersAsync();
+      expect(mockSupabase.from).not.toHaveBeenCalled();
+      expect(mockProgressHandler.hydrate).not.toHaveBeenCalled();
+      expect(service.user()).toBeNull();
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('una respuesta de perfil tardía no restaura el usuario después de cerrar sesión', async () => {
+    vi.useFakeTimers();
+    let resolveProfile!: (value: unknown) => void;
+    mockSupabase.from().maybeSingle.mockReturnValueOnce(new Promise(resolve => { resolveProfile = resolve; }));
+    try {
+      authStateCallback('TOKEN_REFRESHED', { user: { id: 'user-123' } });
+      await vi.advanceTimersByTimeAsync(0);
+      authStateCallback('SIGNED_OUT', null);
+      resolveProfile({ data: { id: 'user-123', role: 'docente', full_name: 'Docente' }, error: null });
+      await vi.runAllTimersAsync();
+      expect(service.user()).toBeNull();
+      expect(mockProgressHandler.hydrate).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('devuelve la ruta de inicio adecuada para cada rol', () => {
+    expect(service.homeFor('estudiante')).toBe('/dashboard');
+    expect(service.homeFor('docente')).toBe('/teacher-dashboard');
+  });
+});

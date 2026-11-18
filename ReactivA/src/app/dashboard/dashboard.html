@@ -1,0 +1,157 @@
+<div class="dashboard-container">
+  <!-- Toast Notificación de Logros y XP -->
+  @if (toastMessage) {
+    <div class="dashboard-toast-box" role="status">
+      <i class="ph ph-sparkle"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+  }
+
+  <!-- Encabezado del Dashboard -->
+  <header class="dashboard-header">
+    <div class="greeting">
+      <h1>Hola, {{ studentProfile.name }}! 👋</h1>
+      <p>Listo para tu siguiente sesión de laboratorio y experimentos?</p>
+    </div>
+    <div class="header-widgets">
+      <select
+        class="grade-select"
+        [value]="studentProfile.grade"
+        (change)="onGradeChange($any($event.target).value)"
+        aria-label="Seleccionar grado académico"
+      >
+        <option value="10th Grade">10th Grade</option>
+        <option value="11th Grade">11th Grade</option>
+      </select>
+      <div class="streak-badge" title="Racha activa de estudio consecutivo">
+        <span class="fire-icon">🔥</span>
+        <div class="streak-info">
+          <strong>{{ gamification.streakDays }} Días</strong>
+          <small>Racha Activa</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Card Principal / Banner -->
+  <section class="banner-card">
+    <div class="banner-info">
+      <span class="badge"><i class="ph ph-flask"></i> Laboratorio Virtual 3D</span>
+      <h2>Simulador Molecular 3D y Enlaces Químicos</h2>
+      <p>Ingresa a la mesa de trabajo virtual, combina reactivos y construye estructuras moleculares sin riesgos.</p>
+    </div>
+    <a routerLink="/virtual-lab" class="btn-enter" title="Ir al simulador de laboratorio">
+      Entrar al Lab <i class="ph ph-arrow-right"></i>
+    </a>
+  </section>
+
+  <!-- Buscador Dinámico con FormControl Individual (Clase 5a) -->
+  <section class="search-section">
+    <div class="search-input-box">
+      <i class="ph ph-magnifying-glass search-icon"></i>
+      <input
+        type="text"
+        [formControl]="searchControl"
+        placeholder="Buscar unidades temáticas o retos..."
+        class="search-input"
+        aria-label="Buscar unidades temáticas o retos"
+      />
+      @if (searchTerm) {
+        <button
+          type="button"
+          class="btn-clear-search"
+          (click)="clearSearch()"
+          title="Limpiar búsqueda"
+          aria-label="Limpiar búsqueda"
+        >
+          <i class="ph ph-x"></i>
+        </button>
+      }
+    </div>
+    @if (searchTerm) {
+      <div class="search-feedback">
+        <span>Filtrando por: <strong>"{{ searchTerm }}"</strong></span>
+      </div>
+    }
+  </section>
+
+  <!-- Sección: Misiones/Retos Diarios con Persistencia y XP (Clases 4a y 4b) -->
+  <section class="daily-missions">
+    <div class="section-header">
+      <div class="header-title-group">
+        <h3>Misiones Diarias</h3>
+        <span class="missions-counter">
+          {{ completedTasksCount }}/{{ allTasks.length }} completadas
+        </span>
+      </div>
+      <span class="missions-reward" title="Nivel y experiencia acumulada">
+        <i class="ph ph-trophy"></i>
+        <span>Nivel {{ gamification.level }} ({{ gamification.xp }} XP)</span>
+      </span>
+    </div>
+
+    <div class="tasks-grid">
+      @for (task of dailyTasks; track task.id) {
+        <div class="task-card" [class.completed]="task.completed">
+          <label class="task-label">
+            <input
+              type="checkbox"
+              class="task-checkbox"
+              [checked]="task.completed"
+              (change)="toggleTask(task.id)"
+            />
+            <span class="task-title">{{ task.title }}</span>
+          </label>
+          <div class="task-badges-group">
+            <span class="task-xp-pill">+{{ task.xpReward }} XP</span>
+            <span class="task-status-badge">
+              {{ task.completed ? 'Completado' : 'Pendiente' }}
+            </span>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <i class="ph ph-clipboard-text"></i>
+          <p>No se encontraron misiones que coincidan con la búsqueda.</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Sección: Ruta del Conocimiento (Clase 3) -->
+  <section class="knowledge-route">
+    <div class="section-header">
+      <h3>Ruta del Conocimiento</h3>
+      <a routerLink="/challenges" class="view-all">Ver Arena de Desafíos &rarr;</a>
+    </div>
+
+    <div class="cards-grid">
+      @for (topic of filteredTopics; track topic.id) {
+        <div class="route-card" [ngClass]="topic.color">
+          <div class="card-header">
+            <div class="icon-box"><i [class]="topic.icon"></i></div>
+            <div class="progress-circle">{{ topic.progress }}%</div>
+          </div>
+          <span class="unit-tag">{{ topic.unit }}</span>
+          <h4>{{ topic.title }}</h4>
+          <p>{{ topic.description }}</p>
+
+          <!-- Indicador de Progreso Dinámico con Property Binding directo (Clase 3) -->
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" [style.width.%]="topic.progress"></div>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <i class="ph ph-magnifying-glass"></i>
+          <p>No se encontraron unidades temáticas para tu búsqueda.</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Botón flotante Asistente -->
+  <button class="floating-chat-btn" aria-label="Abrir asistente virtual">
+    <i class="ph ph-robot"></i>
+  </button>
+</div>

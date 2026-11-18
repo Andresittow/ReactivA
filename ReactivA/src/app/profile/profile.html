@@ -1,0 +1,82 @@
+<div class="profile-page">
+  @if (toastMessage) { <div class="toast-banner" role="status">{{ toastMessage }}</div> }
+  <header class="profile-banner-card">
+    <div class="student-profile-lead">
+      <div class="avatar-pill-container initials-avatar" [attr.aria-label]="'Iniciales de ' + auth.user()?.fullName">{{ initials }}</div>
+      <div class="student-headings"><div class="rank-tagline"><span class="rank-name">{{ state.levelTitle }}</span></div>
+        <h1 class="student-title">{{ auth.user()?.fullName }}</h1>
+        <p>{{ auth.user()?.email }}</p><p>{{ auth.user()?.school || 'Colegio sin registrar' }} · {{ auth.user()?.grade || 'Grado sin registrar' }}</p>
+      </div>
+    </div>
+    <div class="banner-controls">
+      <button class="pill-btn btn-secondary-pill" type="button" (click)="openEditProfileModal()">Editar perfil</button>
+      <button class="pill-btn btn-primary-pill" type="button" (click)="downloadReportPdf()" [disabled]="loading || historyLoading">Descargar ficha (PDF)</button>
+    </div>
+  </header>
+  @if (loading) { <p role="status">Cargando progreso…</p> }
+  @if (progressError) { <p role="alert">{{ progressError }} <button type="button" (click)="load()">Reintentar</button></p> }
+  <section class="kpi-row" aria-label="Progreso real">
+    <div class="kpi-box theme-blue"><div class="kpi-content-cell"><span class="kpi-header-label">Experiencia</span><strong class="kpi-stat-number">{{ state.xp }} XP</strong></div></div>
+    <div class="kpi-box theme-purple"><div class="kpi-content-cell"><span class="kpi-header-label">Nivel</span><strong class="kpi-stat-number">{{ state.level }}</strong></div></div>
+    <div class="kpi-box theme-amber"><div class="kpi-content-cell"><span class="kpi-header-label">Racha</span><strong class="kpi-stat-number">{{ state.streakDays }} días</strong></div></div>
+    <div class="kpi-box theme-green"><div class="kpi-content-cell"><span class="kpi-header-label">Insignias</span><strong class="kpi-stat-number">{{ badges.length }}</strong></div></div>
+  </section>
+  <div class="mid-split-grid">
+    <section class="branches-panel"><div class="panel-top-bar"><div class="title-cluster"><h2 class="panel-heading">Mi aula</h2></div></div>
+      @if (classroomLoading) { <p role="status">Consultando aula…</p> }
+      @else if (classroomError) { <p role="alert">{{ classroomError }}</p><button type="button" class="pill-btn btn-secondary-pill" (click)="loadClassroom()">Reintentar</button> }
+      @else if (classroom) {
+        <h3>{{ classroom.name }}</h3><p>Docente: {{ teacherName || 'Nombre no disponible' }}</p>
+        <p>{{ classroom.location || 'Sin ubicación' }} · {{ classroom.schedule || 'Sin horario' }}</p>
+        @if (confirmLeave) {
+          <p>¿Quieres salir del aula? Perderás acceso a sus talleres.</p>
+          <button type="button" class="pill-btn btn-secondary-pill" (click)="confirmLeave = false" [disabled]="leaving">Cancelar</button>
+          <button type="button" class="pill-btn btn-primary-pill" (click)="leave()" [disabled]="leaving">{{ leaving ? 'Saliendo…' : 'Confirmar salida' }}</button>
+        } @else { <button type="button" class="pill-btn btn-secondary-pill" (click)="confirmLeave = true">Salir del aula</button> }
+      } @else {
+        <p>Aún no perteneces a un aula.</p>
+        <form (ngSubmit)="join()"><label for="profile-pin">PIN de clase</label>
+          <input id="profile-pin" class="text-input" name="pin" [(ngModel)]="pin" maxlength="9" required placeholder="CHEM-1234" [disabled]="joining" />
+          <button type="submit" class="pill-btn btn-primary-pill" [disabled]="joining || !pin.trim()">{{ joining ? 'Uniéndote…' : 'Unirme' }}</button>
+        </form>
+      }
+      @if (actionError && !isEditModalOpen) { <p role="alert">{{ actionError }}</p> }
+    </section>
+    <aside class="research-panel"><div class="panel-top-bar"><div class="title-cluster"><h2 class="panel-heading">Insignias y evaluaciones</h2></div></div>
+      @for (badge of badges; track badge) { <p class="level-badge">{{ badge }}</p> } @empty { <p>Aún no tienes insignias.</p> }
+      <h3>Dominio por ramas y horas de investigación</h3><p>Aún no hay mediciones disponibles.</p>
+      <h3>Calificaciones y rúbricas</h3><p>Aún no hay evaluaciones docentes registradas.</p>
+    </aside>
+  </div>
+  <section class="practices-panel">
+    <div class="panel-top-bar"><div class="title-cluster"><h2 class="panel-heading">Historial de aprendizaje</h2><p class="panel-subheading">Hasta 100 eventos recientes de tu cuenta.</p></div></div>
+    @if (historyLoading) { <p role="status">Cargando historial…</p> }
+    @else if (historyError) { <p role="alert">{{ historyError }}</p><button type="button" class="pill-btn btn-secondary-pill" (click)="loadHistory()">Reintentar</button> }
+    @else {
+      <div class="practices-stack">
+        @for (event of events; track event.id) {
+          <article class="practice-card-item"><div class="practice-details-cell"><h3 class="practice-item-name">{{ event.title }}</h3>
+            <p>{{ event.detail }}</p><span class="practice-footnote">{{ event.createdAt | date:'medium' }} · {{ event.module }} · {{ event.xp ?? 0 }} XP</span>
+          </div></article>
+        } @empty { <p>Aún no tienes actividad registrada.</p> }
+      </div>
+    }
+  </section>
+  <p class="report-note">La ficha refleja tu progreso y actividad registrados; puedes guardarla como PDF desde el diálogo de impresión.</p>
+  @if (isEditModalOpen) {
+    <div class="modal-overlay" (click)="closeEditProfileModal()" (keydown.escape)="closeEditProfileModal()">
+      <section class="modal-dialog-box" role="dialog" aria-modal="true" aria-labelledby="profile-edit-title" (click)="$event.stopPropagation()">
+        <div class="dialog-header"><h2 id="profile-edit-title">Editar perfil</h2><button type="button" class="btn-dismiss" aria-label="Cerrar" (click)="closeEditProfileModal()" [disabled]="saving">×</button></div>
+        <form [formGroup]="editProfileForm" (ngSubmit)="saveProfile()" class="dialog-form">
+          <p>Tu avatar muestra tus iniciales. La subida de fotos estará disponible más adelante.</p>
+          <div class="input-block"><label for="profile-name">Nombre y apellidos</label><input id="profile-name" class="text-input" formControlName="fullName" maxlength="100" /></div>
+          <div class="input-block"><label for="profile-grade">Grado</label><input id="profile-grade" class="text-input" formControlName="grade" maxlength="50" /></div>
+          <div class="input-block"><label for="profile-school">Colegio</label><input id="profile-school" class="text-input" formControlName="school" maxlength="150" /></div>
+          @if (actionError) { <p role="alert">{{ actionError }}</p> }
+          <div class="dialog-footer"><button type="button" class="btn-ghost" (click)="closeEditProfileModal()" [disabled]="saving">Cancelar</button>
+            <button type="submit" class="btn-solid" [disabled]="saving || editProfileForm.invalid">{{ saving ? 'Guardando…' : 'Guardar cambios' }}</button></div>
+        </form>
+      </section>
+    </div>
+  }
+</div>

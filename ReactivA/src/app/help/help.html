@@ -1,0 +1,57 @@
+<div class="help-page">
+  @if (toastMessage) { <div class="toast-banner" role="status">{{ toastMessage }}</div> }
+  <header class="help-header"><div class="help-header-icon"><i class="ph ph-question"></i></div>
+    <div class="help-header-text"><h1 class="help-title">Guía de ayuda y preguntas frecuentes</h1>
+      <p class="help-subtitle">Encuentra instrucciones de los módulos y contacta con soporte.</p></div>
+  </header>
+  <section class="section-block" aria-label="Módulos de la plataforma"><h2 class="section-heading">Módulos de la plataforma</h2>
+    <div class="categories-grid">@for (cat of categories; track cat.id) {
+      <article class="category-card" [ngClass]="'theme-' + cat.colorTheme"><div class="cat-icon-cell"><i [class]="cat.icon"></i></div>
+        <h3 class="cat-title">{{ cat.title }}</h3><p class="cat-desc">{{ cat.description }}</p>
+        <div class="cat-footer"><a [routerLink]="cat.linkRoute" class="cat-link">Ir al módulo <i class="ph ph-arrow-right"></i></a></div>
+      </article>
+    }</div>
+  </section>
+  <section class="section-block" aria-label="Guía rápida"><h2 class="section-heading">Guía rápida</h2>
+    <div class="steps-grid">@for (step of guideSteps; track step.stepBadge) {
+      <div class="step-card" [ngClass]="'step-' + step.colorTheme"><div class="step-lead"><span class="step-badge">{{ step.stepBadge }}</span><i [class]="step.icon"></i></div>
+        <span class="step-sub">{{ step.subtitle }}</span><h3 class="step-title">{{ step.title }}</h3>
+        <p class="step-desc">{{ step.description }}</p><div class="step-tip">{{ step.tip }}</div>
+      </div>
+    }</div>
+  </section>
+  <section class="section-block faq-block" aria-label="Preguntas frecuentes">
+    <h2 class="section-heading">Preguntas frecuentes</h2>
+    <label for="faq-search">Buscar en preguntas y respuestas</label><input id="faq-search" class="support-input" [(ngModel)]="query" type="search" placeholder="Buscar ayuda" />
+    <div class="faq-list">@for (faq of filteredFaqs; track faq.id) {
+      <article class="faq-item" [class.is-open]="faq.isOpen"><button type="button" class="faq-btn" (click)="toggleFaq(faq.id)"
+        [attr.aria-expanded]="faq.isOpen" [attr.aria-controls]="'answer-' + faq.id">
+        <span class="faq-question-block"><span class="faq-label">{{ faq.categoryLabel }}</span><span class="faq-question">{{ faq.question }}</span></span>
+        <i class="ph" [class.ph-caret-down]="!faq.isOpen" [class.ph-caret-up]="faq.isOpen"></i>
+      </button>@if (faq.isOpen) { <div class="faq-body" [id]="'answer-' + faq.id">{{ faq.answer }}</div> }</article>
+    } @empty { <p>No hay preguntas que coincidan con tu búsqueda.</p> }</div>
+  </section>
+  <section class="section-block" aria-labelledby="support-title">
+    <h2 class="section-heading" id="support-title">Contactar con soporte</h2>
+    <p>Describe el problema sin incluir contraseñas ni claves.</p>
+    <form class="support-form" (ngSubmit)="send()">
+      <fieldset [disabled]="sending">
+        <label for="help-subject">Asunto</label><input id="help-subject" class="support-input" name="subject" [(ngModel)]="subject" required minlength="3" maxlength="150" />
+        <label for="help-message">Mensaje</label><textarea id="help-message" class="support-input" name="message" [(ngModel)]="message" required minlength="10" maxlength="4000" rows="5"></textarea>
+      </fieldset>
+      @if (sendError) { <p role="alert">{{ sendError }}</p> }
+      <button type="submit" class="faq-btn support-submit" [disabled]="sending">{{ sending ? 'Enviando…' : 'Enviar solicitud' }}</button>
+    </form>
+    <h3>Tus 50 solicitudes más recientes</h3>
+    @if (loading) { <p role="status">Cargando solicitudes…</p> }
+    @else if (error) { <p role="alert">{{ error }}</p><button type="button" class="faq-btn" (click)="load()">Reintentar</button> }
+    @else {
+      @for (request of requests; track request.id) {
+        <article class="faq-item"><h4 class="faq-question">{{ request.subject }}</h4><p>{{ request.message }}</p>
+          <span class="faq-label">{{ statusLabel(request.status) }} · {{ request.createdAt | date:'medium' }}</span></article>
+      } @empty { <p>Aún no has enviado solicitudes.</p> }
+    }
+  </section>
+  <footer class="inst-footer"><div class="inst-logo-row"><i class="ph ph-flask"></i><h2 class="inst-name">ReactivA</h2></div>
+    <p class="inst-desc">Plataforma educativa de química interactiva.</p></footer>
+</div>

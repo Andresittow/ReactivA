@@ -1,0 +1,299 @@
+<div class="home-page">
+  <!-- ======================================================== -->
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR (NAVBAR)                    -->
+  <!-- ======================================================== -->
+  <header class="home-navbar">
+    <div class="nav-brand">
+      <div class="brand-logo-icon">
+        <i class="ph ph-flask"></i>
+      </div>
+      <div class="brand-info">
+        <span class="brand-title">ReactivA</span>
+        <span class="brand-tag">Plataforma Educativa</span>
+      </div>
+    </div>
+
+    <!-- Enlaces de Navegación Suave -->
+    <nav class="nav-menu" aria-label="Navegación principal de bienvenida">
+      <a href="#hero-section" class="nav-item active">Inicio</a>
+      <a href="#modules-section" class="nav-item">Módulos</a>
+      <a href="#pedagogic-section" class="nav-item">Estándares MEN</a>
+      <a href="#benefits-section" class="nav-item">Metodología</a>
+    </nav>
+
+    <!-- Acciones de Autenticación / Acceso al Dashboard -->
+    <div class="nav-actions">
+      @if (hasActiveSession) {
+        <div class="nav-user-chip" title="Sesión activa">
+          <i class="ph ph-user-circle"></i>
+          <span>{{ profile.name }}</span>
+          <span class="nav-level-tag">Nv. {{ gamification.level }}</span>
+        </div>
+        <a [routerLink]="dashboardUrl" class="btn-nav btn-dashboard" [title]="dashboardLabel">
+          <i class="ph ph-squares-four"></i>
+          <span>{{ dashboardLabel }}</span>
+        </a>
+      } @else {
+        <a routerLink="/login" class="btn-nav btn-login" title="Acceder con tu cuenta">
+          <i class="ph ph-sign-in"></i>
+          <span>Iniciar Sesión</span>
+        </a>
+        <a routerLink="/register" class="btn-nav btn-register" title="Crear una cuenta nueva">
+          <i class="ph ph-user-plus"></i>
+          <span>Registrarse</span>
+        </a>
+      }
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 1. HERO SECTION (CABECERA PRINCIPAL)                     -->
+  <!-- ======================================================== -->
+  <section id="hero-section" class="hero-section">
+    <div class="hero-banner-card">
+      <div class="hero-text-content">
+        <!-- Badge de Nivel y Grado -->
+        <div class="hero-badge">
+          <i class="ph ph-atom"></i>
+          <span>Química & Ciencias Naturales · Grados 10° y 11°</span>
+        </div>
+
+        <!-- Título Principal -->
+        <h1 class="hero-title">
+          ReactivA <span class="emoji-spark">🧪⚡</span>
+          <span class="hero-subtitle-block">Aprende química de forma interactiva, moderna y gamificada</span>
+        </h1>
+
+        <!-- Párrafo Descriptivo -->
+        <p class="hero-desc">
+          Explora la tabla periódica con modelos atómicos cuánticos de Bohr, experimenta en simuladores moleculares 3D, supera misiones de química orgánica y compite en torneos escolares en vivo.
+        </p>
+
+        <!-- Botones de Acción (Call To Action) -->
+        <div class="hero-actions-row">
+          @if (hasActiveSession) {
+            <a [routerLink]="dashboardUrl" class="btn-hero btn-adventure">
+              <i class="ph ph-squares-four"></i>
+              <span>{{ dashboardLabel }}</span>
+            </a>
+          } @else {
+            <a routerLink="/register" class="btn-hero btn-adventure">
+              <i class="ph ph-rocket-launch"></i>
+              <span>Comenzar Aventura</span>
+            </a>
+          }
+          <button type="button" (click)="scrollToModules()" class="btn-hero btn-explore">
+            <i class="ph ph-squares-four"></i>
+            <span>Explorar Módulos</span>
+          </button>
+        </div>
+
+        <!-- Acceso para Usuarios Registrados -->
+        <div class="hero-account-note">
+          @if (hasActiveSession) {
+            <span>Conectado como <strong>{{ profile.name }}</strong> ({{ profile.grade }})</span>
+          } @else {
+            <span>¿Ya tienes una cuenta escolar?</span>
+            <a routerLink="/login" class="link-inline-login">
+              Inicia sesión aquí <i class="ph ph-arrow-right"></i>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 2. SECCIÓN DE MÓDULOS DE REACTIVA (SHOWCASE)             -->
+  <!-- ======================================================== -->
+  <section id="modules-section" class="section-container modules-section">
+    <div class="section-header">
+      <div class="section-tag tag-blue">
+        <i class="ph ph-cube"></i>
+        <span>Ecosistema de Aprendizaje</span>
+      </div>
+      <h2 class="section-title">Módulos y Herramientas del Laboratorio</h2>
+      <p class="section-subtitle">
+        Conoce los componentes interactivos desarrollados para ReactivA. Cada módulo está diseñado para fortalecer el aprendizaje experimental y las competencias curriculares.
+      </p>
+    </div>
+
+    <!-- Grid Informativo de Tarjetas de Módulos -->
+    <div class="modules-grid">
+      @for (module of modules; track module.id) {
+        <article class="module-info-card" [ngClass]="module.themeColor">
+          <!-- Cabecera de la Tarjeta -->
+          <div class="card-header">
+            <div class="module-icon-bubble" [ngClass]="module.themeColor">
+              <i class="ph" [ngClass]="module.icon"></i>
+            </div>
+            <span class="category-pill" [ngClass]="module.themeColor">
+              {{ module.badge }}
+            </span>
+          </div>
+
+          <!-- Contenido de la Tarjeta -->
+          <div class="card-body">
+            <span class="module-category-label">{{ module.category }}</span>
+            <h3 class="module-title">{{ module.title }}</h3>
+            <span class="module-subtitle">{{ module.subtitle }}</span>
+            <p class="module-description">{{ module.description }}</p>
+
+            <!-- Lista de Características / Puntos Clave -->
+            <ul class="highlights-list">
+              @for (item of module.highlights; track item) {
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span>{{ item }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+
+          <!-- Pie: Enlace protegido al módulo -->
+          <div class="card-footer-info">
+            @if (hasActiveSession) {
+              <a [routerLink]="'/' + module.id" class="access-pill">
+                <i class="ph ph-arrow-right"></i>
+                <span>Ingresar al Módulo</span>
+              </a>
+            } @else {
+              <a routerLink="/login" [queryParams]="{ returnUrl: '/' + module.id }" class="access-pill">
+                <i class="ph ph-lock-simple"></i>
+                <span>Disponible al iniciar sesión</span>
+              </a>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 3. ESTÁNDARES PEDAGÓGICOS Y COMPETENCIAS (MEN)           -->
+  <!-- ======================================================== -->
+  <section id="pedagogic-section" class="section-container pedagogic-section">
+    <div class="section-header">
+      <div class="section-tag tag-emerald">
+        <i class="ph ph-certificate"></i>
+        <span>Calidad Académica</span>
+      </div>
+      <h2 class="section-title">Alineado a los Estándares de Ciencias Naturales (MEN)</h2>
+      <p class="section-subtitle">
+        Promovemos el desarrollo de competencias científicas fundamentales en educación media vocacional mediante metodologías activas y formativas.
+      </p>
+    </div>
+
+    <div class="metrics-grid">
+      @for (metric of metrics; track metric.label) {
+        <div class="metric-card" [ngClass]="metric.accent">
+          <div class="metric-icon-circle" [ngClass]="metric.accent">
+            <i class="ph" [ngClass]="metric.icon"></i>
+          </div>
+          <strong class="metric-number">{{ metric.value }}</strong>
+          <span class="metric-label">{{ metric.label }}</span>
+          <p class="metric-desc">{{ metric.description }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 4. BENEFICIOS CLAVE DE LA EXPERIENCIA EDUCATIVA          -->
+  <!-- ======================================================== -->
+  <section id="benefits-section" class="section-container benefits-section">
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon-box blue">
+          <i class="ph ph-shield-check"></i>
+        </div>
+        <h3 class="benefit-title">Laboratorio 100% Seguro</h3>
+        <p class="benefit-desc">
+          Realiza simulaciones de reacciones químicas y balanceo estequiométrico en un entorno digital controlado, libre de riesgos de laboratorio físico.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon-box emerald">
+          <i class="ph ph-game-controller"></i>
+        </div>
+        <h3 class="benefit-title">Gamificación Pedagógica</h3>
+        <p class="benefit-desc">
+          Acumula puntos de experiencia (XP), mantén activa tu racha diaria y compite en torneos escolares para desbloquear insignias curriculares.
+        </p>
+      </div>
+
+      <div class="benefit-card">
+        <div class="benefit-icon-box purple">
+          <i class="ph ph-chalkboard-teacher"></i>
+        </div>
+        <h3 class="benefit-title">Feedback Didáctico Inmediato</h3>
+        <p class="benefit-desc">
+          Cada reto incluye explicaciones detalladas adaptadas para estudiantes de grado 10° y 11°, convirtiendo cada intento en una oportunidad de aprendizaje.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 5. CALL TO ACTION FINAL (BANNER DE INVITACIÓN)           -->
+  <!-- ======================================================== -->
+  <section class="final-cta-section">
+    <div class="final-cta-card">
+      <div class="cta-content">
+        <div class="cta-tag">
+          <i class="ph ph-sparkle"></i>
+          <span>Comienza Ahora</span>
+        </div>
+        <h2 class="cta-title">¿Listo para transformar tu aprendizaje de la química?</h2>
+        <p class="cta-desc">
+          Crea tu cuenta gratuita de estudiante o docente y accede a todas las herramientas interactivas de ReactivA.
+        </p>
+
+        <div class="cta-buttons-row">
+          @if (hasActiveSession) {
+            <a [routerLink]="dashboardUrl" class="btn-cta btn-register-cta">
+              <i class="ph ph-squares-four"></i>
+              <span>{{ dashboardLabel }}</span>
+            </a>
+          } @else {
+            <a routerLink="/register" class="btn-cta btn-register-cta">
+              <i class="ph ph-user-plus"></i>
+              <span>Registrarse Gratis</span>
+            </a>
+            <a routerLink="/login" class="btn-cta btn-login-cta">
+              <i class="ph ph-sign-in"></i>
+              <span>Iniciar Sesión</span>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- PIE DE PÁGINA INSTITUCIONAL                              -->
+  <!-- ======================================================== -->
+  <footer class="home-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <i class="ph ph-flask"></i>
+        </div>
+        <span class="footer-name">ReactivA 🧪⚡</span>
+      </div>
+      <p class="footer-summary">
+        Plataforma educativa interactiva de química y ciencias naturales diseñada para estudiantes y docentes de educación secundaria y media.
+      </p>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 ReactivA. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a routerLink="/login">Iniciar Sesión</a>
+        <span class="sep">·</span>
+        <a routerLink="/register">Registro</a>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,1064 @@
+// ==========================================================
+// HOME / LANDING PAGE DE BIENVENIDA - REACTIVA 🧪⚡
+// Diseño: Blanco como fondo principal con acentos en azul
+// ==========================================================
+
+$font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+// Paleta Clara (Consistente con Dashboard y el resto de ReactivA)
+$bg-page: #f8fafc;
+$bg-card: #ffffff;
+$bg-card-subtle: #f1f5f9;
+
+$text-main: #0f172a;
+$text-body: #334155;
+$text-muted: #64748b;
+$text-light: #94a3b8;
+
+$border-color: #e2e8f0;
+$border-light: #f1f5f9;
+
+// Acentos de Color
+$blue-primary: #2563eb;
+$blue-dark: #1d4ed8;
+$blue-bg: #eff6ff;
+$blue-border: #bfdbfe;
+
+$emerald: #10b981;
+$emerald-bg: #dcfce7;
+$emerald-text: #15803d;
+
+$purple: #635bfc;
+$purple-bg: #ede9fe;
+$purple-text: #6d28d9;
+
+$amber: #f59e0b;
+$amber-bg: #fef3c7;
+$amber-text: #b45309;
+
+.home-page {
+  font-family: $font-family;
+  background-color: $bg-page;
+  color: $text-main;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 1.5rem 2.5rem 3.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+  overflow-x: hidden;
+}
+
+// ----------------------------------------------------------
+// Barra de Navegación Superior (Navbar)
+// ----------------------------------------------------------
+.home-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.85rem 1.75rem;
+  background: #ffffff;
+  border: 1px solid $border-color;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  position: sticky;
+  top: 1rem;
+  z-index: 100;
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .brand-logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: $blue-bg;
+      color: $blue-primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      border: 1px solid $blue-border;
+    }
+
+    .brand-info {
+      display: flex;
+      flex-direction: column;
+
+      .brand-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: $text-main;
+        line-height: 1.2;
+      }
+
+      .brand-tag {
+        font-size: 0.68rem;
+        color: $blue-primary;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+
+    .nav-item {
+      color: $text-muted;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: color 0.2s;
+
+      &:hover,
+      &.active {
+        color: $blue-primary;
+      }
+    }
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+
+      i { font-size: 1.05rem; }
+
+      &.btn-login {
+        background: $bg-card-subtle;
+        border: 1px solid $border-color;
+        color: $text-body;
+
+        &:hover {
+          background: #e2e8f0;
+          color: $text-main;
+        }
+      }
+
+      &.btn-register,
+      &.btn-dashboard {
+        background: $blue-primary;
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+
+        &:hover {
+          background: $blue-dark;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+      }
+    }
+
+    .nav-user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: $text-main;
+      font-size: 0.85rem;
+      font-weight: 700;
+
+      i {
+        font-size: 1.15rem;
+        color: $blue-primary;
+      }
+
+      .nav-level-tag {
+        font-size: 0.7rem;
+        color: #635bfc;
+        background: #ede9fe;
+        padding: 0.15rem 0.45rem;
+        border-radius: 9999px;
+        font-weight: 800;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// 1. Hero Section (Cabecera Principal)
+// ----------------------------------------------------------
+.hero-section {
+  .hero-banner-card {
+    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    border: 1px solid #dbeafe;
+    border-radius: 24px;
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: 3rem;
+    box-shadow: 0 4px 20px -4px rgba(37, 99, 235, 0.08);
+
+    .hero-text-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: #ffffff;
+        border: 1px solid #bfdbfe;
+        color: $blue-dark;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        width: fit-content;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.06);
+
+        i {
+          color: $blue-primary;
+          font-size: 0.95rem;
+        }
+      }
+
+      .hero-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: $text-main;
+        line-height: 1.2;
+        margin: 0;
+        letter-spacing: -0.5px;
+
+        .emoji-spark {
+          font-size: 2.2rem;
+        }
+
+        .hero-subtitle-block {
+          display: block;
+          font-size: 1.75rem;
+          color: $blue-primary;
+          font-weight: 800;
+          margin-top: 0.35rem;
+        }
+      }
+
+      .hero-desc {
+        font-size: 1rem;
+        color: $text-body;
+        line-height: 1.6;
+        margin: 0;
+        max-width: 580px;
+      }
+
+      .hero-actions-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+
+        .btn-hero {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.55rem;
+          padding: 0.85rem 1.65rem;
+          border-radius: 14px;
+          font-size: 0.92rem;
+          font-weight: 700;
+          cursor: pointer;
+          text-decoration: none;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+          i { font-size: 1.15rem; }
+
+          &.btn-adventure {
+            background: $blue-primary;
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+
+            &:hover {
+              background: $blue-dark;
+              transform: translateY(-2px);
+              box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+            }
+          }
+
+          &.btn-explore {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: $text-main;
+
+            &:hover {
+              background: #f8fafc;
+              border-color: #94a3b8;
+              transform: translateY(-2px);
+            }
+          }
+        }
+      }
+
+      .hero-account-note {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.84rem;
+        color: $text-muted;
+
+        .link-inline-login {
+          color: $blue-primary;
+          font-weight: 700;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          transition: gap 0.2s;
+
+          &:hover {
+            color: $blue-dark;
+            gap: 0.5rem;
+          }
+        }
+      }
+    }
+
+    // Ilustración de Átomo Cuántico
+    .hero-visual-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .bohr-atom-card {
+        width: 100%;
+        max-width: 400px;
+        height: 380px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .bohr-orbital-scene {
+          position: relative;
+          width: 240px;
+          height: 240px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .orbit-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1.5px dashed #cbd5e1;
+
+            .electron-dot {
+              position: absolute;
+              width: 10px;
+              height: 10px;
+              border-radius: 50%;
+              background: $blue-primary;
+              box-shadow: 0 0 8px rgba(37, 99, 235, 0.6);
+            }
+
+            &.ring-1 {
+              width: 120px;
+              height: 120px;
+              border-color: #93c5fd;
+              animation: spinOrbit 10s linear infinite;
+
+              .dot-1 {
+                top: -5px;
+                left: 50%;
+                transform: translateX(-50%);
+              }
+            }
+
+            &.ring-2 {
+              width: 180px;
+              height: 180px;
+              border-color: #cbd5e1;
+              animation: spinOrbitReverse 14s linear infinite;
+
+              .dot-2 {
+                bottom: -5px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: $purple;
+              }
+            }
+
+            &.ring-3 {
+              width: 235px;
+              height: 235px;
+              border-color: #bfdbfe;
+              animation: spinOrbit 18s linear infinite;
+
+              .dot-3 {
+                top: 50%;
+                right: -5px;
+                transform: translateY(-50%);
+                background: $emerald;
+              }
+            }
+          }
+
+          .atom-nucleus {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, $blue-primary 0%, #1d4ed8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+            z-index: 10;
+
+            .nucleus-icon {
+              font-size: 1.6rem;
+            }
+
+            .nucleus-label {
+              font-size: 0.62rem;
+              font-weight: 800;
+              letter-spacing: 0.4px;
+            }
+          }
+        }
+
+        // Chips Flotantes
+        .floating-chip {
+          position: absolute;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.45rem 0.85rem;
+          border-radius: 12px;
+          font-size: 0.74rem;
+          font-weight: 700;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+          z-index: 20;
+
+          &.chip-streak {
+            top: 20px;
+            left: -15px;
+            color: #c2410c;
+            border-color: #fed7aa;
+            background: #fff7ed;
+          }
+
+          &.chip-table {
+            bottom: 25px;
+            left: -10px;
+            color: #1e40af;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+          }
+
+          &.chip-trophy {
+            top: 35px;
+            right: -15px;
+            color: #854d0e;
+            border-color: #fde68a;
+            background: #fefce8;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// Secciones Generales Compartidas
+// ----------------------------------------------------------
+.section-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  .section-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: $blue-bg;
+      color: $blue-primary;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      border: 1px solid $blue-border;
+
+      &.tag-emerald {
+        background: $emerald-bg;
+        color: $emerald-text;
+        border-color: #bbf7d0;
+      }
+    }
+
+    .section-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: $text-main;
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: $text-muted;
+      margin: 0;
+      max-width: 650px;
+      line-height: 1.5;
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// 2. Módulos Interactivos (Grid Informativo)
+// ----------------------------------------------------------
+.modules-section {
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 1.5rem;
+
+    .module-info-card {
+      background: #ffffff;
+      border: 1px solid $border-color;
+      border-radius: 20px;
+      padding: 1.65rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1.25rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        border-color: #cbd5e1;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .module-icon-bubble {
+          width: 46px;
+          height: 46px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.4rem;
+
+          &.blue { background: $blue-bg; color: $blue-primary; border: 1px solid $blue-border; }
+          &.emerald { background: $emerald-bg; color: $emerald-text; border: 1px solid #bbf7d0; }
+          &.purple { background: $purple-bg; color: $purple-text; border: 1px solid #ddd6fe; }
+          &.amber { background: $amber-bg; color: $amber-text; border: 1px solid #fde68a; }
+        }
+
+        .category-pill {
+          font-size: 0.72rem;
+          font-weight: 700;
+          padding: 0.25rem 0.65rem;
+          border-radius: 9999px;
+
+          &.blue { background: #eff6ff; color: #1e40af; border: 1px solid #dbeafe; }
+          &.emerald { background: #f0fdf4; color: #166534; border: 1px solid #dcfce7; }
+          &.purple { background: #faf5ff; color: #6b21a8; border: 1px solid #f3e8ff; }
+          &.amber { background: #fffbeb; color: #92400e; border: 1px solid #fef3c7; }
+        }
+      }
+
+      .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+
+        .module-category-label {
+          font-size: 0.7rem;
+          color: $text-muted;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .module-title {
+          font-size: 1.2rem;
+          font-weight: 800;
+          color: $text-main;
+          margin: 0;
+          line-height: 1.25;
+        }
+
+        .module-subtitle {
+          font-size: 0.8rem;
+          color: $blue-primary;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+        }
+
+        .module-description {
+          font-size: 0.86rem;
+          color: $text-body;
+          line-height: 1.5;
+          margin: 0 0 0.75rem 0;
+        }
+
+        .highlights-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.35rem;
+
+          li {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            color: $text-body;
+            font-weight: 500;
+
+            i {
+              color: $blue-primary;
+              font-size: 0.95rem;
+              flex-shrink: 0;
+            }
+          }
+        }
+      }
+
+      .card-footer-info {
+        padding-top: 0.85rem;
+        border-top: 1px solid $border-light;
+
+        .access-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          background: #f8fafc;
+          border: 1px solid $border-color;
+          color: $text-muted;
+          font-size: 0.75rem;
+          font-weight: 600;
+          padding: 0.3rem 0.65rem;
+          border-radius: 8px;
+
+          i {
+            color: #94a3b8;
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// 3. Estándares Pedagógicos (MEN)
+// ----------------------------------------------------------
+.pedagogic-section {
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+
+    .metric-card {
+      background: #ffffff;
+      border: 1px solid $border-color;
+      border-radius: 20px;
+      padding: 1.75rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.45rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+      .metric-icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 0.35rem;
+
+        &.blue { background: $blue-bg; color: $blue-primary; border: 1px solid $blue-border; }
+        &.emerald { background: $emerald-bg; color: $emerald-text; border: 1px solid #bbf7d0; }
+        &.purple { background: $purple-bg; color: $purple-text; border: 1px solid #ddd6fe; }
+        &.amber { background: $amber-bg; color: $amber-text; border: 1px solid #fde68a; }
+      }
+
+      .metric-number {
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: $text-main;
+        letter-spacing: -0.5px;
+        line-height: 1;
+      }
+
+      .metric-label {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: $text-body;
+      }
+
+      .metric-desc {
+        font-size: 0.78rem;
+        color: $text-muted;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// 4. Beneficios
+// ----------------------------------------------------------
+.benefits-section {
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1.5rem;
+
+    .benefit-card {
+      background: #ffffff;
+      border: 1px solid $border-color;
+      border-radius: 20px;
+      padding: 1.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+      .benefit-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.45rem;
+
+        &.blue { background: $blue-bg; color: $blue-primary; border: 1px solid $blue-border; }
+        &.emerald { background: $emerald-bg; color: $emerald-text; border: 1px solid #bbf7d0; }
+        &.purple { background: $purple-bg; color: $purple-text; border: 1px solid #ddd6fe; }
+      }
+
+      .benefit-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: $text-main;
+        margin: 0;
+      }
+
+      .benefit-desc {
+        font-size: 0.88rem;
+        color: $text-muted;
+        line-height: 1.55;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// 5. Call To Action Final
+// ----------------------------------------------------------
+.final-cta-section {
+  .final-cta-card {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    border-radius: 24px;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
+
+    .cta-content {
+      max-width: 620px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.15rem;
+
+      .cta-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .cta-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1.25;
+      }
+
+      .cta-desc {
+        font-size: 0.95rem;
+        color: #dbeafe;
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .cta-buttons-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 0.5rem;
+
+        .btn-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.85rem 1.65rem;
+          border-radius: 12px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          text-decoration: none;
+          transition: all 0.2s;
+
+          &.btn-register-cta {
+            background: #ffffff;
+            color: $blue-dark;
+
+            &:hover {
+              background: #f8fafc;
+              transform: translateY(-2px);
+              box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+            }
+          }
+
+          &.btn-login-cta {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+
+            &:hover {
+              background: rgba(255, 255, 255, 0.22);
+              transform: translateY(-2px);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// Pie de Página Institucional (Footer)
+// ----------------------------------------------------------
+.home-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid $border-color;
+
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+
+      .footer-logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: $blue-bg;
+        color: $blue-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+      }
+
+      .footer-name {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: $text-main;
+      }
+    }
+
+    .footer-summary {
+      font-size: 0.82rem;
+      color: $text-muted;
+      margin: 0;
+      max-width: 500px;
+    }
+  }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.78rem;
+    color: $text-light;
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      a {
+        color: $text-muted;
+        text-decoration: none;
+        transition: color 0.2s;
+
+        &:hover {
+          color: $blue-primary;
+        }
+      }
+
+      .sep {
+        opacity: 0.4;
+      }
+    }
+  }
+}
+
+// ----------------------------------------------------------
+// Animaciones de Órbitas
+// ----------------------------------------------------------
+@keyframes spinOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinOrbitReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+// ----------------------------------------------------------
+// Responsividad (CSS Grid & Flexbox)
+// ----------------------------------------------------------
+@media (max-width: 1024px) {
+  .hero-banner-card {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+    padding: 2rem !important;
+
+    .hero-text-content {
+      align-items: center;
+
+      .hero-title {
+        font-size: 2rem !important;
+        .hero-subtitle-block { font-size: 1.4rem !important; }
+      }
+
+      .hero-actions-row {
+        justify-content: center;
+      }
+    }
+
+    .hero-visual-box {
+      margin-top: 1rem;
+    }
+  }
+
+  .home-navbar {
+    .nav-menu {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .home-page {
+    padding: 1rem 1rem 2.5rem 1rem;
+    gap: 2.5rem;
+  }
+
+  .hero-banner-card {
+    padding: 1.5rem !important;
+
+    .hero-title {
+      font-size: 1.7rem !important;
+      .hero-subtitle-block { font-size: 1.25rem !important; }
+    }
+
+    .hero-actions-row {
+      flex-direction: column;
+      width: 100%;
+
+      .btn-hero {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .final-cta-card {
+    padding: 2rem 1.25rem !important;
+
+    .cta-title {
+      font-size: 1.5rem !important;
+    }
+  }
+}

@@ -1,0 +1,42 @@
+<aside class="teacher-sidebar" [class.collapsed]="collapsed()" aria-label="Panel del profesor">
+  <div class="brand">
+    <div class="brand-info">
+      <div class="logo-icon"><i class="ph ph-flask" aria-hidden="true"></i></div>
+      @if (!collapsed()) {
+        <div class="brand-text"><h2>ReactivA</h2><span>Panel del profesor</span></div>
+      }
+    </div>
+    <button type="button" class="btn-toggle" (click)="collapsed.set(!collapsed())"
+      [attr.aria-expanded]="!collapsed()" aria-controls="teacher-navigation"
+      [attr.aria-label]="collapsed() ? 'Expandir menú docente' : 'Colapsar menú docente'"
+      [title]="collapsed() ? 'Expandir menú' : 'Colapsar menú'">
+      <i class="ph" [class.ph-caret-right]="collapsed()" [class.ph-caret-left]="!collapsed()" aria-hidden="true"></i>
+    </button>
+  </div>
+  <nav id="teacher-navigation" class="nav-menu" aria-label="Navegación docente">
+    <ul>
+      <li>
+        <button type="button" class="nav-link-btn" [class.active]="currentView() === 'overview'"
+          (click)="selectView('overview')" title="Vista general" aria-label="Vista general">
+          <i class="ph ph-squares-four" aria-hidden="true"></i>
+          @if (!collapsed()) { <span>Vista general</span> }
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link-btn" [class.active]="currentView() === 'classrooms'"
+          (click)="selectView('classrooms')" title="Mis aulas y grupos" aria-label="Mis aulas y grupos">
+          <i class="ph ph-chalkboard-teacher" aria-hidden="true"></i>
+          @if (!collapsed()) { <span>Mis aulas y grupos</span> }
+        </button>
+      </li>
+    </ul>
+  </nav>
+  <div class="session-actions">
+    <button type="button" class="btn-sign-out" (click)="signOut()" [disabled]="signingOut()"
+      title="Cerrar sesión" aria-label="Cerrar sesión">
+      <i class="ph ph-sign-out" aria-hidden="true"></i>
+      @if (!collapsed()) { <span>{{ signingOut() ? 'Cerrando sesión…' : 'Cerrar sesión' }}</span> }
+    </button>
+    @if (logoutError()) { <p role="alert">{{ logoutError() }}</p> }
+  </div>
+</aside>

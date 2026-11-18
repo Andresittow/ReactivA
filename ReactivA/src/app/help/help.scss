@@ -1,0 +1,550 @@
+// ============================================================
+// ReactivA — Módulo de Ayuda (Help) · Simplificado
+// Paleta: Azul #00a2ed / #1d4ed8, Morado #635bfc, Fondo #f4f7f9
+// ============================================================
+
+$font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+$c-primary:        #00a2ed;
+$c-primary-dark:   #1d4ed8;
+$c-primary-hover:  #0284c7;
+$c-primary-soft:   rgba(0, 162, 237, 0.09);
+
+$c-secondary:      #635bfc;
+$c-secondary-soft: rgba(99, 91, 252, 0.09);
+
+$c-bg:             #f4f7f9;
+$c-card:           #ffffff;
+$c-border:         #e2e8f0;
+$c-border-subtle:  #f1f5f9;
+
+$c-text-main:  #0f172a;
+$c-text-body:  #334155;
+$c-text-muted: #64748b;
+$c-text-light: #94a3b8;
+
+$c-cyan:        #06b6d4;
+$c-cyan-bg:     #cffafe;
+$c-cyan-text:   #0e7490;
+
+$c-purple:      #8b5cf6;
+$c-purple-bg:   #f3e8ff;
+$c-purple-text: #7e22ce;
+
+$c-amber:       #f59e0b;
+$c-amber-bg:    #fef3c7;
+$c-amber-text:  #b45309;
+
+$c-success:     #10b981;
+
+$radius-card: 18px;
+$radius-btn:  12px;
+$radius-pill: 50px;
+
+$shadow-card:  0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+$shadow-hover: 0 10px 25px rgba(0, 162, 237, 0.08);
+
+// ─── HOST ────────────────────────────────────────────────────
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: $c-bg;
+}
+
+// ─── PAGE WRAPPER ────────────────────────────────────────────
+.help-page {
+  font-family: $font-family;
+  background-color: $c-bg;
+  padding: 2rem 2.5rem 4rem;
+  box-sizing: border-box;
+}
+
+// ─── TOAST ───────────────────────────────────────────────────
+.toast-banner {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 0.85rem 1.4rem;
+  border-radius: $radius-pill;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-left: 4px solid $c-success;
+
+  .toast-icon { color: $c-success; font-size: 1.25rem; }
+}
+
+// ─── HEADER SIMPLE ───────────────────────────────────────────
+.help-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  background-color: $c-card;
+  border: 1px solid $c-border;
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: $shadow-card;
+}
+
+.help-header-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background-color: $c-primary-soft;
+  color: $c-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+
+  i { font-size: 1.5rem; line-height: 1; }
+}
+
+.help-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.help-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: $c-text-main;
+  letter-spacing: -0.02em;
+}
+
+.help-subtitle {
+  margin: 0;
+  font-size: 0.93rem;
+  color: $c-text-muted;
+  line-height: 1.5;
+}
+
+// ─── SECCIONES GENÉRICAS ─────────────────────────────────────
+.section-block {
+  margin-bottom: 2.5rem;
+}
+
+.section-heading {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: $c-text-main;
+  letter-spacing: -0.02em;
+}
+
+.section-subheading {
+  margin: 0 0 1.25rem 0;
+  font-size: 0.9rem;
+  color: $c-text-muted;
+}
+
+// ─── GRID DE CATEGORÍAS ──────────────────────────────────────
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.1rem;
+  margin-top: 1.1rem;
+
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: 1fr; }
+}
+
+.category-card {
+  background-color: $c-card;
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-card;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: $shadow-hover;
+  }
+
+  .cat-icon-cell {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 0.9rem;
+    flex-shrink: 0;
+
+    i { font-size: 1.4rem; line-height: 1; display: inline-flex; }
+  }
+
+  .cat-title {
+    margin: 0 0 0.45rem 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: $c-text-main;
+  }
+
+  .cat-desc {
+    margin: 0 0 0.9rem 0;
+    font-size: 0.84rem;
+    line-height: 1.45;
+    color: $c-text-body;
+    flex: 1;
+  }
+
+  .cat-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+
+    .tag-chip {
+      background-color: #f1f5f9;
+      color: $c-text-muted;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.18rem 0.48rem;
+    }
+  }
+
+  .cat-footer {
+    border-top: 1px solid $c-border-subtle;
+    padding-top: 0.8rem;
+  }
+
+  .cat-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: $c-primary;
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: gap 0.15s ease, color 0.15s ease;
+
+    &:hover { color: $c-primary-hover; gap: 0.55rem; }
+    i { font-size: 0.88rem; }
+  }
+
+  // Temas de color del icono por categoría
+  &.theme-cyan    .cat-icon-cell { background-color: $c-cyan-bg;              color: $c-cyan-text; }
+  &.theme-purple  .cat-icon-cell { background-color: $c-purple-bg;            color: $c-purple-text; }
+  &.theme-amber   .cat-icon-cell { background-color: $c-amber-bg;             color: $c-amber-text; }
+  &.theme-blue    .cat-icon-cell { background-color: $c-primary-soft;         color: $c-primary; }
+}
+
+// ─── GUÍA RÁPIDA (PASOS 1-2-3) ───────────────────────────────
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.1rem;
+
+  @media (max-width: 950px) { grid-template-columns: 1fr; }
+}
+
+.step-card {
+  background-color: $c-card;
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-card;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+  }
+
+  .step-lead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .step-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.3rem 0.75rem;
+    border-radius: $radius-pill;
+  }
+
+  .step-icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+
+    i { font-size: 1.3rem; line-height: 1; display: inline-flex; }
+  }
+
+  .step-sub {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: $c-text-muted;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+  }
+
+  .step-title {
+    margin: 0 0 0.6rem 0;
+    font-size: 1.08rem;
+    font-weight: 800;
+    color: $c-text-main;
+  }
+
+  .step-desc {
+    margin: 0 0 1.1rem 0;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: $c-text-body;
+    flex: 1;
+  }
+
+  .step-tip {
+    background-color: #f8fafc;
+    border: 1px solid $c-border;
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    font-size: 0.78rem;
+    color: $c-text-body;
+    line-height: 1.4;
+    font-weight: 500;
+
+    .tip-icon { color: $c-amber; font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  }
+
+  // Tema de borde superior y colores del badge/icono
+  &.step-cyan {
+    border-top: 4px solid $c-cyan;
+    .step-badge    { background-color: $c-cyan-bg;      color: $c-cyan-text; }
+    .step-icon-wrap { background-color: $c-cyan-bg;      color: $c-cyan-text; }
+  }
+
+  &.step-blue {
+    border-top: 4px solid $c-primary;
+    .step-badge    { background-color: $c-primary-soft;  color: $c-primary-hover; }
+    .step-icon-wrap { background-color: $c-primary-soft;  color: $c-primary; }
+  }
+
+  &.step-purple {
+    border-top: 4px solid $c-secondary;
+    .step-badge    { background-color: $c-purple-bg;     color: $c-purple-text; }
+    .step-icon-wrap { background-color: $c-purple-bg;     color: $c-purple-text; }
+  }
+}
+
+// ─── FAQ ACORDEÓN ────────────────────────────────────────────
+.faq-block { margin-top: 0.25rem; }
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+}
+
+.faq-item {
+  background-color: $c-card;
+  border: 1px solid $c-border;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &.is-open {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+
+    .faq-btn { background-color: #fafbfc; }
+  }
+
+  .faq-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.15rem 1.4rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    gap: 1rem;
+    transition: background-color 0.15s ease;
+
+    &:hover { background-color: #f8fafc; }
+  }
+
+  .faq-question-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .faq-label {
+    align-self: flex-start;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: $c-primary-hover;
+    background-color: $c-primary-soft;
+    padding: 0.18rem 0.55rem;
+    border-radius: 5px;
+    letter-spacing: 0.03em;
+  }
+
+  .faq-question {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: $c-text-main;
+  }
+
+  .faq-caret {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $c-text-muted;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .faq-body {
+    padding: 0 1.4rem 1.4rem;
+    border-top: 1px solid $c-border-subtle;
+    font-size: 0.9rem;
+    color: $c-text-body;
+    line-height: 1.6;
+
+    p  { margin: 0.9rem 0 0.65rem; }
+
+    ol, ul {
+      margin: 0 0 0.9rem;
+      padding-left: 1.35rem;
+
+      li { margin-bottom: 0.38rem; }
+    }
+
+    code {
+      background-color: #f1f5f9;
+      color: $c-primary-dark;
+      padding: 0.12rem 0.32rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.87em;
+    }
+
+    strong { color: $c-text-main; }
+  }
+}
+
+// ─── FOOTER INSTITUCIONAL ────────────────────────────────────
+.inst-footer {
+  background-color: $c-card;
+  border: 1px solid $c-border;
+  border-radius: $radius-card;
+  padding: 1.8rem 2rem;
+  box-shadow: $shadow-card;
+  margin-top: 0.5rem;
+}
+
+.inst-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.8rem;
+
+  .inst-logo-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, $c-primary 0%, $c-primary-dark 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .inst-name {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: $c-text-main;
+  }
+
+  .inst-tagline {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: $c-text-muted;
+  }
+}
+
+.inst-desc {
+  margin: 0 0 1.1rem;
+  font-size: 0.87rem;
+  color: $c-text-body;
+  line-height: 1.55;
+}
+
+.inst-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+  margin-bottom: 1rem;
+}
+
+.inst-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: $c-text-muted;
+
+  i { color: $c-primary; font-size: 1.1rem; }
+}
+
+.inst-quote {
+  margin: 0;
+  font-size: 0.82rem;
+  color: $c-text-muted;
+  border-top: 1px solid $c-border-subtle;
+  padding-top: 0.9rem;
+}
+.support-form { max-width: 720px; display: grid; gap: 1rem; }
+.support-form fieldset { display: grid; gap: .75rem; border: 0; padding: 0; margin: 0; }
+.support-input { box-sizing: border-box; display: block; width: 100%; padding: .75rem; margin: .5rem 0; border: 1px solid #cbd5e1; border-radius: 10px; font: inherit; background: white; color: #1e293b; }
+.support-submit { width: auto; justify-content: center; background: #e0f2fe; }
+button:disabled { opacity: .55; cursor: wait; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }

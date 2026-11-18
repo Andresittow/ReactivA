@@ -1,0 +1,124 @@
+<div class="misaulas-page" [class.embedded]="embedded">
+  @if (toastMessage) { <div class="toast-banner" role="status">{{ toastMessage }}</div> }
+  @if (!embedded) {
+    <header class="inst-topbar">
+      <div class="topbar-brand"><div class="brand-icon"><i class="ph ph-flask"></i></div>
+        <div class="brand-labels"><span class="brand-name">ReactivA</span><span class="brand-sub">{{ auth.user()?.school || 'Mis aulas' }}</span></div>
+      </div>
+      <div class="topbar-meta">{{ auth.user()?.fullName }}</div>
+    </header>
+    <section class="section-header-block"><div class="section-title-row">
+      <div class="section-title-text"><h1 class="section-title">Mis aulas y grupos</h1>
+        <p class="section-subtitle">Gestiona tus aulas, estudiantes y talleres.</p></div>
+      <button type="button" class="btn-create" (click)="openCreate()">Crear aula</button>
+    </div></section>
+  } @else { <button type="button" class="btn-create" (click)="openCreate()">Crear aula</button> }
+  <div class="search-filter-bar">
+    <div class="search-box"><i class="ph ph-magnifying-glass"></i>
+      <input [(ngModel)]="searchQuery" class="search-input" placeholder="Buscar aula, ubicación o módulo" aria-label="Buscar aula" />
+    </div>
+    <div class="filter-pills">
+      @for (filter of ['all','10','11','stem']; track filter) {
+        <button type="button" class="pill" [class.active]="filtroActivo === filter" (click)="filtroActivo = filter">
+          {{ filter === 'all' ? 'Todas' : filter === 'stem' ? 'STEM' : 'Grado ' + filter }}
+          <span class="pill-count">{{ contarPorFiltro(filter) }}</span>
+        </button>
+      }
+    </div>
+  </div>
+  @if (loading) { <p role="status">Cargando aulas…</p> }
+  @else if (error) { <div role="alert">{{ error }} <button type="button" class="btn-ver" (click)="load()">Reintentar</button></div> }
+  @else {
+    <div class="aulas-grid">
+      @for (aula of aulasFiltradas; track aula.id) {
+        <article class="aula-card">
+          <div class="card-top">
+            <span class="aula-tag tag-blue">{{ aula.tag || 'Aula' }}</span>
+            <div class="card-meta-row"><span class="meta-item">{{ aula.location || 'Sin ubicación' }}</span>
+              <span class="meta-item">{{ aula.schedule || 'Sin horario' }}</span></div>
+            <h2 class="aula-nombre">{{ aula.name }}</h2>
+          </div>
+          <div class="card-kpis"><div class="kpi-cell"><i class="ph ph-users"></i><div><strong>{{ aula.capacity }}</strong><span>Cupo máximo</span></div></div>
+            <div class="kpi-cell"><div><strong>{{ aula.joinPin }}</strong><span>PIN de acceso</span></div></div>
+          </div>
+          <div class="card-progress-block"><span class="module-label">Módulo: <strong>{{ aula.activeModule || 'Sin asignar' }}</strong></span>
+            <span class="week-label">Semana {{ aula.currentWeek }} de {{ aula.totalWeeks }}</span></div>
+          <div class="card-actions">
+            <button class="btn-ver" type="button" (click)="viewMembers(aula)">Ver estudiantes</button>
+            <button class="btn-asignar" type="button" (click)="openAction(aula, 'assign')">Asignar taller</button>
+          </div>
+          <div class="card-actions">
+            <button class="btn-ver" type="button" (click)="copyPin(aula)">Copiar PIN</button>
+            <button class="btn-ver" type="button" (click)="openAction(aula, 'pin')">Regenerar PIN</button>
+          </div>
+          <div class="card-actions">
+            <button class="btn-ver" type="button" (click)="openEdit(aula)">Editar</button>
+            <button class="btn-ver" type="button" (click)="openAction(aula, 'delete')">Eliminar</button>
+          </div>
+        </article>
+      } @empty {
+        <div class="empty-state"><p>{{ aulas.length ? 'No hay aulas que coincidan con la búsqueda.' : 'Aún no tienes aulas — crea la primera.' }}</p>
+          <button type="button" class="btn-create" (click)="openCreate()">Crear aula</button></div>
+      }
+    </div>
+  }
+  @if (modal) {
+    <div class="modal-overlay" (keydown.escape)="close()" (click)="close()">
+      <section class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="classroom-dialog-title">
+        <div class="modal-header"><h2 id="classroom-dialog-title">
+          {{ modal === 'edit' ? (selected ? 'Editar aula' : 'Crear aula') : modal === 'members' ? 'Estudiantes de ' + selected?.name :
+             modal === 'assign' ? 'Asignar taller' : modal === 'delete' ? 'Eliminar aula' : 'Regenerar PIN' }}
+        </h2><button type="button" class="btn-dismiss" (click)="close()" [disabled]="busy" aria-label="Cerrar">×</button></div>
+        @if (actionError) { <p role="alert">{{ actionError }}</p> }
+        @if (modal === 'edit') {
+          <form class="modal-form" (ngSubmit)="save()">
+            <fieldset [disabled]="busy">
+              <div class="form-field"><label for="class-name">Nombre *</label><input id="class-name" class="input-text" name="name" [(ngModel)]="draft.name" required maxlength="100" /></div>
+              <div class="form-row-2">
+                <div class="form-field"><label for="class-location">Ubicación</label><input id="class-location" class="input-text" name="location" [(ngModel)]="draft.location" maxlength="150" /></div>
+                <div class="form-field"><label for="class-schedule">Horario</label><input id="class-schedule" class="input-text" name="schedule" [(ngModel)]="draft.schedule" maxlength="150" /></div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-field"><label for="class-tag">Etiqueta</label><input id="class-tag" class="input-text" name="tag" [(ngModel)]="draft.tag" maxlength="40" /></div>
+                <div class="form-field"><label for="class-capacity">Cupo (1–60)</label><input id="class-capacity" class="input-text" name="capacity" type="number" min="1" max="60" step="1" required [(ngModel)]="draft.capacity" /></div>
+              </div>
+              <div class="form-field"><label for="class-grade">Grupo</label><select id="class-grade" class="input-text" name="grade" [(ngModel)]="draft.gradeFilter">
+                <option value="all">General</option><option value="10">Grado 10</option><option value="11">Grado 11</option><option value="stem">STEM</option>
+              </select></div>
+              <div class="form-field"><label for="class-module">Módulo activo</label><input id="class-module" class="input-text" name="module" [(ngModel)]="draft.activeModule" maxlength="100" /></div>
+              <div class="form-row-2">
+                <div class="form-field"><label for="class-week">Semana actual</label><input id="class-week" class="input-text" name="week" type="number" min="1" required [(ngModel)]="draft.currentWeek" /></div>
+                <div class="form-field"><label for="class-total">Semanas totales</label><input id="class-total" class="input-text" name="total" type="number" min="1" required [(ngModel)]="draft.totalWeeks" /></div>
+              </div>
+            </fieldset>
+            <div class="modal-footer"><button type="button" class="btn-cancel" (click)="close()" [disabled]="busy">Cancelar</button>
+              <button type="submit" class="btn-create" [disabled]="busy">{{ busy ? 'Guardando…' : 'Guardar' }}</button></div>
+          </form>
+        }
+        @if (modal === 'members') {
+          @if (membersLoading) { <p role="status">Cargando estudiantes…</p> }
+          @else if (membersError) { <p role="alert">{{ membersError }}</p><button type="button" class="btn-ver" (click)="viewMembers(selected!)">Reintentar</button> }
+          @else {
+            <p>{{ members.length }} estudiantes inscritos</p>
+            @for (member of members; track member.studentId) {
+              <div class="student-row"><strong>{{ member.studentProfile?.fullName || 'Nombre no disponible' }}</strong>
+                <span>{{ member.status }}</span><span>XP: {{ member.xp ?? 'Sin actividad' }} · Nivel: {{ member.level ?? 'Sin actividad' }}</span></div>
+            } @empty { <p>Aún no hay estudiantes en esta aula.</p> }
+          }
+        }
+        @if (modal === 'assign') {
+          <form class="modal-form" (ngSubmit)="assign()"><fieldset [disabled]="busy">
+            <div class="form-field"><label for="work-title">Título *</label><input id="work-title" class="input-text" name="title" [(ngModel)]="assignment.title" required maxlength="150" /></div>
+            <div class="form-field"><label for="work-content">Taller o instrucciones *</label><textarea id="work-content" class="input-text" name="workshop" [(ngModel)]="assignment.workshop" required maxlength="2000"></textarea></div>
+            <div class="form-field"><label for="work-due">Fecha límite (opcional)</label><input id="work-due" class="input-text" name="due" type="date" [(ngModel)]="assignment.dueDate" /></div>
+          </fieldset><button type="submit" class="btn-create" [disabled]="busy">{{ busy ? 'Asignando…' : 'Asignar taller' }}</button></form>
+        }
+        @if (modal === 'delete' || modal === 'pin') {
+          <p>{{ modal === 'delete' ? 'Se eliminarán el aula, sus membresías y talleres. Esta acción no se puede deshacer.' : 'El PIN anterior dejará de servir. Los estudiantes inscritos conservarán su membresía.' }}</p>
+          <div class="modal-footer"><button type="button" class="btn-cancel" (click)="close()" [disabled]="busy">Cancelar</button>
+            <button type="button" class="btn-create" (click)="modal === 'delete' ? remove() : regenerate()" [disabled]="busy">{{ busy ? 'Procesando…' : 'Confirmar' }}</button></div>
+        }
+      </section>
+    </div>
+  }
+</div>
