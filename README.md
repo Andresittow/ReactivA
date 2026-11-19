@@ -1,173 +1,228 @@
 # ReactivA 🧪⚡
 
-**ReactivA** es una plataforma educativa web interactiva, moderna y gamificada, diseñada para el aprendizaje dinámico y experimental de la química y las ciencias naturales para estudiantes de secundaria y media vocacional (grados 10° y 11°). 
+**ReactivA** es una aplicación web educativa para apoyar el aprendizaje de química de estudiantes de grados 10.º y 11.º. Combina una tabla periódica interactiva, actividades de laboratorio virtual, una misión de química orgánica y desafíos con progreso gamificado.
 
-Combina simuladores interactivos 3D, una matriz periódica completa con modelos atómicos cuánticos de Bohr, minijuegos de memoria y síntesis orgánica, arenas de retos competitivos y seguimiento pedagógico curricular.
+La plataforma tiene dos perfiles: **estudiante**, para realizar actividades y consultar su avance, y **docente**, para crear aulas, compartir un PIN y consultar a los estudiantes vinculados. Utiliza Angular para la interfaz, Supabase para autenticación y persistencia, y Vercel para el despliegue.
 
----
+## Entrega y acceso
 
-## 📌 Estado Actual del Proyecto (¿Cómo vamos hasta ahora?)
+| Entregable | Ubicación o evidencia |
+| --- | --- |
+| Código fuente y contribuciones del equipo | [Repositorio de GitHub](https://github.com/Andresittow/ReactivA), [historial de commits](https://github.com/Andresittow/ReactivA/commits/main/) y [pull requests](https://github.com/Andresittow/ReactivA/pulls?q=is%3Apr) |
+| Descripción e instrucciones de ejecución | Este README de la raíz |
+| Aplicación funcional | Desplegada en Vercel; enlace definitivo de producción pendiente de incorporar a este documento |
+| Video de demostración | No se adjunta un video en esta versión de la documentación |
+| Sustentación técnica | Participación de todos los integrantes según el reparto y el guion incluidos al final de este README |
 
-El proyecto se desarrolla bajo una arquitectura modular y escalable con **Angular 21 (Standalone Components)**, organizando el trabajo en **ramas de características (`feature/*`)** que se integran progresivamente:
+Para una demostración sin conexión a Vercel, se puede ejecutar la aplicación localmente siguiendo las instrucciones de este documento. El inicio de sesión y la persistencia requieren conexión al proyecto Supabase configurado.
 
-```mermaid
-graph TD
-    A[Login & Registro: feature/Valeria] -->|Auth UI & Forms| D[develop]
-    B[Sidebar & App Layout: feature/Vanessa & feature/app-layout] -->|Shell Responsivo| D
-    C[Dashboard & Misiones: feature/Andres] -->|Buscador & Rutas| D
-    E[Tabla Periódica & Memory: feature/Andres] -->|Matriz 18 Cols + 3D Cards| D
-    F[Laboratorio Virtual 3D: feature/virtual-lab] -->|Simulaciones Moleculares| D
-    G[Misión Orgánica: feature/organic-mission] -->|Gamificación Carbono| D
-    H[Desafíos & Arena de Logros: feature/Andres] -->|Leaderboard & Trofeos| D
-    I[Perfil & Ajustes: feature/profile] -->|Reporte & Preferencias| D
-```
+## Funcionalidades
 
----
+| Área | Funcionalidad | Ruta |
+| --- | --- | --- |
+| Inicio | Presentación de la plataforma | `/home` |
+| Autenticación | Registro e inicio de sesión por correo y contraseña; acceso según el rol y cierre de sesión | `/register`, `/login` |
+| Panel del estudiante | Actividades, misiones y consulta de progreso | `/dashboard` |
+| Tabla periódica | Consulta de elementos, propiedades, representación atómica y juego de parejas | `/periodic-table` |
+| Laboratorio virtual | Actividades interactivas de química | `/virtual-lab` |
+| Misión orgánica | Actividades por niveles sobre química del carbono | `/mision-organica` |
+| Desafíos | Retos, insignias y clasificación por aula o colegio | `/challenges` |
+| Perfil | Datos del estudiante, historial y unión a un aula mediante PIN | `/profile` |
+| Panel docente | Identidad del docente autenticado y acceso a la gestión de aulas | `/teacher-dashboard` |
+| Aulas | Creación y edición de aulas, PIN, consulta de miembros y asignación de talleres | `/my-classrooms` y vista de aulas del panel docente |
+| Preferencias y ayuda | Ajustes del usuario y registro de solicitudes de ayuda | `/settings`, `/help` |
 
-## 🧩 Módulos y Componentes Implementados
+Las rutas privadas tienen guards de autenticación y rol. Los permisos sobre los datos se controlan también en Supabase mediante **Row Level Security (RLS)**; los guards del navegador no sustituyen esos permisos.
 
-A continuación se detalla el estado actual de cada componente de la plataforma:
+## Tecnologías y arquitectura
 
-| Módulo / Componente | Ruta URL | Estado | Descripción y Funcionalidades Principales |
-| :--- | :--- | :---: | :--- |
-| **Inicio de Sesión (`LoginComponent`)** | `/login` | ✅ Integrado | Selector de rol (*Estudiante* y *Docente/Tutor*), formulario reactivo con validaciones en tiempo real, diseño responsivo y redirección fluida al Dashboard. |
-| **Registro de Usuarios (`RegisterComponent`)** | `/register` | ✅ Integrado | Formulario de alta con validación de credenciales, roles escolares, campos adaptados y enlace directo a inicio de sesión. |
-| **Navegación Lateral (`SidebarComponent`)** | Global | ✅ Integrado | Menú lateral colapsable/expandible con control de estado (`isCollapsed`), navegación activa por `routerLinkActive`, acceso rápido al *Asistente Átomo* y enlaces directos a *Settings* y *Help*. |
-| **Shell & Layout (`AppComponent`)** | Global | ✅ Integrado | Contenedor dinámico que oculta automáticamente el sidebar en pantallas de autenticación (`/login`, `/register`) y provee scroll independiente y responsive en el área principal (`<main class="main-content">`). |
-| **Panel Principal (`DashboardComponent`)** | `/dashboard` | ✅ Integrado | Saludo personalizado, racha activa de 5 días (🔥), banner interactivo al laboratorio 3D, **Buscador dinámico reactivo con `FormControl`**, **Lista interactiva de misiones diarias con checkboxes**, y **Barras de progreso en estilos vinculados dinámicamente (`[style.width.%]`)**. |
-| **Tabla Periódica Interactiva (`PeriodicTableComponent`)** | `/periodic-table`<br>`/tabla-periodica` | ✅ Integrado | Matriz completa de 18 columnas posicionales CSS Grid, buscador reactivo por nombre/símbolo/número, leyenda de familias químicas, **Panel de Detalle Químico inferior** (con visor cuántico del **Modelo de Bohr SVG**, distribución electrónica por capas $n$, configuración electrónica en notación estándar y sub-grid 2x2 de propiedades físicas), más el minijuego integrado **Memory: Parejas Periódicas** (volteo 3D, 5 elementos por categoría, cronómetro, contador de movimientos y modal de victoria). |
-| **Laboratorio Virtual 3D (`VirtualLabComponent`)** | `/virtual-lab` | ✅ Integrado | Mesa de trabajo interactiva de química virtual, simulación de enlaces moleculares, combinación de reactivos químicos, control de instrumental de laboratorio y feedback experimental. |
-| **Misión Orgánica: Domina el Carbono (`MisionOrganicaComponent`)** | `/mision-organica` | ✅ Integrado | Módulo gamificado de química del carbono para grado 11: 4 niveles de progresión (*Detectives del Carbono*, *Cazadores de Hidrocarburos*, *El Desafío IUPAC*, *Maestro del Carbono*), mecánicas de match, selección múltiple, retos contrarreloj y feedback pedagógico con persistencia en `localStorage`. |
-| **Desafíos & Arena de Logros (`ChallengesComponent`)** | `/challenges` | ✅ Listo | Arena competitiva escolar: cabecera de **Temporada 3: Enlaces Iónicos (En Vivo)**, widgets de nivel 14 (*Alquimista Experto* con racha de 5 días y barra de XP de 4,850/5,000) y torneo activo (*Gran Enlace Covalente*), **Grid de 4 misiones activas** con reloj de cuenta regresiva (`08:42:15`), **Leaderboard escolar** con filtros (*Mi Clase 10° B*, *Colegio*, *Top Nacional*) destacando al líder Mateo R., **Vitrina de Trofeos** con 18 insignias (7 desbloqueadas, Nivel Coleccionista II con modal pedagógico), y panel de **Seguimiento Académico y Evaluación Curricular (Estándares MEN)** con 94.2% de eficiencia pedagógica. |
-| **Perfil del Estudiante (`ProfileComponent`)** | `/profile` | ✅ Integrado | Resumen de rendimiento académico, métricas de competencias científicas alcanzadas, historial de actividades recientes, datos de usuario y estadísticas globales de aprendizaje. |
-| **Configuración (`SettingsComponent`)** | `/settings` | ✅ Integrado | Panel de preferencias del estudiante: ajustes de notificaciones, efectos de audio del simulador, tema de interfaz y opciones de accesibilidad. |
-
----
-
-## 📂 Estructura del Código Fuente (`src/app/`)
+- **Angular 21 y TypeScript:** componentes standalone, rutas con carga diferida y formularios reactivos.
+- **Signals y RxJS:** estado de la interfaz y flujos reactivos.
+- **HTML y SCSS:** estilos por componente, diseño adaptable y representaciones visuales de las actividades.
+- **Supabase Auth y PostgreSQL:** cuentas de usuario, perfiles, progreso, aulas y relaciones entre docentes y estudiantes.
+- **Vitest:** pruebas de componentes, servicios y restauración de sesión.
+- **GitHub Actions:** validación de TypeScript, pruebas y compilación en los PR.
+- **Vercel:** publicación de la salida estática. Las páginas públicas se prerenderizan y las áreas privadas se ejecutan en el navegador.
 
 ```text
-src/app/
-├── app.html                  # Shell del layout principal con sidebar y router-outlet
-├── app.routes.ts             # Definición y lazy loading de rutas principales
-├── app.scss                  # Estilos estructurales del layout base
-├── app.ts                    # Controlador raíz (AppComponent)
-├── challenges/               # Componente de Desafíos & Arena de Logros
-│   ├── challenges.html
-│   ├── challenges.scss
-│   └── challenges.ts
-├── dashboard/                # Panel de control del estudiante con misiones y buscador
-│   ├── dashboard.html
-│   ├── dashboard.scss
-│   └── dashboard.ts
-├── login/                    # Autenticación y acceso
-│   ├── login.html
-│   ├── login.scss
-│   └── login.ts
-├── organic-mission/          # Módulo gamificado «Misión Orgánica: Domina el Carbono»
-│   ├── organic-mission.html
-│   ├── organic-mission.scss
-│   └── organic-mission.ts
-├── periodic-table/           # Tabla periódica interactiva (18 columnas) + Memory Game
-│   ├── periodic-table.html
-│   ├── periodic-table.scss
-│   └── periodic-table.ts
-├── profile/                  # Perfil del usuario y reporte pedagógico
-│   ├── profile.html
-│   ├── profile.scss
-│   └── profile.ts
-├── register/                 # Registro de nuevos usuarios
-│   ├── register.html
-│   ├── register.scss
-│   └── register.ts
-├── settings/                 # Ajustes y preferencias de la aplicación
-│   ├── settings.html
-│   ├── settings.scss
-│   └── settings.ts
-├── sidebar/                  # Menú de navegación lateral colapsable
-│   ├── sidebar.html
-│   ├── sidebar.scss
-│   └── sidebar.ts
-└── virtual-lab/              # Simulador de Laboratorio Virtual 3D
-    ├── virtual-lab.html
-    ├── virtual-lab.scss
-    └── virtual-lab.ts
+ReactivA/                         # Raíz del repositorio
+├── README.md                     # Documentación de entrega
+├── .github/workflows/            # Validación automática
+├── supabase/migrations/          # Esquema, funciones y políticas de datos
+└── ReactivA/                     # Proyecto Angular; ejecutar npm aquí
+    ├── package.json
+    ├── angular.json
+    ├── vercel.json
+    ├── scripts/                  # Compilación y validación de configuración
+    └── src/
+        ├── environments/         # Configuración por entorno
+        └── app/
+            ├── core/             # Autenticación, guards, modelos y servicios
+            ├── dashboard/
+            ├── periodic-table/
+            ├── virtual-lab/
+            ├── organic-mission/
+            ├── challenges/
+            ├── teacher-dashboard/
+            ├── my-classrooms/
+            ├── profile/
+            ├── settings/
+            └── help/
 ```
 
----
+## Ejecutar en el equipo local
 
-## 🌿 Flujo de Trabajo y Gestión en Git
+### Requisitos
 
-El flujo oficial utiliza exactamente seis ramas: `main`, `develop`, `feature/Valeria`, `feature/Vanessa`, `feature/Andres` y `feature/app-layout`.
+- **Node.js 24.x**, según la configuración del proyecto y del despliegue.
+- **npm**, con versión declarada `11.17.0` en el proyecto.
+- Git y conexión a Internet para instalar dependencias y acceder a Supabase.
 
-Cada integrante desarrolla sus componentes en su rama personal. Andrés revisa e integra los Pull Requests hacia `develop`; `main` se reserva para la entrega final autorizada. Las rutas se configuran por turnos en `feature/app-layout`, después de integrar los componentes.
+No es necesario instalar Angular CLI globalmente: los comandos npm utilizan la versión del proyecto.
 
-Consulta [responsabilidades, validaciones y flujo de Git Graph](CONTRIBUTING.md).
+### Instalación
 
----
+```sh
+git clone https://github.com/Andresittow/ReactivA.git
+cd ReactivA/ReactivA
+npm ci
+```
 
-## 🛠️ Tecnologías y Herramientas
+### Configuración de desarrollo
 
-* **Framework:** [Angular 21](https://angular.dev/) (Arquitectura 100% **Standalone Components**).
-* **Gestión de Estado & Reactividad:** `ReactiveFormsModule`, `FormControl`, `valueChanges`, Observables con RxJS.
-* **Detección de Cambios:** Zoneless Angular (`ChangeDetectorRef.markForCheck()`).
-* **Representaciones Visuales Cuánticas:** Gráficos vectoriales SVG dinámicos para órbitas atómicas, electrones cuánticos y núcleos atómicos.
-* **Animaciones 3D:** CSS 3D Transforms (`perspective`, `rotateY(180deg)`, `transform-style: preserve-3d`) para el volteo de cartas.
-* **Estilos:** SCSS modular, BEM, sistema de variables corporativas, gradientes personalizados y maquetación CSS Grid / Flexbox.
-* **Iconografía:** [Phosphor Icons](https://phosphoricons.com/) (`<i class="ph ph-..."></i>`).
-* **Persistencia Local:** `localStorage` para almacenamiento local de progreso, vidas, insignias y configuraciones.
-* **Pruebas:** Vitest (`@angular/build:unit-test`).
+El archivo [environment.development.ts](./ReactivA/src/environments/environment.development.ts) contiene `supabaseUrl` y `supabaseAnonKey` para desarrollo. La copia del repositorio ya incluye la configuración pública del proyecto utilizado por el equipo.
 
----
+Para utilizar otro proyecto Supabase, reemplaza esos dos valores por su URL y su clave pública `publishable` o `anon`, y prepara su base de datos con las migraciones indicadas más adelante. Nunca introduzcas una clave `service_role`, una clave `sb_secret_...` ni la contraseña de la base de datos en el frontend.
 
-## 🚀 Guía de Inicio Rápido
+### Iniciar la aplicación
 
-### Requisitos Previos
-* [Node.js](https://nodejs.org/) v24.16.0 (versión usada en las validaciones y CI).
-* [Angular CLI](https://angular.dev/tools/cli) (`npm install -g @angular/cli`).
+```sh
+npm start
+```
 
-### Pasos de Instalación y Ejecución
+Abre [http://localhost:4200](http://localhost:4200). El servidor de desarrollo recompila al guardar cambios.
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone https://github.com/Andresittow/ReactivA.git
-   cd ReactivA/ReactivA
-   ```
+## Preparar una base de datos Supabase propia
 
-2. **Instalar dependencias:**
-   ```bash
-   npm ci
-   ```
+Este paso es necesario para un proyecto Supabase nuevo; no es necesario repetirlo para demostrar la aplicación con la base ya configurada del equipo.
 
-3. **Configuración de variables de entorno (Supabase):**
-   El proyecto utiliza Supabase para autenticación y persistencia relacional con RLS. Las configuraciones residen en `src/environments/`:
-   - `src/environments/environment.development.ts`: Configuración para entorno de desarrollo local (`supabaseUrl` y `supabaseAnonKey` / publishable key del proyecto `reactiva-dev`).
-   - `src/environments/environment.ts`: Plantilla para entorno de producción con placeholders (`fileReplacements` configurado en `angular.json`).
-   
-   > ⚠️ **Importante:** Nunca commitear la `service_role` (secret key) en ningún archivo del frontend ni repositorio. Solo se utiliza la clave pública anónima / publishable.
+En el SQL Editor del proyecto Supabase, ejecuta el contenido completo de cada archivo, uno por uno y en este orden:
 
-4. **Iniciar el servidor local de desarrollo:**
-   ```bash
-   npm start
-   # o bien: ng serve
-   ```
-   Accede a [http://localhost:4200/](http://localhost:4200/) en tu navegador.
+1. [202611140000_core.sql](./supabase/migrations/202611140000_core.sql): perfiles, progreso, actividades, preferencias e inicialización de usuarios.
+2. [202611150001_classrooms.sql](./supabase/migrations/202611150001_classrooms.sql): aulas, membresías y funciones para generar, renovar y canjear PIN.
+3. [202611150002_support_assignments.sql](./supabase/migrations/202611150002_support_assignments.sql): talleres y solicitudes de ayuda.
+4. [202611150003_leaderboards.sql](./supabase/migrations/202611150003_leaderboards.sql): función del ranking.
+5. [202611150004_private_teacher_invites.sql](./supabase/migrations/202611150004_private_teacher_invites.sql): restricciones de acceso a códigos de registro docente.
 
-5. **Compilar para desarrollo/verificación:**
-   ```bash
-   npm run build -- --configuration development
-   ```
+Espera el resultado correcto de cada archivo antes de continuar. Si una consulta falla dentro de una transacción, ejecuta `ROLLBACK;` antes de reintentar el archivo corregido. Para una base con tablas creadas manualmente, compara primero su estructura: `CREATE TABLE IF NOT EXISTS` no adapta columnas existentes.
 
-6. **Compilar para producción:**
-   ```bash
-   npm run build
-   ```
+Para registrar un docente, un administrador debe crear un código privado de un solo uso desde SQL Editor:
 
-7. **Ejecutar pruebas unitarias:**
-   ```bash
-   npm test -- --no-watch
-   ```
+```sql
+insert into public.teacher_invite_codes (code)
+values ('REEMPLAZA-POR-UN-CODIGO-PRIVADO-Y-UNICO');
+```
+
+El docente utiliza ese código en el registro. No publiques códigos válidos ni contraseñas en el repositorio. La confirmación por correo depende de la configuración de Supabase Auth; los enlaces de confirmación requieren que el origen de la aplicación esté autorizado en Authentication → URL Configuration.
+
+## Pruebas y compilación
+
+Ejecuta estos comandos desde la carpeta interna `ReactivA/`:
+
+```sh
+# Comprobar tipos de la aplicación y las pruebas
+npm exec tsc -- --noEmit -p tsconfig.app.json
+npm exec tsc -- --noEmit -p tsconfig.spec.json
+
+# Ejecutar pruebas sin modo observación
+npm test -- --no-watch
+
+# Verificar la validación de configuración de despliegue
+npm run test:deploy
+
+# Compilar con configuración de desarrollo
+npm run build -- --configuration development
+```
+
+Para compilar **producción**, copia [.env.example](./ReactivA/.env.example) a `.env.production` dentro de la carpeta interna y completa:
+
+```dotenv
+SUPABASE_URL=https://TU-PROYECTO.supabase.co
+SUPABASE_ANON_KEY=TU-CLAVE-PUBLICA
+```
+
+Después ejecuta:
+
+```sh
+npm run build
+```
+
+El script valida la configuración, genera `src/environments/environment.generated.ts` y prepara la salida en `dist/ReactivA/browser`. Tanto el archivo generado como `.env.production` están excluidos de Git. No se editan ni se suben manualmente.
 
 ## Despliegue en Vercel
 
-Consulta la [guia de despliegue](docs/DESPLIEGUE_VERCEL.md) para configurar Supabase, variables de entorno y Preview antes de main.
+La configuración versionada se encuentra en [vercel.json](./ReactivA/vercel.json).
+
+| Opción | Valor |
+| --- | --- |
+| Framework | Angular |
+| Root Directory | `ReactivA` |
+| Node.js | `24.x` |
+| Install Command | `npm ci` |
+| Build Command | `npm run build` |
+| Output Directory | `dist/ReactivA/browser` |
+| Rama de producción | `main` |
+| Rama de integración y Preview | `develop` |
+
+Configura `SUPABASE_URL` y `SUPABASE_ANON_KEY` en Vercel para cada entorno utilizado: **Preview** y **Production**. Los cambios en estas variables se incorporan en la siguiente compilación y requieren un nuevo deployment.
+
+En Supabase → Authentication → URL Configuration, establece el dominio definitivo de producción como **Site URL** y añade las URLs de retorno necesarias en **Redirect URLs**. Para las pruebas en Preview, autoriza también su URL; conserva el origen local si continúas desarrollando.
+
+El despliegue incluye el respaldo de Angular Router para abrir y recargar rutas privadas directamente. La restauración de sesión evita esperar consultas dentro del listener de autenticación de Supabase.
+
+## Demostración funcional
+
+Utiliza cuentas de prueba de ambos roles, con acceso a sus correos si está habilitada la confirmación. No se incluyen credenciales compartidas en este repositorio.
+
+1. Registrar o iniciar sesión como estudiante y abrir el panel.
+2. Explorar la tabla periódica y una actividad del laboratorio o de la misión orgánica.
+3. Recargar una ruta privada y comprobar que la aplicación vuelve a cargar.
+4. Completar una actividad y verificar su progreso después de cerrar y volver a iniciar sesión.
+5. Iniciar sesión como docente, comprobar su identidad y crear un aula.
+6. Copiar el PIN del aula y cerrar sesión.
+7. Entrar como estudiante y unirse desde Perfil utilizando el PIN.
+8. Volver al docente y mostrar al estudiante en el listado de miembros.
+9. Recargar o volver a iniciar sesión para demostrar que el aula y la membresía persisten.
+
+Estos flujos se comprobaron durante la preparación del despliegue y la validación del Preview por el equipo.
+
+## Equipo y contribuciones
+
+| Integrante | Cuenta de GitHub | Áreas de trabajo |
+| --- | --- | --- |
+| Andrés | [Andresittow](https://github.com/Andresittow) | Inicio, dashboard del estudiante, tabla periódica, desafíos, integración, validación y preparación del despliegue |
+| Valeria Estefanía Góngora Torres | [valeriagongorator](https://github.com/valeriagongorator) | Login, registro, misión orgánica, configuración y panel docente |
+| Vanessa | [vanessaucc](https://github.com/vanessaucc) | Navegación lateral, laboratorio virtual, perfil, ayuda y gestión de aulas |
+
+El historial del repositorio y los PR conservan las contribuciones y las integraciones del equipo. Las áreas compartidas se coordinaron mediante las ramas personales y `feature/app-layout`.
+
+El flujo de entrega es **rama de trabajo → PR a `develop` → validación → PR a `main`**. `main` contiene la versión de producción; las mejoras posteriores siguen el mismo flujo.
+
+## Sustentación técnica del equipo
+
+La sustentación debe incluir la intervención de los tres integrantes. Este reparto sirve como guía de exposición y debe acompañarse de una demostración real:
+
+| Participante | Contenido propuesto |
+| --- | --- |
+| Andrés | Problema educativo, arquitectura general, tabla periódica y desafíos, flujo Git, pruebas y despliegue en Vercel |
+| Valeria | Formularios y validaciones, autenticación y roles, misión orgánica y funcionamiento del panel docente |
+| Vanessa | Navegación y componentes de interfaz, laboratorio virtual, perfil, creación de aulas y vinculación por PIN |
+| Todo el equipo | Demostración del recorrido estudiante–docente, persistencia en Supabase y respuesta a preguntas técnicas |
+
+Temas para explicar: componentes standalone y carga diferida; diferencias entre guards y RLS; relaciones entre perfiles, aulas y miembros; variables públicas de Supabase; restauración de sesión al recargar; y separación entre Preview y Production.
+
+Si se requiere un video, puede seguir el mismo recorrido de demostración y reparto de participación. El enlace debe añadirse a la tabla de entregables cuando exista una grabación disponible.
+
+## Alcance de la versión entregada
+
+La autenticación por correo y contraseña, la persistencia y la gestión de aulas están conectadas a Supabase. Algunas métricas, listados y contenidos de la vista general docente conservan datos de demostración; no deben presentarse como analítica real de todos los estudiantes. Las integraciones escolares externas anunciadas en elementos de la interfaz no forman parte del flujo validado de esta entrega.
